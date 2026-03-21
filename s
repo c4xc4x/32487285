@@ -197,7 +197,7 @@ do -- Drawing Library
         UI = 0,
         System = 1,
         Plex = 2,
-        Monospace = 3
+        Code = 3
     }
 
     local fontIndexes = {
