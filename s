@@ -1177,11 +1177,11 @@ do -- UI Library
     --customFont.Data = Nyula.theme.fontData
     local defaultProperties = {
         Filled = true,
-        Outline = true,
+        Outline = false,
         Transparency = 1,
         NumSides = 64,
         Visible = false,
-        Font = Nyula.useCustomFont and customFont or nil
+        Font = Drawing.Font.Monospace
     }
     local themed = {
         accent = {},
@@ -1603,12 +1603,12 @@ do -- UI Library
         self.menu.sectionIndexes[text] = section
         height = height == "half" and 257 or height == "whole" and 518 or height == "third" and 170 or height
         section.outline = self.menu:draw("Square", {Size = v2(231, height), Position = self.menu.sectionbg.Position + v2(7 + (right and 235 or 0), 3 + self[side]), Color = Nyula.theme.outline, Visible = visible}, "outline")
-        section.highlightoutline = self.menu:draw("Square", {Size = v2(229, 4), Position = section.outline.Position + v2(1, 1), Color = Nyula.theme.outline, Visible = visible}, "outline")
-        section.highlight = modifyDrawing(self.menu:gradient({Nyula.theme.accent:Lerp(Color3.new(1, 1, 1), 0.1), Nyula.theme.accent, darken(Nyula.theme.accent, 0.4)}, 3), {Size = v2(229, 3), Position = section.highlightoutline.Position, Color = Nyula.theme.accent, Visible = visible})
-        section.buttons = self.menu:draw("Square", {Size = v2(229, 20), Position = section.highlightoutline.Position + v2(0, 4), Color = Nyula.theme.hidden, Visible = visible}, "hidden")
-        section.buttonoutline = self.menu:draw("Square", {Position = section.highlightoutline.Position + v2(0, 4), Color = Nyula.theme.outline, Visible = visible}, "outline")
-        section.button = self.menu:draw("Square", {Position = section.highlightoutline.Position + v2(0, 4), Color = Nyula.theme.background, Visible = visible}, "background")
-        section.buttonbackground = modifyDrawing(self.menu:gradient({Nyula.theme.lightbackground, Nyula.theme.background}, 8), {Position = section.highlightoutline.Position + v2(0, 4), Color = Nyula.theme.background, Visible = visible})
+        section.highlightoutline = self.menu:draw("Square", {Size = v2(229, 2), Position = section.outline.Position + v2(1, 1), Color = Nyula.theme.outline, Visible = visible}, "outline")
+        section.highlight = modifyDrawing(self.menu:gradient({Nyula.theme.accent:Lerp(Color3.new(1, 1, 1), 0.1), Nyula.theme.accent, darken(Nyula.theme.accent, 0.4)}, 2), {Size = v2(229, 1), Position = section.highlightoutline.Position, Color = Nyula.theme.accent, Visible = visible})
+        section.buttons = self.menu:draw("Square", {Size = v2(229, 20), Position = section.highlightoutline.Position + v2(0, 2), Color = Nyula.theme.hidden, Visible = visible}, "hidden")
+        section.buttonoutline = self.menu:draw("Square", {Position = section.highlightoutline.Position + v2(0, 2), Color = Nyula.theme.outline, Visible = visible}, "outline")
+        section.button = self.menu:draw("Square", {Position = section.highlightoutline.Position + v2(0, 2), Color = Nyula.theme.background, Visible = visible}, "background")
+        section.buttonbackground = modifyDrawing(self.menu:gradient({Nyula.theme.lightbackground, Nyula.theme.background}, 8), {Position = section.highlightoutline.Position + v2(0, 2), Color = Nyula.theme.background, Visible = visible})
         section.text = self.menu:draw("Text", {Size = 12, Color = Nyula.theme.text, Center = true, Text = text, Visible = visible}, "text")
         section.button.Size = v2(10 + section.text.TextBounds.X, 21)
         section.buttonbackground.Size = section.button.Size
@@ -1616,7 +1616,7 @@ do -- UI Library
         section.buttonoutline.Size = v2(11 + section.text.TextBounds.X, 21)
         section.text.Position = section.buttons.Position + v2(5 + section.text.TextBounds.X * 0.5, 4)
         section.text.ZIndex = 3
-        section.background = self.menu:draw("Square", {Size = v2(229, height - 27), Position = section.outline.Position + v2(1, 26), Color = Nyula.theme.background, Visible = visible}, "background")
+        section.background = self.menu:draw("Square", {Size = v2(229, height - 24), Position = section.outline.Position + v2(1, 23), Color = Nyula.theme.background, Visible = visible}, "background")
         section.menu = self.menu
         section.tab = self
         section.name = text
@@ -1850,7 +1850,7 @@ do -- UI Library
         keys.background = keys:draw("Square", {Color = Nyula.theme.background, Visible = true}, "background")
         keys.titlebackground = modifyDrawing(keys:gradient({Nyula.theme.lightbackground, Nyula.theme.background}, 7), {Color = Nyula.theme.accent, Visible = true})
         keys.highlightoutline = keys:draw("Square", {Color = Nyula.theme.outline, Visible = true}, "outline")
-        keys.highlight = modifyDrawing(keys:gradient({Nyula.theme.accent:Lerp(Color3.new(1, 1, 1), 0.1), Nyula.theme.accent, darken(Nyula.theme.accent, 0.4)}, 3), {Color = Nyula.theme.accent, Visible = true})
+        keys.highlight = modifyDrawing(keys:gradient({Nyula.theme.accent:Lerp(Color3.new(1, 1, 1), 0.1), Nyula.theme.accent, darken(Nyula.theme.accent, 0.4)}, 2), {Color = Nyula.theme.accent, Visible = true})
         keys.title = keys:draw("Text", {Size = 16, Color = Nyula.theme.text, Text = "Keybinds", Visible = true}, "text")
 
         local function updateKeybinds()
@@ -1898,9 +1898,9 @@ do -- UI Library
             keys.titlebackground.Position = keys.background.Position + v2(0, 5)
             keys.titlebackground.Size = v2(width, 14)
             keys.highlightoutline.Position = keys.outline.Position
-            keys.highlightoutline.Size = v2(width + 2, 5)
+            keys.highlightoutline.Size = v2(width + 2, 2)
             keys.highlight.Position = keys.background.Position
-            keys.highlight.Size = v2(width, 3)
+            keys.highlight.Size = v2(width, 1)
             keys.title.Position = keys.background.Position + v2(2, 3)
 
             for keyIndex = 1, keycount do
@@ -1939,9 +1939,9 @@ do -- UI Library
         menu.tabIndex = index and math.clamp(index, 1, 5) or 1
         menu.outline = menu:draw("Square", {Size = bgSize + v2(2, 2), Position = middle - bgSize * 0.5 - v2(1, 1), Color = self.theme.outline, Visible = visible}, "outline")
         menu.background = menu:draw("Square", {Size = bgSize, Position = middle - bgSize * 0.5, Color = self.theme.background, Visible = visible}, "background")
-        menu.outline2 = menu:draw("Square", {Size = v2(502, 4), Position = menu.outline.Position, Color = self.theme.outline, Visible = visible}, "outline")
-        menu.highlightoutline = menu:draw("Square", {Size = v2(500, 4), Position = menu.background.Position, Color = self.theme.outline, Visible = visible}, "outline")
-        menu.highlight = modifyDrawing(menu:gradient({self.theme.accent:Lerp(Color3.new(1, 1, 1), 0.1), self.theme.accent, darken(self.theme.accent, 0.4)}, 3), {Size = v2(500, 3), Position = menu.background.Position, Color = self.theme.accent, Visible = visible})
+        menu.outline2 = menu:draw("Square", {Size = v2(502, 2), Position = menu.outline.Position, Color = self.theme.outline, Visible = visible}, "outline")
+        menu.highlightoutline = menu:draw("Square", {Size = v2(500, 2), Position = menu.background.Position, Color = self.theme.outline, Visible = visible}, "outline")
+        menu.highlight = modifyDrawing(menu:gradient({self.theme.accent:Lerp(Color3.new(1, 1, 1), 0.1), self.theme.accent, darken(self.theme.accent, 0.4)}, 2), {Size = v2(500, 1), Position = menu.background.Position, Color = self.theme.accent, Visible = visible})
         menu.titlebackground = modifyDrawing(menu:gradient({self.theme.lightbackground, self.theme.background}, 7), {Size = v2(500, 21), Position = menu.background.Position + v2(0, 4), Color = self.theme.accent, Visible = visible})
         menu.title = menu:draw("Text", {Size = 16, Position = menu.background.Position + v2(5, 5), Color = self.theme.text, Text = title, Visible = visible}, "text")
         menu.inline = menu:draw("Square", {Size = bgSize + v2(2 - 20, 2 - 35), Position = menu.outline.Position + v2(10, 25), Color = self.theme.outline, Visible = visible}, "outline")
@@ -1951,9 +1951,9 @@ do -- UI Library
         menu.tab4 = menu:draw("Square", {Size = v2(95, 35), Position = menu.tab3.Position + v2(97, 0), Color = self.theme.hidden, Visible = visible}, "hidden")
         menu.tab5 = menu:draw("Square", {Size = v2(95, 35), Position = menu.tab4.Position + v2(96, 0), Color = self.theme.hidden, Visible = visible}, "hidden")
         menu.tabbackground = modifyDrawing(menu:gradient({self.theme.lightbackground, self.theme.background}, 14), {Visible = visible})
-        menu.inlightoutline = menu:draw("Square", {Size = v2(480, 4), Position = menu.inline.Position + v2(1, 1), Color = self.theme.outline, Visible = visible}, "outline")
+        menu.inlightoutline = menu:draw("Square", {Size = v2(480, 2), Position = menu.inline.Position + v2(1, 1), Color = self.theme.outline, Visible = visible}, "outline")
         --menu.inlight = menu:draw("Square", {Size = v2(480, 2), Position = menu.inlightoutline.Position, Color = self.theme.accent, Visible = visible}, "accent")
-        menu.inlight = modifyDrawing(menu:gradient({self.theme.accent:Lerp(Color3.new(1, 1, 1), 0.20), self.theme.accent, darken(self.theme.accent, 0.4)}, 3), {Size = v2(480, 3), Position = menu.inlightoutline.Position, Color = self.theme.accent, Visible = visible})
+        menu.inlight = modifyDrawing(menu:gradient({self.theme.accent:Lerp(Color3.new(1, 1, 1), 0.20), self.theme.accent, darken(self.theme.accent, 0.4)}, 2), {Size = v2(480, 1), Position = menu.inlightoutline.Position, Color = self.theme.accent, Visible = visible})
         menu.sectionbg = menu:draw("Square", {Size = v2(480, 527), Position = menu.inlight.Position + v2(0, 38), Color = self.theme.background, Visible = visible}, "background")
         menu.sectionIndexes = {}
         menu.tabs = {}
