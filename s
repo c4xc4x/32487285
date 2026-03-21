@@ -1181,7 +1181,7 @@ do -- UI Library
         Transparency = 1,
         NumSides = 64,
         Visible = false,
-        Font = Drawing.Font.Monospace
+        Font = Drawing.Font.Code
     }
     local themed = {
         accent = {},
