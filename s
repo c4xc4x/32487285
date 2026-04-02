@@ -86,7 +86,7 @@ if LPH_OBFUSCATED then
 end
 
 LPH_NO_VIRTUALIZE(function()
-workspace:FindFirstChild("nigga stop deobfuscating my script you black monkey nigger - iray") -- theres this bitch nigga named isse (@723741691583922209)
+workspace:FindFirstChild("stupid nigger bitch stop deobfuscating my script whore slave")
 do -- Drawing Library
     local drawing = {}
     local cache = {
@@ -173,9 +173,9 @@ do -- Drawing Library
     }
 
     local fontIndexes = {
-        [0] = Enum.Font.GothamBold,
+        [0] = Enum.Font.Code,
         [1] = Enum.Font.Gotham,
-        [2] = Enum.Font.Code,
+        [2] = Enum.Font.GothamBold,
         [3] = Enum.Font.GothamMedium
     }
 
