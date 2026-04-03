@@ -1926,7 +1926,34 @@ do -- UI Library
         menu.tabbackground = modifyDrawing(menu:gradient({self.theme.lightbackground, self.theme.background}, 14), {Visible = visible})
         menu.inlightoutline = menu:draw("Square", {Size = v2(480, 4), Position = menu.inline.Position + v2(1, 1), Color = self.theme.outline, Visible = visible}, "outline")
         --menu.inlight = menu:draw("Square", {Size = v2(480, 2), Position = menu.inlightoutline.Position, Color = self.theme.accent, Visible = visible}, "accent")
-        menu.inlight = modifyDrawing(menu:gradient({self.theme.accent:Lerp(Color3.new(1, 1, 1), 0.20), self.theme.accent, darken(self.theme.accent, 0.4)}, 3), {Size = v2(480, 3), Position = menu.inlightoutline.Position, Color = self.theme.accent, Visible = visible})
+        local rainbowColors = {Color3.fromRGB(0, 150, 255), Color3.fromRGB(255, 0, 255), Color3.fromRGB(255, 240, 0)}
+        local rainbowSquares = {}
+        local segW = math.floor(480 / 3)
+        for i = 1, 3 do
+            local seg = drawing.new("Square")
+            seg.Filled = true
+            seg.Color = rainbowColors[i]
+            seg.Size = Vector2.new(i == 3 and (480 - segW * 2) or segW, 3)
+            seg.Position = menu.inlightoutline.Position + Vector2.new(segW * (i - 1), 0)
+            seg.Visible = visible
+            rainbowSquares[i] = seg
+            table.insert(menu.drawCache, seg)
+            table.insert(allDrawCache, seg)
+        end
+        menu.inlight = setmetatable({}, {
+            __index = function(_, k) return rainbowSquares[1][k] end,
+            __newindex = function(_, k, v)
+                for i = 1, 3 do
+                    if k == "Position" then
+                        rainbowSquares[i].Position = v + Vector2.new(segW * (i - 1), 0)
+                    elseif k == "Visible" then
+                        rainbowSquares[i].Visible = v
+                    elseif k == "Transparency" then
+                        rainbowSquares[i].Transparency = v
+                    end
+                end
+            end
+        })
         menu.sectionbg = menu:draw("Square", {Size = v2(480, 527), Position = menu.inlight.Position + v2(0, 38), Color = self.theme.background, Visible = visible}, "background")
         menu.sectionIndexes = {}
         menu.tabs = {}
