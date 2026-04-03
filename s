@@ -1123,7 +1123,7 @@ do -- UI Library
             lightbackground = Color3.fromRGB(50, 50, 50),
             hidden = Color3.fromRGB(26, 26, 26),
             hiddenText = Color3.fromRGB(200, 200, 200),
-            outline = Color3.fromRGB(60, 60, 60),
+            outline = Color3.fromRGB(0, 0, 0),
             --fontData = game:HttpGet("https://get.fontspace.co/download/font/g0P4/YzVlMTg1YTgwOGNhNGQyYjljZDFiNmI0NjMxNGY0YzgudHRm/EpilepsySans-g0P4.ttf") -- miss krampus
         },
         menus = {},
@@ -1787,7 +1787,7 @@ do -- UI Library
         local tab = {}
         tab.tabIndex = #self.tabs + 1
         tab.button = self["tab" .. tostring(tab.tabIndex)]
-        tab.title = self:draw("Text", {Size = 14, Position = tab.button.Position + v2(48, 13), Color = wapus.theme[tab.tabIndex == self.tabIndex and "text" or "hiddenText"], Text = text, Center = true, Visible = self.open}, "text")
+        tab.title = self:draw("Text", {Size = 15, Position = tab.button.Position + v2(48, 11), Color = wapus.theme[tab.tabIndex == self.tabIndex and "text" or "hiddenText"], Text = text, Center = true, Visible = self.open}, "text")
         tab.CreateSection = createSection
         tab.CreatePlayerList = createPlayerList
         tab.menu = self
@@ -1824,7 +1824,7 @@ do -- UI Library
         keys.titlebackground = modifyDrawing(keys:gradient({wapus.theme.lightbackground, wapus.theme.background}, 7), {Color = wapus.theme.accent, Visible = true})
         keys.highlightoutline = keys:draw("Square", {Color = wapus.theme.outline, Visible = true}, "outline")
         keys.highlight = modifyDrawing(keys:gradient({wapus.theme.accent:Lerp(Color3.new(1, 1, 1), 0.1), wapus.theme.accent, darken(wapus.theme.accent, 0.4)}, 3), {Color = wapus.theme.accent, Visible = true})
-        keys.title = keys:draw("Text", {Size = 14, Color = wapus.theme.text, Text = "Keybinds", Visible = true}, "text")
+        keys.title = keys:draw("Text", {Size = 16, Color = wapus.theme.text, Text = "Keybinds", Visible = true}, "text")
 
         local function updateKeybinds()
             if keys.keybinds then
@@ -1843,7 +1843,7 @@ do -- UI Library
                     text = text .. " [ " .. keyName .. " ]"
                 end
 
-                insert(newkeybinds, {keys:draw("Text", {Size = 14, Color = wapus.theme.text, Text = text, Visible = true}, "text"), keybind})
+                insert(newkeybinds, {keys:draw("Text", {Size = 16, Color = wapus.theme.text, Text = text, Visible = true}, "text"), keybind})
             end
 
             keys.keybinds = newkeybinds
@@ -1906,73 +1906,29 @@ do -- UI Library
         menu.drawCache = {}
         menu.draw = draw
         menu.gradient = gradient
-        local bgSize = v2(600, 600)
+        local bgSize = v2(500, 600)
         menu.open = visible
         self.open = visible
         menu.tabIndex = index and math.clamp(index, 1, 5) or 1
-        menu.outline = menu:draw("Square", {Size = bgSize + v2(4, 4), Position = middle - bgSize * 0.5 - v2(2, 2), Color = Color3.fromRGB(80, 80, 80), Visible = visible}, "outline")
+        menu.outline = menu:draw("Square", {Size = bgSize + v2(2, 2), Position = middle - bgSize * 0.5 - v2(1, 1), Color = self.theme.outline, Visible = visible}, "outline")
         menu.background = menu:draw("Square", {Size = bgSize, Position = middle - bgSize * 0.5, Color = self.theme.background, Visible = visible}, "background")
-        menu.outline2 = menu:draw("Square", {Size = v2(0, 0), Position = menu.outline.Position, Color = self.theme.outline, Visible = false}, "outline")
-        menu.highlightoutline = menu:draw("Square", {Size = v2(0, 0), Position = menu.background.Position, Color = self.theme.outline, Visible = false}, "outline")
-        menu.highlight = modifyDrawing(menu:gradient({self.theme.accent, self.theme.accent}, 2), {Size = v2(0, 0), Position = menu.background.Position, Visible = false})
-        menu.titlebackground = modifyDrawing(menu:gradient({self.theme.lightbackground, self.theme.background}, 2), {Size = v2(0, 0), Position = menu.background.Position, Visible = false})
-        menu.title = menu:draw("Text", {Size = 16, Position = menu.background.Position + v2(5, 5), Color = self.theme.text, Text = title, Visible = false}, "text")
-        -- left sidebar border
-        menu.inline = menu:draw("Square", {Size = v2(596, 596), Position = menu.outline.Position + v2(2, 2), Color = self.theme.outline, Visible = visible}, "outline")
-        -- sidebar background
-        menu.sidebar = menu:draw("Square", {Size = v2(98, 596), Position = menu.inline.Position + v2(1, 1), Color = self.theme.hidden, Visible = visible}, "hidden")
-        -- tab buttons: stacked vertically in sidebar
-        menu.tab1 = menu:draw("Square", {Size = v2(96, 40), Position = menu.sidebar.Position + v2(1, 1),   Color = self.theme.hidden, Visible = visible}, "hidden")
-        menu.tab2 = menu:draw("Square", {Size = v2(96, 40), Position = menu.tab1.Position + v2(0, 41),     Color = self.theme.hidden, Visible = visible}, "hidden")
-        menu.tab3 = menu:draw("Square", {Size = v2(96, 40), Position = menu.tab2.Position + v2(0, 41),     Color = self.theme.hidden, Visible = visible}, "hidden")
-        menu.tab4 = menu:draw("Square", {Size = v2(96, 40), Position = menu.tab3.Position + v2(0, 41),     Color = self.theme.hidden, Visible = visible}, "hidden")
-        menu.tab5 = menu:draw("Square", {Size = v2(96, 40), Position = menu.tab4.Position + v2(0, 41),     Color = self.theme.hidden, Visible = visible}, "hidden")
+        menu.outline2 = menu:draw("Square", {Size = v2(500, 4), Position = menu.background.Position, Color = self.theme.background, Visible = visible}, "background")
+        menu.draghandle = menu:draw("Square", {Size = v2(500, 4), Position = menu.background.Position, Color = self.theme.background:Lerp(Color3.new(1, 1, 1), 0.08), Visible = visible}, "background")
+        menu.highlightoutline = menu:draw("Square", {Size = v2(500, 4), Position = menu.background.Position + v2(0, 4), Color = self.theme.outline, Visible = visible}, "outline")
+        menu.highlight = modifyDrawing(menu:gradient({self.theme.accent:Lerp(Color3.new(1, 1, 1), 0.1), self.theme.accent, darken(self.theme.accent, 0.4)}, 3), {Size = v2(500, 3), Position = menu.background.Position + v2(0, 4), Color = self.theme.accent, Visible = visible})
+        menu.titlebackground = modifyDrawing(menu:gradient({self.theme.lightbackground, self.theme.background}, 7), {Size = v2(500, 21), Position = menu.background.Position + v2(0, 8), Color = self.theme.accent, Visible = visible})
+        menu.title = menu:draw("Text", {Size = 16, Position = menu.background.Position + v2(5, 9), Color = self.theme.text, Text = title, Visible = visible}, "text")
+        menu.inline = menu:draw("Square", {Size = bgSize + v2(2 - 20, 2 - 35), Position = menu.outline.Position + v2(10, 25), Color = self.theme.outline, Visible = visible}, "outline")
+        menu.tab1 = menu:draw("Square", {Size = v2(95, 35), Position = menu.inline.Position + v2(1, 3), Color = self.theme.hidden, Visible = visible}, "hidden")
+        menu.tab2 = menu:draw("Square", {Size = v2(95, 35), Position = menu.tab1.Position + v2(96, 0), Color = self.theme.hidden, Visible = visible}, "hidden")
+        menu.tab3 = menu:draw("Square", {Size = v2(96, 35), Position = menu.tab2.Position + v2(96, 0), Color = self.theme.hidden, Visible = visible}, "hidden")
+        menu.tab4 = menu:draw("Square", {Size = v2(95, 35), Position = menu.tab3.Position + v2(97, 0), Color = self.theme.hidden, Visible = visible}, "hidden")
+        menu.tab5 = menu:draw("Square", {Size = v2(95, 35), Position = menu.tab4.Position + v2(96, 0), Color = self.theme.hidden, Visible = visible}, "hidden")
         menu.tabbackground = modifyDrawing(menu:gradient({self.theme.lightbackground, self.theme.background}, 14), {Visible = visible})
-        -- content area top accent line
-        menu.inlightoutline = menu:draw("Square", {Size = v2(494, 4), Position = menu.sidebar.Position + v2(100, 1), Color = self.theme.outline, Visible = visible}, "outline")
+        menu.inlightoutline = menu:draw("Square", {Size = v2(480, 4), Position = menu.inline.Position + v2(1, 1), Color = self.theme.outline, Visible = visible}, "outline")
         --menu.inlight = menu:draw("Square", {Size = v2(480, 2), Position = menu.inlightoutline.Position, Color = self.theme.accent, Visible = visible}, "accent")
-        local rainbowStops = {
-            Color3.fromRGB(0, 150, 255),
-            Color3.fromRGB(255, 0, 255),
-            Color3.fromRGB(255, 240, 0)
-        }
-        local rainbowSquares = {}
-        local rbBreaks = 48
-        local rbSegW = 480 / rbBreaks
-        local function getRainbowColor(t)
-            local scaled = t * 2
-            local i = math.floor(scaled)
-            local f = scaled - i
-            local a = rainbowStops[i + 1]
-            local b = rainbowStops[math.min(i + 2, 3)]
-            return a:Lerp(b, f)
-        end
-        for i = 1, rbBreaks do
-            local seg = drawing.new("Square")
-            seg.Filled = true
-            seg.Color = getRainbowColor((i - 1) / (rbBreaks - 1))
-            seg.Size = Vector2.new(math.ceil(rbSegW), 3)
-            seg.Position = menu.inlightoutline.Position + Vector2.new(math.floor((i - 1) * rbSegW), 0)
-            seg.Visible = visible
-            rainbowSquares[i] = seg
-            table.insert(menu.drawCache, seg)
-            table.insert(allDrawCache, seg)
-        end
-        menu.inlight = setmetatable({}, {
-            __index = function(_, k) return rainbowSquares[1][k] end,
-            __newindex = function(_, k, v)
-                for i = 1, rbBreaks do
-                    if k == "Position" then
-                        rainbowSquares[i].Position = v + Vector2.new(math.floor((i - 1) * rbSegW), 0)
-                    elseif k == "Visible" then
-                        rainbowSquares[i].Visible = v
-                    elseif k == "Transparency" then
-                        rainbowSquares[i].Transparency = v
-                    end
-                end
-            end
-        })
-        menu.sectionbg = menu:draw("Square", {Size = v2(490, 580), Position = menu.inlightoutline.Position + v2(0, 5), Color = self.theme.background, Visible = visible}, "background")
+        menu.inlight = modifyDrawing(menu:gradient({self.theme.accent:Lerp(Color3.new(1, 1, 1), 0.20), self.theme.accent, darken(self.theme.accent, 0.4)}, 3), {Size = v2(480, 3), Position = menu.inlightoutline.Position, Color = self.theme.accent, Visible = visible})
+        menu.sectionbg = menu:draw("Square", {Size = v2(480, 527), Position = menu.inlight.Position + v2(0, 38), Color = self.theme.background, Visible = visible}, "background")
         menu.sectionIndexes = {}
         menu.tabs = {}
         menu.keybinds = {}
@@ -1982,7 +1938,7 @@ do -- UI Library
         menu.CreateTab = createTab
         local selectedTab = menu["tab" .. tostring(menu.tabIndex)]
         selectedTab.Color = self.theme.background
-        selectedTab.Size += v2(1, 0)
+        selectedTab.Size += v2(0, 1)
         menu.tabbackground.Position = selectedTab.Position
         menu.tabbackground.Size = selectedTab.Size
         menu.CreateKeyList = createKeyList
@@ -2215,11 +2171,11 @@ do -- UI Library
                         menu.outline,
                         menu.background,
                         menu.outline2,
+                        menu.draghandle,
                         menu.highlightoutline,
                         menu.highlight,
                         menu.title,
                         menu.inline,
-                        menu.sidebar,
                         menu.tab1,
                         menu.tab2,
                         menu.tab3,
@@ -2516,18 +2472,19 @@ do -- UI Library
                     end
 
                     if onInside then
-                        if mouse.X < menuData.sectionbg.Position.X then
+                        local sectionbg = menuData.sectionbg.Position
+
+                        if mouse.Y < sectionbg.Y then
                             if clicked then
-                                local tab1Y = menuData.tab1.Position.Y
-                                local newIndex = math.clamp(math.ceil((mouse.Y - tab1Y) / 41), 1, 5)
+                                local newIndex = math.clamp(math.ceil((mouse.X - sectionbg.X) / 96), 1, 5)
                                 local oldTab = menuData.tabs[menuData.tabIndex]
                                 local newTab = menuData.tabs[newIndex]
                                 oldTab.title.Color = wapus.theme.hiddenText
                                 newTab.title.Color = wapus.theme.text
                                 local oldButton = menuData["tab" .. tostring(menuData.tabIndex)]
                                 local newButton = menuData["tab" .. tostring(newIndex)]
-                                oldButton.Size = oldButton.Size - v2(1, 0)
-                                newButton.Size = newButton.Size + v2(1, 0)
+                                oldButton.Size = oldButton.Size - v2(0, 1)
+                                newButton.Size = newButton.Size + v2(0, 1)
                                 oldButton.Color = wapus.theme.hidden
                                 newButton.Color = wapus.theme.background
                                 menuData.tabbackground.Position = newButton.Position
@@ -6115,7 +6072,7 @@ LPH_NO_VIRTUALIZE(function() -- Make UI
             ["Light Background Color"] = {50, 50, 50},
             ["Hidden Color"] = {26, 26, 26},
             ["Hidden Text Color"] = {200, 200, 200},
-            ["Outline Color"] = {60, 60, 60}
+            ["Outline Color"] = {0, 0, 0}
         }
 
         writefile(folderName .. "/theme.json", httpService:JSONEncode(themeData))
