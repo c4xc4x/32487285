@@ -1123,7 +1123,7 @@ do -- UI Library
             lightbackground = Color3.fromRGB(50, 50, 50),
             hidden = Color3.fromRGB(26, 26, 26),
             hiddenText = Color3.fromRGB(200, 200, 200),
-            outline = Color3.fromRGB(0, 0, 0),
+            outline = Color3.fromRGB(60, 60, 60),
             --fontData = game:HttpGet("https://get.fontspace.co/download/font/g0P4/YzVlMTg1YTgwOGNhNGQyYjljZDFiNmI0NjMxNGY0YzgudHRm/EpilepsySans-g0P4.ttf") -- miss krampus
         },
         menus = {},
@@ -1910,14 +1910,14 @@ do -- UI Library
         menu.open = visible
         self.open = visible
         menu.tabIndex = index and math.clamp(index, 1, 5) or 1
-        menu.outline = menu:draw("Square", {Size = bgSize + v2(2, 2), Position = middle - bgSize * 0.5 - v2(1, 1), Color = self.theme.outline, Visible = visible}, "outline")
+        menu.outline = menu:draw("Square", {Size = bgSize + v2(4, 4), Position = middle - bgSize * 0.5 - v2(2, 2), Color = Color3.fromRGB(80, 80, 80), Visible = visible}, "outline")
         menu.background = menu:draw("Square", {Size = bgSize, Position = middle - bgSize * 0.5, Color = self.theme.background, Visible = visible}, "background")
-        menu.outline2 = menu:draw("Square", {Size = v2(502, 1), Position = menu.outline.Position, Color = self.theme.outline, Visible = visible}, "outline")
-        menu.highlightoutline = menu:draw("Square", {Size = v2(500, 4), Position = menu.background.Position, Color = self.theme.outline, Visible = visible}, "outline")
-        menu.highlight = modifyDrawing(menu:gradient({self.theme.accent:Lerp(Color3.new(1, 1, 1), 0.1), self.theme.accent, darken(self.theme.accent, 0.4)}, 3), {Size = v2(500, 3), Position = menu.background.Position, Color = self.theme.accent, Visible = visible})
-        menu.titlebackground = modifyDrawing(menu:gradient({self.theme.lightbackground, self.theme.background}, 7), {Size = v2(500, 21), Position = menu.background.Position + v2(0, 4), Color = self.theme.accent, Visible = visible})
-        menu.title = menu:draw("Text", {Size = 16, Position = menu.background.Position + v2(5, 5), Color = self.theme.text, Text = title, Visible = visible}, "text")
-        menu.inline = menu:draw("Square", {Size = bgSize + v2(2 - 20, 2 - 35), Position = menu.outline.Position + v2(10, 25), Color = self.theme.outline, Visible = visible}, "outline")
+        menu.outline2 = menu:draw("Square", {Size = v2(0, 0), Position = menu.outline.Position, Color = self.theme.outline, Visible = false}, "outline")
+        menu.highlightoutline = menu:draw("Square", {Size = v2(0, 0), Position = menu.background.Position, Color = self.theme.outline, Visible = false}, "outline")
+        menu.highlight = modifyDrawing(menu:gradient({self.theme.accent, self.theme.accent}, 2), {Size = v2(0, 0), Position = menu.background.Position, Visible = false})
+        menu.titlebackground = modifyDrawing(menu:gradient({self.theme.lightbackground, self.theme.background}, 2), {Size = v2(0, 0), Position = menu.background.Position, Visible = false})
+        menu.title = menu:draw("Text", {Size = 16, Position = menu.background.Position + v2(5, 5), Color = self.theme.text, Text = title, Visible = false}, "text")
+        menu.inline = menu:draw("Square", {Size = bgSize + v2(2 - 20, 2 - 35), Position = menu.outline.Position + v2(12, 2), Color = self.theme.outline, Visible = visible}, "outline")
         menu.tab1 = menu:draw("Square", {Size = v2(95, 35), Position = menu.inline.Position + v2(1, 3), Color = self.theme.hidden, Visible = visible}, "hidden")
         menu.tab2 = menu:draw("Square", {Size = v2(95, 35), Position = menu.tab1.Position + v2(96, 0), Color = self.theme.hidden, Visible = visible}, "hidden")
         menu.tab3 = menu:draw("Square", {Size = v2(96, 35), Position = menu.tab2.Position + v2(96, 0), Color = self.theme.hidden, Visible = visible}, "hidden")
@@ -6110,7 +6110,7 @@ LPH_NO_VIRTUALIZE(function() -- Make UI
             ["Light Background Color"] = {50, 50, 50},
             ["Hidden Color"] = {26, 26, 26},
             ["Hidden Text Color"] = {200, 200, 200},
-            ["Outline Color"] = {0, 0, 0}
+            ["Outline Color"] = {60, 60, 60}
         }
 
         writefile(folderName .. "/theme.json", httpService:JSONEncode(themeData))
