@@ -173,10 +173,10 @@ do -- Drawing Library
     }
 
     local fontIndexes = {
-        [0] = Enum.Font.Legacy,
-        [1] = Enum.Font.Ubuntu,
-        [2] = Enum.Font.Code,
-        [3] = Enum.Font.Jura
+        [0] = Enum.Font.ArialBold,
+        [1] = Enum.Font.ArialBold,
+        [2] = Enum.Font.ArialBold,
+        [3] = Enum.Font.ArialBold
     }
 
     local newMetatable = {
@@ -1576,12 +1576,12 @@ do -- UI Library
         self.menu.sectionIndexes[text] = section
         height = height == "half" and 257 or height == "whole" and 518 or height == "third" and 170 or height
         section.outline = self.menu:draw("Square", {Size = v2(231, height), Position = self.menu.sectionbg.Position + v2(7 + (right and 235 or 0), 3 + self[side]), Color = wapus.theme.outline, Visible = visible}, "outline")
-        section.highlightoutline = self.menu:draw("Square", {Size = v2(229, 2), Position = section.outline.Position + v2(1, 1), Color = wapus.theme.outline, Visible = visible}, "outline")
-        section.highlight = modifyDrawing(self.menu:gradient({wapus.theme.accent:Lerp(Color3.new(1, 1, 1), 0.1), wapus.theme.accent, darken(wapus.theme.accent, 0.4)}, 3), {Size = v2(229, 1), Position = section.highlightoutline.Position, Color = wapus.theme.accent, Visible = visible})
-        section.buttons = self.menu:draw("Square", {Size = v2(229, 20), Position = section.highlightoutline.Position + v2(0, 2), Color = wapus.theme.hidden, Visible = visible}, "hidden")
-        section.buttonoutline = self.menu:draw("Square", {Position = section.highlightoutline.Position + v2(0, 2), Color = wapus.theme.outline, Visible = visible}, "outline")
-        section.button = self.menu:draw("Square", {Position = section.highlightoutline.Position + v2(0, 2), Color = wapus.theme.background, Visible = visible}, "background")
-        section.buttonbackground = modifyDrawing(self.menu:gradient({wapus.theme.lightbackground, wapus.theme.background}, 8), {Position = section.highlightoutline.Position + v2(0, 2), Color = wapus.theme.background, Visible = visible})
+        section.highlightoutline = self.menu:draw("Square", {Size = v2(229, 4), Position = section.outline.Position + v2(1, 1), Color = wapus.theme.outline, Visible = visible}, "outline")
+        section.highlight = modifyDrawing(self.menu:gradient({wapus.theme.accent:Lerp(Color3.new(1, 1, 1), 0.1), wapus.theme.accent, darken(wapus.theme.accent, 0.4)}, 3), {Size = v2(229, 3), Position = section.highlightoutline.Position, Color = wapus.theme.accent, Visible = visible})
+        section.buttons = self.menu:draw("Square", {Size = v2(229, 20), Position = section.highlightoutline.Position + v2(0, 4), Color = wapus.theme.hidden, Visible = visible}, "hidden")
+        section.buttonoutline = self.menu:draw("Square", {Position = section.highlightoutline.Position + v2(0, 4), Color = wapus.theme.outline, Visible = visible}, "outline")
+        section.button = self.menu:draw("Square", {Position = section.highlightoutline.Position + v2(0, 4), Color = wapus.theme.background, Visible = visible}, "background")
+        section.buttonbackground = modifyDrawing(self.menu:gradient({wapus.theme.lightbackground, wapus.theme.background}, 8), {Position = section.highlightoutline.Position + v2(0, 4), Color = wapus.theme.background, Visible = visible})
         section.text = self.menu:draw("Text", {Size = 14, Color = wapus.theme.text, Center = true, Text = text, Visible = visible}, "text")
         section.button.Size = v2(10 + section.text.TextBounds.X, 21)
         section.buttonbackground.Size = section.button.Size
@@ -1719,12 +1719,12 @@ do -- UI Library
         playerlist.votekick = callbacks.votekick
         playerlist.spectate = callbacks.spectate
         playerlist.outline = self.menu:draw("Square", {Size = v2(231 + 235, height), Position = self.menu.sectionbg.Position + v2(7, 3), Color = wapus.theme.outline, Visible = visible}, "outline")
-        playerlist.highlightoutline = self.menu:draw("Square", {Size = v2(229 + 235, 2), Position = playerlist.outline.Position + v2(1, 1), Color = wapus.theme.outline, Visible = visible}, "outline")
-        playerlist.highlight = modifyDrawing(self.menu:gradient({wapus.theme.accent:Lerp(Color3.new(1, 1, 1), 0.1), wapus.theme.accent, darken(wapus.theme.accent, 0.4)}, 3), {Size = v2(229 + 235, 1), Position = playerlist.highlightoutline.Position, Color = wapus.theme.accent, Visible = visible})
-        playerlist.buttons = self.menu:draw("Square", {Size = v2(229 + 235, 20), Position = playerlist.highlightoutline.Position + v2(0, 2), Color = wapus.theme.hidden, Visible = visible}, "hidden")
-        playerlist.buttonoutline = self.menu:draw("Square", {Position = playerlist.highlightoutline.Position + v2(0, 2), Color = wapus.theme.outline, Visible = visible}, "outline")
-        playerlist.button = self.menu:draw("Square", {Position = playerlist.highlightoutline.Position + v2(0, 2), Color = wapus.theme.background, Visible = visible}, "background")
-        playerlist.buttonbackground = modifyDrawing(self.menu:gradient({wapus.theme.lightbackground, wapus.theme.background}, 8), {Position = playerlist.highlightoutline.Position + v2(0, 2), Color = wapus.theme.background, Visible = visible})
+        playerlist.highlightoutline = self.menu:draw("Square", {Size = v2(229 + 235, 4), Position = playerlist.outline.Position + v2(1, 1), Color = wapus.theme.outline, Visible = visible}, "outline")
+        playerlist.highlight = modifyDrawing(self.menu:gradient({wapus.theme.accent:Lerp(Color3.new(1, 1, 1), 0.1), wapus.theme.accent, darken(wapus.theme.accent, 0.4)}, 3), {Size = v2(229 + 235, 3), Position = playerlist.highlightoutline.Position, Color = wapus.theme.accent, Visible = visible})
+        playerlist.buttons = self.menu:draw("Square", {Size = v2(229 + 235, 20), Position = playerlist.highlightoutline.Position + v2(0, 4), Color = wapus.theme.hidden, Visible = visible}, "hidden")
+        playerlist.buttonoutline = self.menu:draw("Square", {Position = playerlist.highlightoutline.Position + v2(0, 4), Color = wapus.theme.outline, Visible = visible}, "outline")
+        playerlist.button = self.menu:draw("Square", {Position = playerlist.highlightoutline.Position + v2(0, 4), Color = wapus.theme.background, Visible = visible}, "background")
+        playerlist.buttonbackground = modifyDrawing(self.menu:gradient({wapus.theme.lightbackground, wapus.theme.background}, 8), {Position = playerlist.highlightoutline.Position + v2(0, 4), Color = wapus.theme.background, Visible = visible})
         playerlist.text = self.menu:draw("Text", {Size = 14, Color = wapus.theme.text, Center = true, Text = "Player List", Visible = visible}, "text")
         playerlist.button.Size = v2(10 + playerlist.text.TextBounds.X, 21)
         playerlist.buttonbackground.Size = playerlist.button.Size
@@ -1871,9 +1871,9 @@ do -- UI Library
             keys.titlebackground.Position = keys.background.Position + v2(0, 5)
             keys.titlebackground.Size = v2(width, 14)
             keys.highlightoutline.Position = keys.outline.Position
-            keys.highlightoutline.Size = v2(width + 2, 2)
+            keys.highlightoutline.Size = v2(width + 2, 5)
             keys.highlight.Position = keys.background.Position
-            keys.highlight.Size = v2(width, 1)
+            keys.highlight.Size = v2(width, 3)
             keys.title.Position = keys.background.Position + v2(2, 3)
 
             for keyIndex = 1, keycount do
@@ -1913,8 +1913,8 @@ do -- UI Library
         menu.outline = menu:draw("Square", {Size = bgSize + v2(2, 2), Position = middle - bgSize * 0.5 - v2(1, 1), Color = self.theme.outline, Visible = visible}, "outline")
         menu.background = menu:draw("Square", {Size = bgSize, Position = middle - bgSize * 0.5, Color = self.theme.background, Visible = visible}, "background")
         menu.outline2 = menu:draw("Square", {Size = v2(502, 4), Position = menu.outline.Position, Color = self.theme.outline, Visible = visible}, "outline")
-        menu.highlightoutline = menu:draw("Square", {Size = v2(500, 2), Position = menu.background.Position, Color = self.theme.outline, Visible = visible}, "outline")
-        menu.highlight = modifyDrawing(menu:gradient({self.theme.accent:Lerp(Color3.new(1, 1, 1), 0.1), self.theme.accent, darken(self.theme.accent, 0.4)}, 3), {Size = v2(500, 1), Position = menu.background.Position, Color = self.theme.accent, Visible = visible})
+        menu.highlightoutline = menu:draw("Square", {Size = v2(500, 4), Position = menu.background.Position, Color = self.theme.outline, Visible = visible}, "outline")
+        menu.highlight = modifyDrawing(menu:gradient({self.theme.accent:Lerp(Color3.new(1, 1, 1), 0.1), self.theme.accent, darken(self.theme.accent, 0.4)}, 3), {Size = v2(500, 3), Position = menu.background.Position, Color = self.theme.accent, Visible = visible})
         menu.titlebackground = modifyDrawing(menu:gradient({self.theme.lightbackground, self.theme.background}, 7), {Size = v2(500, 21), Position = menu.background.Position + v2(0, 4), Color = self.theme.accent, Visible = visible})
         menu.title = menu:draw("Text", {Size = 16, Position = menu.background.Position + v2(5, 5), Color = self.theme.text, Text = title, Visible = visible}, "text")
         menu.inline = menu:draw("Square", {Size = bgSize + v2(2 - 20, 2 - 35), Position = menu.outline.Position + v2(10, 25), Color = self.theme.outline, Visible = visible}, "outline")
@@ -1924,9 +1924,9 @@ do -- UI Library
         menu.tab4 = menu:draw("Square", {Size = v2(95, 35), Position = menu.tab3.Position + v2(97, 0), Color = self.theme.hidden, Visible = visible}, "hidden")
         menu.tab5 = menu:draw("Square", {Size = v2(95, 35), Position = menu.tab4.Position + v2(96, 0), Color = self.theme.hidden, Visible = visible}, "hidden")
         menu.tabbackground = modifyDrawing(menu:gradient({self.theme.lightbackground, self.theme.background}, 14), {Visible = visible})
-        menu.inlightoutline = menu:draw("Square", {Size = v2(480, 2), Position = menu.inline.Position + v2(1, 1), Color = self.theme.outline, Visible = visible}, "outline")
+        menu.inlightoutline = menu:draw("Square", {Size = v2(480, 4), Position = menu.inline.Position + v2(1, 1), Color = self.theme.outline, Visible = visible}, "outline")
         --menu.inlight = menu:draw("Square", {Size = v2(480, 2), Position = menu.inlightoutline.Position, Color = self.theme.accent, Visible = visible}, "accent")
-        menu.inlight = modifyDrawing(menu:gradient({self.theme.accent:Lerp(Color3.new(1, 1, 1), 0.20), self.theme.accent, darken(self.theme.accent, 0.4)}, 3), {Size = v2(480, 1), Position = menu.inlightoutline.Position, Color = self.theme.accent, Visible = visible})
+        menu.inlight = modifyDrawing(menu:gradient({self.theme.accent:Lerp(Color3.new(1, 1, 1), 0.20), self.theme.accent, darken(self.theme.accent, 0.4)}, 3), {Size = v2(480, 3), Position = menu.inlightoutline.Position, Color = self.theme.accent, Visible = visible})
         menu.sectionbg = menu:draw("Square", {Size = v2(480, 527), Position = menu.inlight.Position + v2(0, 38), Color = self.theme.background, Visible = visible}, "background")
         menu.sectionIndexes = {}
         menu.tabs = {}
@@ -2596,8 +2596,8 @@ do -- UI Library
                                                                 } -- i wanna kms
                                                                 picker.outline = picker:draw("Square", {Position = color.toggle.buttonoutline.Position + v2(-57, -8), Size = v2(275, 217), Color = wapus.theme.outline, Visible = true, ZIndex = 4})
                                                                 picker.background = picker:draw("Square", {Position = picker.outline.Position + v2(1, 1), Size = v2(273, 215), Color = wapus.theme.background, Visible = true, ZIndex = 4})
-                                                                picker.highlightbackground = picker:draw("Square", {Position = picker.outline.Position + v2(1, 1), Size = v2(273, 2), Color = wapus.theme.outline, Visible = true, ZIndex = 4})
-                                                                picker.highlight = modifyDrawing(picker:gradient({wapus.theme.accent:Lerp(Color3.new(1, 1, 1), 0.1), wapus.theme.accent, darken(wapus.theme.accent, 0.4)}, 3), {Position = picker.highlightbackground.Position, Size = v2(273, 1), Visible = true, ZIndex = 4})
+                                                                picker.highlightbackground = picker:draw("Square", {Position = picker.outline.Position + v2(1, 1), Size = v2(273, 4), Color = wapus.theme.outline, Visible = true, ZIndex = 4})
+                                                                picker.highlight = modifyDrawing(picker:gradient({wapus.theme.accent:Lerp(Color3.new(1, 1, 1), 0.1), wapus.theme.accent, darken(wapus.theme.accent, 0.4)}, 3), {Position = picker.highlightbackground.Position, Size = v2(273, 3), Visible = true, ZIndex = 4})
                                                                 picker.titlebackground = modifyDrawing(picker:gradient({wapus.theme.lightbackground, wapus.theme.background}, 6), {Size = v2(273, 17), Position = picker.background.Position + v2(0, 4), Visible = true, ZIndex = 4})
                                                                 picker.title = picker:draw("Text", {Position = picker.background.Position + v2(3, 3), Size = 14, Color = wapus.theme.text, Text = color.name, Visible = true, ZIndex = 4})
                                                                 picker.hsvOutline = picker:draw("Square", {Position = picker.background.Position + v2(7, 19), Size = v2(202 - 18 - 16, 168), Color = wapus.theme.outline, Visible = true, ZIndex = 4})
