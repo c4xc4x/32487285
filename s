@@ -135,7 +135,7 @@ do -- Drawing Library
         },
         Text = {
             Text = "",
-            Size = 16,
+            Size = 14,
             Center = false,
             Outline = false,
             OutlineColor = black,
@@ -173,10 +173,10 @@ do -- Drawing Library
     }
 
     local fontIndexes = {
-        [0] = Enum.Font.Arial,
-        [1] = Enum.Font.ArialBold,
-        [2] = Enum.Font.Arial,
-        [3] = Enum.Font.Arial
+        [0] = Enum.Font.Legacy,
+        [1] = Enum.Font.Ubuntu,
+        [2] = Enum.Font.Code,
+        [3] = Enum.Font.Jura
     }
 
     local newMetatable = {
@@ -203,7 +203,7 @@ do -- Drawing Library
                         self._data[index] = value
                         return
                     elseif index == "Size" then
-                        self._data.drawings.label.TextSize = value
+                        self._data.drawings.label.TextSize = value * 0.66
                         self._data[index] = value
                         return
                     end
@@ -1307,8 +1307,8 @@ do -- UI Library
         textbox.height = 34
         textbox.buttonoutline = self.menu:draw("Square", {Position = container + v2(0, 15), Size = v2(213, 18), Color = wapus.theme.outline, Visible = visible}, "outline")
         textbox.button = modifyDrawing(self.menu:gradient({wapus.theme.lightbackground, wapus.theme.background}, 6), {Position = textbox.buttonoutline.Position + v2(1, 1), Size = v2(211, 16), Color = wapus.theme.background, Visible = visible})
-        textbox.text = self.menu:draw("Text", {Position = textbox.buttonoutline.Position + v2(2, -16), Size = 16, Color = wapus.theme.text, Text = text, Visible = visible}, "text")
-        textbox.valuetext = self.menu:draw("Text", {Position = textbox.button.Position + v2(6, 0), Size = 16, Color = wapus.theme.text, Text = textbox.value, Visible = visible}, "text")
+        textbox.text = self.menu:draw("Text", {Position = textbox.buttonoutline.Position + v2(2, -16), Size = 14, Color = wapus.theme.text, Text = text, Visible = visible}, "text")
+        textbox.valuetext = self.menu:draw("Text", {Position = textbox.button.Position + v2(6, 0), Size = 14, Color = wapus.theme.text, Text = textbox.value, Visible = visible}, "text")
         self.bgOffset += v2(0, textbox.height)
         insert(self.elements, textbox)
         return textbox
@@ -1323,7 +1323,7 @@ do -- UI Library
         button.height = 23
         button.buttonoutline = self.menu:draw("Square", {Position = container + v2(0, 3), Size = v2(213, 18), Color = wapus.theme.outline, Visible = visible}, "outline")
         button.button = modifyDrawing(self.menu:gradient({wapus.theme.lightbackground, wapus.theme.background}, 6), {Position = button.buttonoutline.Position + v2(1, 1), Size = v2(211, 16), Color = wapus.theme.background, Visible = visible})
-        button.text = self.menu:draw("Text", {Position = button.button.Position + v2(106, 0), Center = true, Size = 16, Color = wapus.theme.text, Text = text, Visible = visible}, "text")
+        button.text = self.menu:draw("Text", {Position = button.button.Position + v2(106, 0), Center = true, Size = 14, Color = wapus.theme.text, Text = text, Visible = visible}, "text")
         self.bgOffset += v2(0, button.height)
         insert(self.elements, button)
         return button
@@ -1351,9 +1351,9 @@ do -- UI Library
         dropdown.height = 34
         dropdown.buttonoutline = self.menu:draw("Square", {Position = container + v2(0, 15), Size = v2(213, 18), Color = wapus.theme.outline, Visible = visible}, "outline")
         dropdown.button = modifyDrawing(self.menu:gradient({wapus.theme.lightbackground, wapus.theme.background}, 6), {Position = dropdown.buttonoutline.Position + v2(1, 1), Size = v2(211, 16), Color = wapus.theme.background, Visible = visible})
-        dropdown.text = self.menu:draw("Text", {Position = dropdown.buttonoutline.Position + v2(2, -16), Size = 16, Color = wapus.theme.text, Text = text, Visible = visible}, "text")
-        dropdown.valuetext = self.menu:draw("Text", {Position = dropdown.button.Position + v2(6, 0), Size = 16, Color = wapus.theme.text, Text = dropdown.value, Visible = visible}, "text")
-        dropdown.droptext = self.menu:draw("Text", {Position = dropdown.button.Position + v2(200, 2), Size = 16, Color = wapus.theme.text, Text = "-", Visible = visible}, "text")
+        dropdown.text = self.menu:draw("Text", {Position = dropdown.buttonoutline.Position + v2(2, -16), Size = 14, Color = wapus.theme.text, Text = text, Visible = visible}, "text")
+        dropdown.valuetext = self.menu:draw("Text", {Position = dropdown.button.Position + v2(6, 0), Size = 14, Color = wapus.theme.text, Text = dropdown.value, Visible = visible}, "text")
+        dropdown.droptext = self.menu:draw("Text", {Position = dropdown.button.Position + v2(200, 2), Size = 14, Color = wapus.theme.text, Text = "-", Visible = visible}, "text")
         self.bgOffset += v2(0, dropdown.height)
         insert(self.elements, dropdown)
         return dropdown
@@ -1389,8 +1389,8 @@ do -- UI Library
         slider.buttonoutline = self.menu:draw("Square", {Position = container + v2(0, 16), Size = v2(213, 11), Color = wapus.theme.outline, Visible = visible}, "outline")
         slider.button = modifyDrawing(self.menu:gradient({wapus.theme.lightbackground, wapus.theme.background}, 3), {Position = slider.buttonoutline.Position + v2(1, 1), Size = v2(211, 9), Color = wapus.theme.background, Visible = visible})
         slider.highlight = modifyDrawing(self.menu:gradient({wapus.theme.accent, darken(wapus.theme.accent, 0.25)}, 3), {Position = slider.button.Position, Size = v2(math.clamp(ratio * 211, 0, 211), 9), Color = wapus.theme.accent, Visible = visible})
-        slider.text = self.menu:draw("Text", {Position = slider.buttonoutline.Position + v2(2, -15), Size = 16, Color = wapus.theme.text, Text = text, Visible = visible}, "text")
-        slider.valuetext = self.menu:draw("Text", {Position = slider.button.Position + v2(106, -3), Size = 16, Center = true, Color = wapus.theme.text, Text = tostring(default) .. slider.suffix, Visible = visible}, "text")
+        slider.text = self.menu:draw("Text", {Position = slider.buttonoutline.Position + v2(2, -15), Size = 14, Color = wapus.theme.text, Text = text, Visible = visible}, "text")
+        slider.valuetext = self.menu:draw("Text", {Position = slider.button.Position + v2(106, -3), Size = 14, Center = true, Color = wapus.theme.text, Text = tostring(default) .. slider.suffix, Visible = visible}, "text")
         slider.callback = callback
         slider.SetValue = setSliderValue
         self.bgOffset += v2(0, slider.height)
@@ -1437,7 +1437,7 @@ do -- UI Library
 
     local function setKeybindValue(self, value)
         if value and value ~= "None" then
-            self.text.Size = 16
+            self.text.Size = 14
             self.text.Text = value
 
             task.spawn(function()
@@ -1454,7 +1454,7 @@ do -- UI Library
                 insert(self.menu.keybinds, self.keyIndex, {value, self})
             end
         else
-            self.text.Size = 16
+            self.text.Size = 14
             self.text.Text = "None"
 
             if self.keyIndex then
@@ -1483,7 +1483,7 @@ do -- UI Library
             keybind.AddColorPicker = addColorToToggle
             keybind.buttonoutline = self.menu:draw("Square", {Position = self.buttonoutline.Position + v2(171 - self.additions, 0), Size = v2(42, 14), Color = wapus.theme.outline, Visible = visible}, "outline")
             keybind.button = self.menu:draw("Square", {Position = keybind.buttonoutline.Position + v2(1, 1), Size = v2(40, 12), Color = wapus.theme.hidden, Visible = visible}, "hidden")
-            keybind.text = self.menu:draw("Text", {Position = keybind.button.Position + v2(21, -2), Size = 16, Color = wapus.theme.text, Text = default, Center = true, Visible = visible}, "text")
+            keybind.text = self.menu:draw("Text", {Position = keybind.button.Position + v2(21, -2), Size = 14, Color = wapus.theme.text, Text = default, Center = true, Visible = visible}, "text")
             keybind.SetValue = setKeybindValue
             self.keybind = keybind
             self.additions += 49
@@ -1528,7 +1528,7 @@ do -- UI Library
         toggle.buttonoutline = self.menu:draw("Square", {Position = container + v2(0, 3), Size = v2(11, 11), Color = wapus.theme.outline, Visible = visible}, "outline")
         --toggle.button = self.menu:draw("Square", {Position = toggle.buttonoutline.Position + v2(1, 1), Size = v2(9, 9), Color = default and wapus.theme.accent or wapus.theme.background, Visible = visible}, "background")
         toggle.button = modifyDrawing(self.menu:gradient({wapus.theme.accent, darken(wapus.theme.accent, 0.25)}, 3), {Position = toggle.buttonoutline.Position + v2(1, 1), Size = v2(9, 9), Color = default and wapus.theme.accent or wapus.theme.background, Visible = visible})
-        toggle.text = self.menu:draw("Text", {Position = toggle.buttonoutline.Position + v2(16, -2), Size = 16, Color = wapus.theme.text, Text = text, Visible = visible}, "text")
+        toggle.text = self.menu:draw("Text", {Position = toggle.buttonoutline.Position + v2(16, -2), Size = 14, Color = wapus.theme.text, Text = text, Visible = visible}, "text")
         toggle.AddKeyBind = addKeybindToToggle
         toggle.AddColorPicker = addColorToToggle
         toggle.callback = callback
@@ -1549,7 +1549,7 @@ do -- UI Library
         section.index = #self.sections + 1
         section.buttonoutline = self.menu:draw("Square", {Position = lastButton.Position + v2(lastButton.Size.X + 1, 0), Color = wapus.theme.outline, Visible = visible}, "outline")
         section.button = self.menu:draw("Square", {Position = section.buttonoutline.Position + v2(0, 0), Color = wapus.theme.hidden, Visible = visible}, "hidden")
-        section.text = self.menu:draw("Text", {Size = 16, Font = 1, Color = wapus.theme.hiddenText, Center = true, Text = text, Visible = visible}, "text")
+        section.text = self.menu:draw("Text", {Size = 14, Color = wapus.theme.hiddenText, Center = true, Text = text, Visible = visible}, "text")
         section.button.Size = v2(10 + section.text.TextBounds.X, 20)
         section.buttonoutline.Size = v2(11 + section.text.TextBounds.X, 21)
         section.text.Position = section.button.Position + v2(5 + section.text.TextBounds.X * 0.5, 4)
@@ -1582,7 +1582,7 @@ do -- UI Library
         section.buttonoutline = self.menu:draw("Square", {Position = section.highlightoutline.Position + v2(0, 4), Color = wapus.theme.outline, Visible = visible}, "outline")
         section.button = self.menu:draw("Square", {Position = section.highlightoutline.Position + v2(0, 4), Color = wapus.theme.background, Visible = visible}, "background")
         section.buttonbackground = modifyDrawing(self.menu:gradient({wapus.theme.lightbackground, wapus.theme.background}, 8), {Position = section.highlightoutline.Position + v2(0, 4), Color = wapus.theme.background, Visible = visible})
-        section.text = self.menu:draw("Text", {Size = 16, Font = 1, Color = wapus.theme.text, Center = true, Text = text, Visible = visible}, "text")
+        section.text = self.menu:draw("Text", {Size = 14, Color = wapus.theme.text, Center = true, Text = text, Visible = visible}, "text")
         section.button.Size = v2(10 + section.text.TextBounds.X, 21)
         section.buttonbackground.Size = section.button.Size
         section.buttonbackground.ZIndex = 2
@@ -1725,7 +1725,7 @@ do -- UI Library
         playerlist.buttonoutline = self.menu:draw("Square", {Position = playerlist.highlightoutline.Position + v2(0, 4), Color = wapus.theme.outline, Visible = visible}, "outline")
         playerlist.button = self.menu:draw("Square", {Position = playerlist.highlightoutline.Position + v2(0, 4), Color = wapus.theme.background, Visible = visible}, "background")
         playerlist.buttonbackground = modifyDrawing(self.menu:gradient({wapus.theme.lightbackground, wapus.theme.background}, 8), {Position = playerlist.highlightoutline.Position + v2(0, 4), Color = wapus.theme.background, Visible = visible})
-        playerlist.text = self.menu:draw("Text", {Size = 16, Font = 1, Color = wapus.theme.text, Center = true, Text = "Player List", Visible = visible}, "text")
+        playerlist.text = self.menu:draw("Text", {Size = 14, Color = wapus.theme.text, Center = true, Text = "Player List", Visible = visible}, "text")
         playerlist.button.Size = v2(10 + playerlist.text.TextBounds.X, 21)
         playerlist.buttonbackground.Size = playerlist.button.Size
         playerlist.buttonbackground.ZIndex = 2
@@ -1745,17 +1745,17 @@ do -- UI Library
         playerlist.spectatebuttonoutline = self.menu:draw("Square", {Size = v2(69, 20), Position = playerlist.outline.Position + v2(308 + 80, 26 + 18 + 210 + 53), Color = wapus.theme.outline, Visible = visible}, "outline")
         playerlist.spectatebutton = modifyDrawing(self.menu:gradient({wapus.theme.lightbackground, wapus.theme.background}, 6), {Size = v2(67, 18), Position = playerlist.outline.Position + v2(308 + 81, 26 + 18 + 210 + 54), Visible = visible})
 
-        playerlist.nametext = self.menu:draw("Text", {Position = playerlist.playerBoxOutline.Position + v2(4, -17), Size = 16, Color = wapus.theme.text, Text = "Name", Visible = visible}, "text")
-        playerlist.teamtext = self.menu:draw("Text", {Position = playerlist.playerBoxOutline.Position + v2(4 + 148, -17), Size = 16, Color = wapus.theme.text, Text = "Team", Visible = visible}, "text")
-        playerlist.statuslabeltext = self.menu:draw("Text", {Position = playerlist.playerBoxOutline.Position + v2(4 + 298, -17), Size = 16, Color = wapus.theme.text, Text = "Status", Visible = visible}, "text")
-        playerlist.playertext = self.menu:draw("Text", {Position = playerlist.playerPFP.Position + v2(78, -2), Size = 16, Color = wapus.theme.text, Text = "No Player Selected", Visible = visible}, "text")
-        playerlist.playerstatustext = self.menu:draw("Text", {Position = playerlist.statusbuttonoutline.Position + v2(-1, -17), Size = 16, Color = wapus.theme.text, Text = "Player Status", Visible = visible}, "text")
-        playerlist.statustext = self.menu:draw("Text", {Position = playerlist.playerstatustext.Position + v2(6, 19), Size = 16, Color = wapus.theme.text, Text = "None", Visible = visible}, "text")
-        playerlist.droptext = self.menu:draw("Text", {Position = playerlist.playerstatustext.Position + v2(137, 20), Size = 16, Color = wapus.theme.text, Text = "-", Visible = visible}, "text")
-        playerlist.votekicktext = self.menu:draw("Text", {Position = playerlist.votekickbutton.Position + v2(33, 1), Size = 16, Center = true, Color = wapus.theme.text, Text = "Votekick", Visible = visible}, "text")
-        playerlist.spectatetext = self.menu:draw("Text", {Position = playerlist.spectatebutton.Position + v2(33, 1), Size = 16, Center = true, Color = wapus.theme.text, Text = "Spectate", Visible = visible}, "text")
+        playerlist.nametext = self.menu:draw("Text", {Position = playerlist.playerBoxOutline.Position + v2(4, -17), Size = 14, Color = wapus.theme.text, Text = "Name", Visible = visible}, "text")
+        playerlist.teamtext = self.menu:draw("Text", {Position = playerlist.playerBoxOutline.Position + v2(4 + 148, -17), Size = 14, Color = wapus.theme.text, Text = "Team", Visible = visible}, "text")
+        playerlist.statuslabeltext = self.menu:draw("Text", {Position = playerlist.playerBoxOutline.Position + v2(4 + 298, -17), Size = 14, Color = wapus.theme.text, Text = "Status", Visible = visible}, "text")
+        playerlist.playertext = self.menu:draw("Text", {Position = playerlist.playerPFP.Position + v2(78, -2), Size = 14, Color = wapus.theme.text, Text = "No Player Selected", Visible = visible}, "text")
+        playerlist.playerstatustext = self.menu:draw("Text", {Position = playerlist.statusbuttonoutline.Position + v2(-1, -17), Size = 14, Color = wapus.theme.text, Text = "Player Status", Visible = visible}, "text")
+        playerlist.statustext = self.menu:draw("Text", {Position = playerlist.playerstatustext.Position + v2(6, 19), Size = 14, Color = wapus.theme.text, Text = "None", Visible = visible}, "text")
+        playerlist.droptext = self.menu:draw("Text", {Position = playerlist.playerstatustext.Position + v2(137, 20), Size = 14, Color = wapus.theme.text, Text = "-", Visible = visible}, "text")
+        playerlist.votekicktext = self.menu:draw("Text", {Position = playerlist.votekickbutton.Position + v2(33, 1), Size = 14, Center = true, Color = wapus.theme.text, Text = "Votekick", Visible = visible}, "text")
+        playerlist.spectatetext = self.menu:draw("Text", {Position = playerlist.spectatebutton.Position + v2(33, 1), Size = 14, Center = true, Color = wapus.theme.text, Text = "Spectate", Visible = visible}, "text")
 
-        playerlist.carrot = self.menu:draw("Text", {Position = playerlist.playerBoxBackground.Position + v2(437, -1), Size = 16, Outline = false, Color = wapus.theme.accent, Text = "^", Visible = visible}, "accent")
+        playerlist.carrot = self.menu:draw("Text", {Position = playerlist.playerBoxBackground.Position + v2(437, -1), Size = 14, Outline = false, Color = wapus.theme.accent, Text = "^", Visible = visible}, "accent")
         playerlist.tinyv = self.menu:draw("Text", {Position = playerlist.playerBoxBackground.Position + v2(437, 195), Size = 11, Outline = false, Color = wapus.theme.accent, Text = "v", Visible = visible}, "accent")
 
         playerlist.playerdrawings = {}
@@ -1768,9 +1768,9 @@ do -- UI Library
 
             drawinglist.teamline = self.menu:draw("Square", {Size = v2(1, playerIndex ~= 9 and 16 or 17), Position = playerlist.playerBoxBackground.Position + v2(148, 23 * (playerIndex - 1) + 4), Color = wapus.theme.outline, Visible = visible}, "outline")
             drawinglist.statusline = self.menu:draw("Square", {Size = v2(1, playerIndex ~= 9 and 16 or 17), Position = playerlist.playerBoxBackground.Position + v2(298, 23 * (playerIndex - 1) + 4), Color = wapus.theme.outline, Visible = visible}, "outline")
-            drawinglist.name = self.menu:draw("Text", {Position = playerlist.playerBoxBackground.Position + v2(4, 23 * (playerIndex - 1) + 5), Size = 16, Color = wapus.theme.text, Text = "", Visible = visible}, "text")
-            drawinglist.team = self.menu:draw("Text", {Position = playerlist.playerBoxBackground.Position + v2(152, 23 * (playerIndex - 1) + 5), Size = 16, Color = wapus.theme.text, Text = "", Visible = visible}, "text")
-            drawinglist.status = self.menu:draw("Text", {Position = playerlist.playerBoxBackground.Position + v2(302, 23 * (playerIndex - 1) + 5), Size = 16, Color = wapus.theme.text, Text = "", Visible = visible}, "text")
+            drawinglist.name = self.menu:draw("Text", {Position = playerlist.playerBoxBackground.Position + v2(4, 23 * (playerIndex - 1) + 5), Size = 14, Color = wapus.theme.text, Text = "", Visible = visible}, "text")
+            drawinglist.team = self.menu:draw("Text", {Position = playerlist.playerBoxBackground.Position + v2(152, 23 * (playerIndex - 1) + 5), Size = 14, Color = wapus.theme.text, Text = "", Visible = visible}, "text")
+            drawinglist.status = self.menu:draw("Text", {Position = playerlist.playerBoxBackground.Position + v2(302, 23 * (playerIndex - 1) + 5), Size = 14, Color = wapus.theme.text, Text = "", Visible = visible}, "text")
 
             playerlist.playerdrawings[playerIndex] = drawinglist
         end
@@ -1787,7 +1787,7 @@ do -- UI Library
         local tab = {}
         tab.tabIndex = #self.tabs + 1
         tab.button = self["tab" .. tostring(tab.tabIndex)]
-        tab.title = self:draw("Text", {Size = 18, Position = tab.button.Position + v2(48, 11), Color = wapus.theme[tab.tabIndex == self.tabIndex and "text" or "hiddenText"], Text = text, Center = true, Visible = self.open}, "text")
+        tab.title = self:draw("Text", {Size = 15, Position = tab.button.Position + v2(48, 11), Color = wapus.theme[tab.tabIndex == self.tabIndex and "text" or "hiddenText"], Text = text, Center = true, Visible = self.open}, "text")
         tab.CreateSection = createSection
         tab.CreatePlayerList = createPlayerList
         tab.menu = self
@@ -1824,7 +1824,7 @@ do -- UI Library
         keys.titlebackground = modifyDrawing(keys:gradient({wapus.theme.lightbackground, wapus.theme.background}, 7), {Color = wapus.theme.accent, Visible = true})
         keys.highlightoutline = keys:draw("Square", {Color = wapus.theme.outline, Visible = true}, "outline")
         keys.highlight = modifyDrawing(keys:gradient({wapus.theme.accent:Lerp(Color3.new(1, 1, 1), 0.1), wapus.theme.accent, darken(wapus.theme.accent, 0.4)}, 3), {Color = wapus.theme.accent, Visible = true})
-        keys.title = keys:draw("Text", {Size = 16, Color = wapus.theme.text, Text = "Keybinds", Visible = true}, "text")
+        keys.title = keys:draw("Text", {Size = 14, Color = wapus.theme.text, Text = "Keybinds", Visible = true}, "text")
 
         local function updateKeybinds()
             if keys.keybinds then
@@ -1843,7 +1843,7 @@ do -- UI Library
                     text = text .. " [ " .. keyName .. " ]"
                 end
 
-                insert(newkeybinds, {keys:draw("Text", {Size = 16, Color = wapus.theme.text, Text = text, Visible = true}, "text"), keybind})
+                insert(newkeybinds, {keys:draw("Text", {Size = 14, Color = wapus.theme.text, Text = text, Visible = true}, "text"), keybind})
             end
 
             keys.keybinds = newkeybinds
@@ -1916,7 +1916,7 @@ do -- UI Library
         menu.highlightoutline = menu:draw("Square", {Size = v2(500, 4), Position = menu.background.Position, Color = self.theme.outline, Visible = visible}, "outline")
         menu.highlight = modifyDrawing(menu:gradient({self.theme.accent:Lerp(Color3.new(1, 1, 1), 0.1), self.theme.accent, darken(self.theme.accent, 0.4)}, 3), {Size = v2(500, 3), Position = menu.background.Position, Color = self.theme.accent, Visible = visible})
         menu.titlebackground = modifyDrawing(menu:gradient({self.theme.lightbackground, self.theme.background}, 7), {Size = v2(500, 21), Position = menu.background.Position + v2(0, 4), Color = self.theme.accent, Visible = visible})
-        menu.title = menu:draw("Text", {Size = 18, Position = menu.background.Position + v2(5, 5), Color = self.theme.text, Text = title, Visible = visible}, "text")
+        menu.title = menu:draw("Text", {Size = 16, Position = menu.background.Position + v2(5, 5), Color = self.theme.text, Text = title, Visible = visible}, "text")
         menu.inline = menu:draw("Square", {Size = bgSize + v2(2 - 20, 2 - 35), Position = menu.outline.Position + v2(10, 25), Color = self.theme.outline, Visible = visible}, "outline")
         menu.tab1 = menu:draw("Square", {Size = v2(95, 35), Position = menu.inline.Position + v2(1, 3), Color = self.theme.hidden, Visible = visible}, "hidden")
         menu.tab2 = menu:draw("Square", {Size = v2(95, 35), Position = menu.tab1.Position + v2(96, 0), Color = self.theme.hidden, Visible = visible}, "hidden")
@@ -1926,15 +1926,28 @@ do -- UI Library
         menu.tabbackground = modifyDrawing(menu:gradient({self.theme.lightbackground, self.theme.background}, 14), {Visible = visible})
         menu.inlightoutline = menu:draw("Square", {Size = v2(480, 4), Position = menu.inline.Position + v2(1, 1), Color = self.theme.outline, Visible = visible}, "outline")
         --menu.inlight = menu:draw("Square", {Size = v2(480, 2), Position = menu.inlightoutline.Position, Color = self.theme.accent, Visible = visible}, "accent")
-        local rainbowColors = {Color3.fromRGB(0, 150, 255), Color3.fromRGB(255, 0, 255), Color3.fromRGB(255, 240, 0)}
+        local rainbowStops = {
+            Color3.fromRGB(0, 150, 255),
+            Color3.fromRGB(255, 0, 255),
+            Color3.fromRGB(255, 240, 0)
+        }
         local rainbowSquares = {}
-        local segW = math.floor(480 / 3)
-        for i = 1, 3 do
+        local rbBreaks = 48
+        local rbSegW = 480 / rbBreaks
+        local function getRainbowColor(t)
+            local scaled = t * 2
+            local i = math.floor(scaled)
+            local f = scaled - i
+            local a = rainbowStops[i + 1]
+            local b = rainbowStops[math.min(i + 2, 3)]
+            return a:Lerp(b, f)
+        end
+        for i = 1, rbBreaks do
             local seg = drawing.new("Square")
             seg.Filled = true
-            seg.Color = rainbowColors[i]
-            seg.Size = Vector2.new(i == 3 and (480 - segW * 2) or segW, 3)
-            seg.Position = menu.inlightoutline.Position + Vector2.new(segW * (i - 1), 0)
+            seg.Color = getRainbowColor((i - 1) / (rbBreaks - 1))
+            seg.Size = Vector2.new(math.ceil(rbSegW), 3)
+            seg.Position = menu.inlightoutline.Position + Vector2.new(math.floor((i - 1) * rbSegW), 0)
             seg.Visible = visible
             rainbowSquares[i] = seg
             table.insert(menu.drawCache, seg)
@@ -1943,9 +1956,9 @@ do -- UI Library
         menu.inlight = setmetatable({}, {
             __index = function(_, k) return rainbowSquares[1][k] end,
             __newindex = function(_, k, v)
-                for i = 1, 3 do
+                for i = 1, rbBreaks do
                     if k == "Position" then
-                        rainbowSquares[i].Position = v + Vector2.new(segW * (i - 1), 0)
+                        rainbowSquares[i].Position = v + Vector2.new(math.floor((i - 1) * rbSegW), 0)
                     elseif k == "Visible" then
                         rainbowSquares[i].Visible = v
                     elseif k == "Transparency" then
@@ -2563,7 +2576,7 @@ do -- UI Library
                                                     buttonData.status = statusName
                                                     buttonData.outline = statusdropping:draw("Square", {Size = v2(149, 20), Position = statusButton.Position + v2(0, 19 * statusIndex), Color = wapus.theme.outline, Visible = true, ZIndex = 4}, "outline")
                                                     buttonData.button = statusdropping:draw("Square", {Size = v2(147, 18), Position = buttonData.outline.Position + v2(1, 1), Color = wapus.theme.background, Visible = true, ZIndex = 4}, "outline")
-                                                    buttonData.text = statusdropping:draw("Text", {Position = buttonData.button.Position + v2(4, 1), Size = 16, Color = wapus.theme.text, Text = statusName, Visible = true, ZIndex = 4}, "text")
+                                                    buttonData.text = statusdropping:draw("Text", {Position = buttonData.button.Position + v2(4, 1), Size = 14, Color = wapus.theme.text, Text = statusName, Visible = true, ZIndex = 4}, "text")
                                                     statusdropping.buttons[statusIndex] = buttonData
                                                 end
                                             end
@@ -2626,19 +2639,19 @@ do -- UI Library
                                                                 picker.highlightbackground = picker:draw("Square", {Position = picker.outline.Position + v2(1, 1), Size = v2(273, 4), Color = wapus.theme.outline, Visible = true, ZIndex = 4})
                                                                 picker.highlight = modifyDrawing(picker:gradient({wapus.theme.accent:Lerp(Color3.new(1, 1, 1), 0.1), wapus.theme.accent, darken(wapus.theme.accent, 0.4)}, 3), {Position = picker.highlightbackground.Position, Size = v2(273, 3), Visible = true, ZIndex = 4})
                                                                 picker.titlebackground = modifyDrawing(picker:gradient({wapus.theme.lightbackground, wapus.theme.background}, 6), {Size = v2(273, 17), Position = picker.background.Position + v2(0, 4), Visible = true, ZIndex = 4})
-                                                                picker.title = picker:draw("Text", {Position = picker.background.Position + v2(3, 3), Size = 16, Color = wapus.theme.text, Text = color.name, Visible = true, ZIndex = 4})
+                                                                picker.title = picker:draw("Text", {Position = picker.background.Position + v2(3, 3), Size = 14, Color = wapus.theme.text, Text = color.name, Visible = true, ZIndex = 4})
                                                                 picker.hsvOutline = picker:draw("Square", {Position = picker.background.Position + v2(7, 19), Size = v2(202 - 18 - 16, 168), Color = wapus.theme.outline, Visible = true, ZIndex = 4})
                                                                 picker.hueOutline = picker:draw("Square", {Position = picker.hsvOutline.Position + v2(7 + picker.hsvOutline.Size.X, 0), Size = v2(12, 168), Color = wapus.theme.outline, Visible = true, ZIndex = 4})
                                                                 picker.hue = picker:draw("Image", {Position = picker.hsvOutline.Position + v2(8 + picker.hsvOutline.Size.X, 1), Size = v2(10, 166), Data = hueData, Visible = true, ZIndex = 4})
                                                                 picker.valueOutline = picker:draw("Square", {Position = picker.background.Position + v2(7, 195), Size = v2(202 - 18 - 16, 12), Color = wapus.theme.outline, Visible = true, ZIndex = 4})
                                                                 picker.valuebar = picker:draw("Image", {Position = picker.background.Position + v2(8, 196), Size = v2(200 - 18 - 16, 10), Data = valueData, Visible = true, ZIndex = 4})
-                                                                picker.newtext = picker:draw("Text", {Position = picker.hueOutline.Position + v2(19, -2), Size = 16, Color = wapus.theme.text, Text = "New Color", Visible = true, ZIndex = 4})
+                                                                picker.newtext = picker:draw("Text", {Position = picker.hueOutline.Position + v2(19, -2), Size = 14, Color = wapus.theme.text, Text = "New Color", Visible = true, ZIndex = 4})
                                                                 picker.newOutline = picker:draw("Square", {Position = picker.newtext.Position + v2(0, 17), Size = v2(65, 35), Color = wapus.theme.outline, Visible = true, ZIndex = 4})
                                                                 picker.newColor = picker:draw("Square", {Position = picker.newtext.Position + v2(1, 18), Size = v2(63, 33), Color = color.value, Visible = true, ZIndex = 4})
-                                                                picker.oldtext = picker:draw("Text", {Position = picker.hueOutline.Position + v2(19, 52), Size = 16, Color = wapus.theme.text, Text = "Old Color", Visible = true, ZIndex = 4})
+                                                                picker.oldtext = picker:draw("Text", {Position = picker.hueOutline.Position + v2(19, 52), Size = 14, Color = wapus.theme.text, Text = "Old Color", Visible = true, ZIndex = 4})
                                                                 picker.oldOutline = picker:draw("Square", {Position = picker.oldtext.Position + v2(0, 17), Size = v2(65, 35), Color = wapus.theme.outline, Visible = true, ZIndex = 4})
                                                                 picker.oldColor = picker:draw("Square", {Position = picker.oldtext.Position + v2(1, 18), Size = v2(63, 33), Color = color.value, Visible = true, ZIndex = 4})
-                                                                picker.applytext = picker:draw("Text", {Position = picker.hueOutline.Position + v2(27, 175), Size = 16, Color = wapus.theme.text, Text = "[  Apply  ]", Visible = true, ZIndex = 4})
+                                                                picker.applytext = picker:draw("Text", {Position = picker.hueOutline.Position + v2(27, 175), Size = 14, Color = wapus.theme.text, Text = "[  Apply  ]", Visible = true, ZIndex = 4})
                                                                 picker.colordrawings = {}
 
                                                                 local h, s, v = color.value:ToHSV()
@@ -2694,7 +2707,7 @@ do -- UI Library
                                                             local newDrawings = {}
                                                             newDrawings.outline = menuData:draw("Square", {Position = element.buttonoutline.Position + v2(0, optionIndex * 17), Size = v2(213, 18), Color = wapus.theme.outline, Visible = true, ZIndex = 4}, "outline")
                                                             newDrawings.button = menuData:draw("Square", {Position = newDrawings.outline.Position + v2(1, 1), Size = v2(211, 16), Color = wapus.theme.background, Visible = true, ZIndex = 4}, "background")
-                                                            newDrawings.valuetext = menuData:draw("Text", {Position = newDrawings.button.Position + v2(6, 0), Size = 16, Color = wapus.theme.text, Text = element.options[optionIndex], Visible = true, ZIndex = 4}, "text")
+                                                            newDrawings.valuetext = menuData:draw("Text", {Position = newDrawings.button.Position + v2(6, 0), Size = 14, Color = wapus.theme.text, Text = element.options[optionIndex], Visible = true, ZIndex = 4}, "text")
                                                             element.optionDrawings[optionIndex] = newDrawings
                                                         end
                                                     elseif element.type == "button" then
