@@ -203,7 +203,7 @@ do -- Drawing Library
                         self._data[index] = value
                         return
                     elseif index == "Size" then
-                        self._data.drawings.label.TextSize = value * 0.66
+                        self._data.drawings.label.TextSize = value
                         self._data[index] = value
                         return
                     end
@@ -1787,7 +1787,7 @@ do -- UI Library
         local tab = {}
         tab.tabIndex = #self.tabs + 1
         tab.button = self["tab" .. tostring(tab.tabIndex)]
-        tab.title = self:draw("Text", {Size = 18, Font = 1, Position = tab.button.Position + v2(48, 11), Color = wapus.theme[tab.tabIndex == self.tabIndex and "text" or "hiddenText"], Text = text, Center = true, Visible = self.open}, "text")
+        tab.title = self:draw("Text", {Size = 18, Position = tab.button.Position + v2(48, 11), Color = wapus.theme[tab.tabIndex == self.tabIndex and "text" or "hiddenText"], Text = text, Center = true, Visible = self.open}, "text")
         tab.CreateSection = createSection
         tab.CreatePlayerList = createPlayerList
         tab.menu = self
@@ -1916,7 +1916,7 @@ do -- UI Library
         menu.highlightoutline = menu:draw("Square", {Size = v2(500, 4), Position = menu.background.Position, Color = self.theme.outline, Visible = visible}, "outline")
         menu.highlight = modifyDrawing(menu:gradient({self.theme.accent:Lerp(Color3.new(1, 1, 1), 0.1), self.theme.accent, darken(self.theme.accent, 0.4)}, 3), {Size = v2(500, 3), Position = menu.background.Position, Color = self.theme.accent, Visible = visible})
         menu.titlebackground = modifyDrawing(menu:gradient({self.theme.lightbackground, self.theme.background}, 7), {Size = v2(500, 21), Position = menu.background.Position + v2(0, 4), Color = self.theme.accent, Visible = visible})
-        menu.title = menu:draw("Text", {Size = 18, Font = 1, Position = menu.background.Position + v2(5, 5), Color = self.theme.text, Text = title, Visible = visible}, "text")
+        menu.title = menu:draw("Text", {Size = 18, Position = menu.background.Position + v2(5, 5), Color = self.theme.text, Text = title, Visible = visible}, "text")
         menu.inline = menu:draw("Square", {Size = bgSize + v2(2 - 20, 2 - 35), Position = menu.outline.Position + v2(10, 25), Color = self.theme.outline, Visible = visible}, "outline")
         menu.tab1 = menu:draw("Square", {Size = v2(95, 35), Position = menu.inline.Position + v2(1, 3), Color = self.theme.hidden, Visible = visible}, "hidden")
         menu.tab2 = menu:draw("Square", {Size = v2(95, 35), Position = menu.tab1.Position + v2(96, 0), Color = self.theme.hidden, Visible = visible}, "hidden")
