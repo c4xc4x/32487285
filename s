@@ -13,8 +13,11 @@ do
 	local TweenService = game:GetService("TweenService")
 	local Lighting = game:GetService("Lighting")
 	local MarketplaceService = game:GetService("MarketplaceService")
-	local gameInfo = MarketplaceService:GetProductInfo(game.PlaceId)
-	local gameName = gameInfo and gameInfo.Name or game.Name
+	local ok, gameInfo = pcall(function()
+    return MarketplaceService:GetProductInfo(game.PlaceId)
+end)
+	local gameName = (ok and gameInfo and gameInfo.Name) or game.Name
+
 
 
 	gethui = gethui or function()
