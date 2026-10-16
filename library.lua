@@ -2370,6 +2370,71 @@ local Library do
             return KeybindList
         end
 
+        Library.TitleLabels = { }
+
+        Library.TitlePhrases = {
+            "pchaxx13",
+            "PPPPCCCCHHHAAAXXX1113333 $$$$$$$$",
+            "pchaxx13 ◣_◢",
+            "pchaxx13 on top",
+            "pchaxx13 best roblox script",
+            "pchaxx13 always ud ◣_◢",
+            "pchaxx13 private script",
+            "pchaxx13: generating free robux $$$",
+            "pchaxx13 big money $$"
+        }
+
+        -- Registra un TextLabel para que muestre el titulo con animacion typewriter
+        Library.AddTitle = function(self, Label)
+            TableInsert(self.TitleLabels, Label)
+
+            if self.TitleThread then
+                return
+            end
+
+            self.TitleThread = Library:Thread(function()
+                local Phrases = Library.TitlePhrases
+                local Phrase = Phrases[1]
+
+                local Set = function(Text)
+                    for Index = #Library.TitleLabels, 1, -1 do
+                        local Item = Library.TitleLabels[Index]
+                        local Object = Item.Instance or Item
+
+                        if Object and Object.Parent then
+                            Object.Text = Text
+                        else
+                            TableRemove(Library.TitleLabels, Index)
+                        end
+                    end
+                end
+
+                while true do
+                    local Length = utf8.len(Phrase)
+
+                    for Count = 1, Length do
+                        Set(Phrase:sub(1, utf8.offset(Phrase, Count + 1) - 1))
+                        task.wait(0.09)
+                    end
+
+                    task.wait(2.5)
+
+                    for Count = Length - 1, 0, -1 do
+                        Set(Count == 0 and "" or Phrase:sub(1, utf8.offset(Phrase, Count + 1) - 1))
+                        task.wait(0.04)
+                    end
+
+                    task.wait(0.4)
+
+                    local Next = Phrase
+                    while Next == Phrase and #Phrases > 1 do
+                        Next = Phrases[math.random(1, #Phrases)]
+                    end
+                    Phrase = Next
+                end
+            end)
+        end
+
         Library.Watermark = function(self, Name, Icon)
             local Watermark = { }
 
@@ -2406,20 +2471,7 @@ local Library do
                     ApplyStrokeMode = Enum.ApplyStrokeMode.Border
                 })
                 
-                Items["Logo"] = Instances:Create("ImageLabel", {
-                    Parent = Items["Watermark"].Instance,
-                    Name = "\0",
-                    ImageColor3 = FromRGB(166, 147, 243),
-                    ScaleType = Enum.ScaleType.Fit,
-                    BorderColor3 = FromRGB(0, 0, 0),
-                    AnchorPoint = Vector2New(0, 0.5),
-                    Image = Icon,
-                    BackgroundTransparency = 1,
-                    Position = UDim2New(0, 0, 0.5, 0),
-                    Size = UDim2New(0, 20, 0, 20),
-                    BorderSizePixel = 0,
-                    BackgroundColor3 = FromRGB(255, 255, 255)
-                })  Items["Logo"]:AddToTheme({ImageColor3 = "Accent"})
+                
                 
                 Items["Text"] = Instances:Create("TextLabel", {
                     Parent = Items["Watermark"].Instance,
@@ -2433,7 +2485,7 @@ local Library do
                     AnchorPoint = Vector2New(0, 0.5),
                     BorderSizePixel = 0,
                     BackgroundTransparency = 1,
-                    Position = UDim2New(0, 28, 0.5, -2),
+                    Position = UDim2New(0, 0, 0.5, -2),
                     AutomaticSize = Enum.AutomaticSize.X,
                     TextSize = 14,
                     BackgroundColor3 = FromRGB(255, 255, 255)
@@ -2446,6 +2498,8 @@ local Library do
                     Color = RGBSequence{RGBSequenceKeypoint(0, FromRGB(255, 255, 255)), RGBSequenceKeypoint(1, FromRGB(158, 158, 158))}
                 })                
             end
+
+            Library:AddTitle(Items["Text"])
 
             function Watermark:SetText(Text)
                 Text = tostring(Text)
@@ -2613,20 +2667,25 @@ local Library do
                     Transparency = NumSequence{NumSequenceKeypoint(0, 1), NumSequenceKeypoint(0.025, 0.800000011920929), NumSequenceKeypoint(0.106, 0.7250000238418579), NumSequenceKeypoint(0.22, 0.8500000238418579), NumSequenceKeypoint(1, 1)}
                 })
                 
-                Items["Logo"] = Instances:Create("ImageLabel", {
+                Items["Logo"] = Instances:Create("TextLabel", {
                     Parent = Items["Top"].Instance,
                     Name = "\0",
-                    ImageColor3 = FromRGB(166, 147, 243),
-                    ScaleType = Enum.ScaleType.Fit,
+                    FontFace = Library.SubFont,
+                    TextColor3 = FromRGB(166, 147, 243),
                     BorderColor3 = FromRGB(0, 0, 0),
+                    Text = "",
+                    TextSize = 16,
+                    TextXAlignment = Enum.TextXAlignment.Left,
                     AnchorPoint = Vector2New(0, 0.5),
-                    Image = Window.Logo,
+                    Size = UDim2New(0, 0, 0, 16),
                     BackgroundTransparency = 1,
-                    Position = UDim2New(0, 6, 0.5, 0),
-                    Size = UDim2New(0, 32, 0, 32),
+                    Position = UDim2New(0, 14, 0.5, -1),
                     BorderSizePixel = 0,
+                    AutomaticSize = Enum.AutomaticSize.X,
                     BackgroundColor3 = FromRGB(255, 255, 255)
-                })  Items["Logo"]:AddToTheme({ImageColor3 = "Accent"})
+                })  Items["Logo"]:AddToTheme({TextColor3 = "Accent"})
+
+                Library:AddTitle(Items["Logo"])
                 
                 Items["Liner"] = Instances:Create("Frame", {
                     Parent = Items["Top"].Instance,
