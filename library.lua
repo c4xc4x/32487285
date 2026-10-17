@@ -421,88 +421,24 @@ local Library do
             self = nil
         end
 
-        Instances.MakeDraggable = function(self)
-            if not self.Instance then 
-                return
-            end
-        
-            local Gui = self.Instance
-            local Dragging = false 
-            local DragStart
-            local StartPosition 
-        
-            local Set = function(Input)
-                local DragDelta = Input.Position - DragStart
-                local NewX = StartPosition.X.Offset + DragDelta.X
-                local NewY = StartPosition.Y.Offset + DragDelta.Y
+        -- Bordes de redimensionado compartidos (ventana y paneles)
+        local MakeEdges = function(Gui, Thickness, OnBegin)
+            local Edges = { }
 
-                local ScreenSize = Gui.Parent.AbsoluteSize
-                local GuiSize = Gui.AbsoluteSize
-        
-                NewX = MathClamp(NewX, 0, ScreenSize.X - GuiSize.X)
-                NewY = MathClamp(NewY, 0, ScreenSize.Y - GuiSize.Y)
-        
-                self:Tween(TweenInfo.new(0.06, Enum.EasingStyle.Linear), {Position = UDim2New(0, NewX, 0, NewY)})
-            end
-        
-            local InputChanged
-        
-            self:Connect("InputBegan", function(Input)
-                if Input.UserInputType == Enum.UserInputType.MouseButton1 or Input.UserInputType == Enum.UserInputType.Touch then
-                    Dragging = true
-                    DragStart = Input.Position
+            local Definitions = {
+                {"L", UDim2New(0, 0, 0, 0), UDim2New(0, Thickness, 1, 0)},
+                {"R", UDim2New(1, -Thickness, 0, 0), UDim2New(0, Thickness, 1, 0)},
+                {"T", UDim2New(0, 0, 0, 0), UDim2New(1, 0, 0, Thickness)},
+                {"B", UDim2New(0, 0, 1, -Thickness), UDim2New(1, 0, 0, Thickness)}
+            }
 
-                    local Absolute = Gui.AbsolutePosition
-                    Gui.AnchorPoint = Vector2New(0, 0)
-                    Gui.Position = UDim2New(0, Absolute.X, 0, Absolute.Y)
-                    StartPosition = Gui.Position
-        
-                    if InputChanged then 
-                        return
-                    end
-        
-                    InputChanged = Input.Changed:Connect(function()
-                        if Input.UserInputState == Enum.UserInputState.End then
-                            Dragging = false
-                            InputChanged:Disconnect()
-                            InputChanged = nil
-                        end
-                    end)
-                end
-            end)
-        
-            Library:Connect(UserInputService.InputChanged, function(Input)
-                if Input.UserInputType == Enum.UserInputType.MouseMovement or Input.UserInputType == Enum.UserInputType.Touch then
-                    if Dragging then
-                        Set(Input)
-                    end
-                end
-            end)
-        
-            return Dragging
-        end
+            for Index, Definition in Definitions do
+                local Side = Definition[1]
 
-        Instances.MakeResizeable = function(self, Minimum, Maximum)
-            if not self.Instance then 
-                return
-            end
-
-            local Gui = self.Instance
-
-            local Resizing = false 
-            local CurrentSide = nil
-
-            local StartMouse = nil 
-            local StartPosition = nil 
-            local StartSize = nil
-            
-            local EdgeThickness = 2
-
-            local MakeEdge = function(Name, Position, Size)
                 local Button = Instances:Create("TextButton", {
                     Name = "\0",
-                    Size = Size,
-                    Position = Position,
+                    Position = Definition[2],
+                    Size = Definition[3],
                     BackgroundColor3 = FromRGB(166, 147, 243),
                     BackgroundTransparency = 1,
                     Text = "",
@@ -512,117 +448,314 @@ local Library do
                     ZIndex = 99999,
                 })  Button:AddToTheme({BackgroundColor3 = "Accent"})
 
-                return Button
-            end
-
-            local Edges = {
-                {Button = MakeEdge(
-                    "Left", 
-                    UDim2New(0, 0, 0, 0), 
-                    UDim2New(0, EdgeThickness, 1, 0)), 
-                    Side = "L"
-                },
-
-                {Button = MakeEdge(
-                    "Right", 
-                    UDim2New(1, -EdgeThickness, 0, 0), 
-                    UDim2New(0, EdgeThickness, 1, 0)), 
-                    Side = "R"
-                },
-
-                {Button = MakeEdge(
-                    "Top", UDim2New(0, 0, 0, 0), 
-                    UDim2New(1, 0, 0, EdgeThickness)), 
-                    Side = "T"
-                },
-
-                {Button = MakeEdge(
-                    "Bottom", 
-                    UDim2New(0, 0, 1, -EdgeThickness), 
-                    UDim2New(1, 0, 0, EdgeThickness)), 
-                    Side = "B"
-                },
-            }
-
-            local BeginResizing = function(Side)
-                Resizing = true 
-                CurrentSide = Side 
-
-                StartMouse = UserInputService:GetMouseLocation()
-
-                -- store offsets, not absolute screen pos
-                StartPosition = Vector2New(Gui.Position.X.Offset, Gui.Position.Y.Offset)
-                StartSize = Vector2New(Gui.Size.X.Offset, Gui.Size.Y.Offset)
-                
-                for Index, Value in Edges do 
-                    Value.Button.Instance.BackgroundTransparency = (Value.Side == Side) and 0 or 1
-                end
-            end
-
-            local EndResizing = function()
-                Resizing = false 
-                CurrentSide = nil
-
-                for Index, Value in Edges do 
-                    Value.Button.Instance.BackgroundTransparency = 1
-                end
-            end
-
-            for Index, Value in Edges do 
-                Value.Button:Connect("InputBegan", function(Input)
+                Button:Connect("InputBegan", function(Input)
                     if Input.UserInputType == Enum.UserInputType.MouseButton1 then
-                        BeginResizing(Value.Side)
+                        OnBegin(Side)
                     end
                 end)
+
+                TableInsert(Edges, {Button = Button, Side = Side})
             end
+
+            return function(ActiveSide)
+                for Index, Value in Edges do
+                    Value.Button.Instance.BackgroundTransparency = (ActiveSide and Value.Side == ActiveSide) and 0 or 1
+                end
+            end
+        end
+
+        Instances.MakeDraggable = function(self)
+            if not self.Instance then
+                return
+            end
+
+            local Gui = self.Instance
+
+            local Dragging = false
+            local Pointer = Vector2New(0, 0)
+            local PointerStart = Vector2New(0, 0)
+
+            local BasePosition = Gui.Position
+            local BaseAbsolute = Vector2New(0, 0)
+
+            local Target = nil
+            local Current = Vector2New(0, 0)
+
+            local Smoothness = 24
+
+            -- Calcula hasta donde debe ir la ventana (solo el delta del cursor, sin tocar Position/AnchorPoint al hacer click)
+            local UpdateTarget = function()
+                local Desired = BaseAbsolute + (Pointer - PointerStart)
+                local Parent = Gui.Parent
+
+                if Parent and Parent:IsA("GuiBase2d") then
+                    local Min = Parent.AbsolutePosition
+                    local Max = Min + Parent.AbsoluteSize - Gui.AbsoluteSize
+
+                    Desired = Vector2New(
+                        MathClamp(Desired.X, Min.X, math.max(Min.X, Max.X)),
+                        MathClamp(Desired.Y, Min.Y, math.max(Min.Y, Max.Y))
+                    )
+                end
+
+                Target = Desired - BaseAbsolute
+            end
+
+            local InputChanged
+
+            self:Connect("InputBegan", function(Input)
+                if Input.UserInputType == Enum.UserInputType.MouseButton1 or Input.UserInputType == Enum.UserInputType.Touch then
+                    Dragging = true
+
+                    PointerStart = Vector2New(Input.Position.X, Input.Position.Y)
+                    Pointer = PointerStart
+
+                    BasePosition = Gui.Position
+                    BaseAbsolute = Gui.AbsolutePosition
+
+                    Current = Vector2New(0, 0)
+                    Target = Vector2New(0, 0)
+
+                    if InputChanged then
+                        return
+                    end
+
+                    InputChanged = Input.Changed:Connect(function()
+                        if Input.UserInputState == Enum.UserInputState.End then
+                            Dragging = false
+                            InputChanged:Disconnect()
+                            InputChanged = nil
+                        end
+                    end)
+                end
+            end)
+
+            Library:Connect(UserInputService.InputChanged, function(Input)
+                if Input.UserInputType == Enum.UserInputType.MouseMovement or Input.UserInputType == Enum.UserInputType.Touch then
+                    if Dragging then
+                        Pointer = Vector2New(Input.Position.X, Input.Position.Y)
+                    end
+                end
+            end)
+
+            -- Movimiento suavizado
+            Library:Connect(RunService.RenderStepped, function(DeltaTime)
+                if not Target then
+                    return
+                end
+
+                if Dragging then
+                    UpdateTarget()
+                end
+
+                local Alpha = 1 - math.exp(-DeltaTime * Smoothness)
+                Current = Current:Lerp(Target, Alpha)
+
+                local Finished = false
+
+                if not Dragging and (Target - Current).Magnitude < 0.25 then
+                    Current = Target
+                    Finished = true
+                end
+
+                Gui.Position = UDim2New(
+                    BasePosition.X.Scale, BasePosition.X.Offset + Current.X,
+                    BasePosition.Y.Scale, BasePosition.Y.Offset + Current.Y
+                )
+
+                if Finished then
+                    Target = nil
+                end
+            end)
+        end
+
+        Instances.MakeResizeable = function(self, Minimum, Maximum)
+            if not self.Instance then
+                return
+            end
+
+            local Gui = self.Instance
+            Maximum = Maximum or Vector2New(9999, 9999)
+
+            local Resizing = false
+            local CurrentSide = nil
+
+            local StartMouse = nil
+            local StartPosition = nil
+            local StartSize = nil
+
+            local Highlight
+
+            -- Funciona con cualquier AnchorPoint (no cambia la posicion al empezar)
+            local BeginResizing = function(Side)
+                Resizing = true
+                CurrentSide = Side
+
+                StartMouse = UserInputService:GetMouseLocation()
+                StartPosition = Gui.Position
+                StartSize = Vector2New(Gui.Size.X.Offset, Gui.Size.Y.Offset)
+
+                Highlight(Side)
+            end
+
+            Highlight = MakeEdges(Gui, 2, BeginResizing)
 
             Library:Connect(UserInputService.InputEnded, function(Input)
                 if Input.UserInputType == Enum.UserInputType.MouseButton1 then
                     if Resizing then
-                        EndResizing()
+                        Resizing = false
+                        CurrentSide = nil
+                        Highlight(nil)
                     end
                 end
             end)
 
             Library:Connect(RunService.RenderStepped, function()
-                if not Resizing or not CurrentSide then 
-                    return 
+                if not Resizing or not CurrentSide then
+                    return
                 end
 
                 local MouseLocation = UserInputService:GetMouseLocation()
                 local dx = MouseLocation.X - StartMouse.X
                 local dy = MouseLocation.Y - StartMouse.Y
-            
-                local x, y = StartPosition.X, StartPosition.Y
+
                 local w, h = StartSize.X, StartSize.Y
 
                 if CurrentSide == "L" then
-                    x = StartPosition.X + dx
                     w = StartSize.X - dx
                 elseif CurrentSide == "R" then
                     w = StartSize.X + dx
                 elseif CurrentSide == "T" then
-                    y = StartPosition.Y + dy
                     h = StartSize.Y - dy
                 elseif CurrentSide == "B" then
                     h = StartSize.Y + dy
                 end
-            
-                if w < Minimum.X then
-                    if CurrentSide == "L" then
-                        x = x - (Minimum.X - w)
-                    end
-                    w = Minimum.X
+
+                w = MathClamp(w, Minimum.X, Maximum.X)
+                h = MathClamp(h, Minimum.Y, Maximum.Y)
+
+                local dw = w - StartSize.X
+                local dh = h - StartSize.Y
+
+                local Anchor = Gui.AnchorPoint
+                local px, py = 0, 0
+
+                if CurrentSide == "L" then
+                    px = -dw * (1 - Anchor.X)
+                elseif CurrentSide == "R" then
+                    px = dw * Anchor.X
+                elseif CurrentSide == "T" then
+                    py = -dh * (1 - Anchor.Y)
+                elseif CurrentSide == "B" then
+                    py = dh * Anchor.Y
                 end
-                if h < Minimum.Y then
-                    if CurrentSide == "T" then
-                        y = y - (Minimum.Y - h)
+
+                Gui.Size = UDim2FromOffset(w, h)
+                Gui.Position = UDim2New(
+                    StartPosition.X.Scale, StartPosition.X.Offset + px,
+                    StartPosition.Y.Scale, StartPosition.Y.Offset + py
+                )
+            end)
+        end
+
+        -- Redimensionado por escala (UIScale) para paneles con tamaño automatico
+        Instances.MakeScalable = function(self, MinScale, MaxScale)
+            if not self.Instance then
+                return
+            end
+
+            local Gui = self.Instance
+
+            MinScale = MinScale or 0.6
+            MaxScale = MaxScale or 2.5
+
+            local UIScaleItem = Instances:Create("UIScale", {
+                Parent = Gui,
+                Name = "\0",
+                Scale = 1
+            })
+
+            local Scaling = false
+            local CurrentSide = nil
+
+            local StartMouse = nil
+            local StartPosition = nil
+            local StartSize = nil
+            local StartScale = 1
+
+            local Highlight
+
+            local BeginScaling = function(Side)
+                Scaling = true
+                CurrentSide = Side
+
+                StartMouse = UserInputService:GetMouseLocation()
+                StartPosition = Gui.Position
+                StartSize = Vector2New(math.max(Gui.AbsoluteSize.X, 1), math.max(Gui.AbsoluteSize.Y, 1))
+                StartScale = UIScaleItem.Instance.Scale
+
+                Highlight(Side)
+            end
+
+            Highlight = MakeEdges(Gui, 4, BeginScaling)
+
+            Library:Connect(UserInputService.InputEnded, function(Input)
+                if Input.UserInputType == Enum.UserInputType.MouseButton1 then
+                    if Scaling then
+                        Scaling = false
+                        CurrentSide = nil
+                        Highlight(nil)
                     end
-                    h = Minimum.Y
                 end
-            
-                self:Tween(TweenInfo.new(0.05, Enum.EasingStyle.Linear), {Position = UDim2FromOffset(x, y)})
-                self:Tween(TweenInfo.new(0.05, Enum.EasingStyle.Linear), {Size = UDim2FromOffset(w, h)})
+            end)
+
+            Library:Connect(RunService.RenderStepped, function()
+                if not Scaling or not CurrentSide then
+                    return
+                end
+
+                local MouseLocation = UserInputService:GetMouseLocation()
+                local dx = MouseLocation.X - StartMouse.X
+                local dy = MouseLocation.Y - StartMouse.Y
+
+                local Factor = 1
+
+                if CurrentSide == "L" then
+                    Factor = (StartSize.X - dx) / StartSize.X
+                elseif CurrentSide == "R" then
+                    Factor = (StartSize.X + dx) / StartSize.X
+                elseif CurrentSide == "T" then
+                    Factor = (StartSize.Y - dy) / StartSize.Y
+                elseif CurrentSide == "B" then
+                    Factor = (StartSize.Y + dy) / StartSize.Y
+                end
+
+                local NewScale = MathClamp(StartScale * Factor, MinScale, MaxScale)
+                local Real = NewScale / StartScale
+
+                local dw = StartSize.X * Real - StartSize.X
+                local dh = StartSize.Y * Real - StartSize.Y
+
+                local Anchor = Gui.AnchorPoint
+                local px, py
+
+                -- el lado opuesto al que arrastras se queda fijo
+                if CurrentSide == "L" then
+                    px = -dw * (1 - Anchor.X)
+                    py = dh * Anchor.Y
+                elseif CurrentSide == "T" then
+                    px = dw * Anchor.X
+                    py = -dh * (1 - Anchor.Y)
+                else
+                    px = dw * Anchor.X
+                    py = dh * Anchor.Y
+                end
+
+                UIScaleItem.Instance.Scale = NewScale
+                Gui.Position = UDim2New(
+                    StartPosition.X.Scale, StartPosition.X.Offset + px,
+                    StartPosition.Y.Scale, StartPosition.Y.Offset + py
+                )
             end)
         end
 
@@ -2437,6 +2570,7 @@ local Library do
             end
 
             Items["KeybindsList"]:MakeDraggable()
+            Items["KeybindsList"]:MakeScalable(0.6, 2.5)
 
             function KeybindList:SetVisibility(Bool)
                 Items["KeybindsList"].Instance.Visible = Bool
@@ -2631,6 +2765,7 @@ local Library do
             end
 
             Items["Panel"]:MakeDraggable()
+            Items["Panel"]:MakeScalable(0.6, 2.5)
 
             return Items
         end
@@ -3298,7 +3433,7 @@ local Library do
                     BackgroundTransparency = 1,
                     Position = UDim2New(0, 0, 0, 46),
                     BorderColor3 = FromRGB(0, 0, 0),
-                    Size = UDim2New(0, 148, 1, -71),
+                    Size = UDim2New(0, 54, 1, -71),
                     BorderSizePixel = 0,
                     BackgroundColor3 = FromRGB(255, 255, 255)
                 })
@@ -3331,11 +3466,10 @@ local Library do
             local Debounce = false
 
             function Window:SetCenter()
-                local CenterPosition = Items["MainFrame"].Instance.AbsolutePosition
-                task.wait()
-                Items["MainFrame"].Instance.AnchorPoint = Vector2New(0, 0)
-
-                Items["MainFrame"].Instance.Position = UDim2New(0, CenterPosition.X, 0, CenterPosition.Y)
+                -- La ventana ya esta centrada con AnchorPoint 0.5 / Position 0.5.
+                -- Ya no se convierte a posicion absoluta (eso provocaba el salto hacia arriba).
+                Items["MainFrame"].Instance.AnchorPoint = Vector2New(0.5, 0.5)
+                Items["MainFrame"].Instance.Position = UDim2New(0.5, 0, 0.5, 0)
             end
 
             function Window:SetOpen(Bool)
@@ -3442,9 +3576,9 @@ local Library do
                     Name = "\0",
                     Visible = false,
                     BackgroundTransparency = 1,
-                    Position = UDim2New(0, 149, 0, 45),
+                    Position = UDim2New(0, 55, 0, 45),
                     BorderColor3 = FromRGB(0, 0, 0),
-                    Size = UDim2New(1, -149, 1, -70),
+                    Size = UDim2New(1, -55, 1, -70),
                     BorderSizePixel = 0,
                     BackgroundColor3 = FromRGB(255, 255, 255)
                 })
@@ -3605,32 +3739,13 @@ local Library do
                     ScaleType = Enum.ScaleType.Fit,
                     BorderColor3 = FromRGB(0, 0, 0),
                     Image = Page.Icon,
-                    AnchorPoint = Vector2New(0, 0.5),
-                    Size = UDim2New(0, 20, 0, 20),
+                    AnchorPoint = Vector2New(0.5, 0.5),
+                    Size = UDim2New(0, 22, 0, 22),
                     BackgroundTransparency = 1,
-                    Position = UDim2New(0, 16, 0.5, 0),
+                    Position = UDim2New(0.5, 0, 0.5, 0),
                     BorderSizePixel = 0,
                     BackgroundColor3 = FromRGB(255, 255, 255)
                 })  Items["Icon"]:AddToTheme({ImageColor3 = function()
-                    return FromRGB(74, 74, 74)
-                end})
-
-                Items["Text"] = Instances:Create("TextLabel", {
-                    Parent = Items["Inactive"].Instance,
-                    Name = "\0",
-                    FontFace = Library.Font,
-                    TextColor3 = FromRGB(74, 74, 74),
-                    Text = Page.Name,
-                    AnchorPoint = Vector2New(0, 0.5),
-                    Position = UDim2New(0, 44, 0.5, -2),
-                    Size = UDim2New(0, 0, 0, 15),
-                    AutomaticSize = Enum.AutomaticSize.X,
-                    BackgroundTransparency = 1,
-                    BorderSizePixel = 0,
-                    TextXAlignment = Enum.TextXAlignment.Left,
-                    TextSize = 14,
-                    BackgroundColor3 = FromRGB(255, 255, 255)
-                })  Items["Text"]:AddToTheme({TextColor3 = function()
                     return FromRGB(74, 74, 74)
                 end})
                 
@@ -3709,8 +3824,6 @@ local Library do
                 if Page.Active then
                     Items["Icon"]:ChangeItemTheme({ImageColor3 = "Accent"})
                     Items["Icon"]:Tween(nil, {ImageColor3 = Library.Theme.Accent})
-                    Items["Text"]:ChangeItemTheme({TextColor3 = "Accent"})
-                    Items["Text"]:Tween(nil, {TextColor3 = Library.Theme.Accent})
                     Items["Accent1"]:Tween(TweenInfo.new(0.4, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {BackgroundTransparency = 0, Size = UDim2New(0, 1, 1, 0)})
                     Items["Accent2"]:Tween(TweenInfo.new(0.4, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {BackgroundTransparency = 0, Size = UDim2New(0, 1, 1, 0)})
                     Items["Background"]:Tween(nil, {BackgroundTransparency = 0})
@@ -3719,10 +3832,6 @@ local Library do
                         return FromRGB(74, 74, 74)
                     end})
                     Items["Icon"]:Tween(nil, {ImageColor3 = FromRGB(74, 74, 74)})
-                    Items["Text"]:ChangeItemTheme({TextColor3 = function()
-                        return FromRGB(74, 74, 74)
-                    end})
-                    Items["Text"]:Tween(nil, {TextColor3 = FromRGB(74, 74, 74)})
                     Items["Accent1"]:Tween(TweenInfo.new(0.4, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {BackgroundTransparency = 1, Size = UDim2New(0, 1, 0, 0)})
                     Items["Accent2"]:Tween(TweenInfo.new(0.4, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {BackgroundTransparency = 1, Size = UDim2New(0, 1, 0, 0)})
                     Items["Background"]:Tween(nil, {BackgroundTransparency = 1})
