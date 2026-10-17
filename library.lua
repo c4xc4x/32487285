@@ -2676,7 +2676,7 @@ local Library do
         end
 
         -- Panel base con el mismo estilo que el Keybind List (header + liner + contenido)
-        Library.CreatePanel = function(self, Title, Width, Position, AnchorPoint)
+        Library.CreatePanel = function(self, Title, Width, Position, AnchorPoint, MinSize)
             local Items = { } do
                 Items["Panel"] = Instances:Create("Frame", {
                     Parent = Library.Holder.Instance,
@@ -2810,7 +2810,7 @@ local Library do
             end
 
             Items["Panel"]:MakeDraggable()
-            Items["Panel"]:MakeResizeable(Vector2New(110, 45), Vector2New(9999, 9999), {Thickness = 4})
+            Items["Panel"]:MakeResizeable(MinSize or Vector2New(110, 45), Vector2New(9999, 9999), {Thickness = 4})
 
             return Items
         end
@@ -2822,7 +2822,7 @@ local Library do
                 Health = -1
             }
 
-            local Items = Library:CreatePanel("Player indicator", 170, UDim2New(0.014, 0, 0.55, 0)) do
+            local Items = Library:CreatePanel("Player indicator", 170, UDim2New(0.014, 0, 0.55, 0), nil, Vector2New(150, 75)) do
                 Items["Row"] = Instances:Create("Frame", {
                     Parent = Items["Content"].Instance,
                     Name = "\0",
@@ -2984,7 +2984,7 @@ local Library do
                 Signature = nil
             }
 
-            local Items = Library:CreatePanel("Hotbar", 150, UDim2New(0.5, 0, 1, -16), Vector2New(0.5, 1)) do
+            local Items = Library:CreatePanel("Hotbar", 150, UDim2New(0.5, 0, 1, -16), Vector2New(0.5, 1), Vector2New(100, 80)) do
                 Instances:Create("UIListLayout", {
                     Parent = Items["Content"].Instance,
                     Name = "\0",
@@ -3018,7 +3018,7 @@ local Library do
 
                 if Items["Panel"].Instance.AutomaticSize ~= Enum.AutomaticSize.None then
                     local Columns = MathClamp(#List, 1, 10)
-                    Items["Panel"].Instance.Size = UDim2New(0, math.max(150, Columns * 34 + 12), 0, 0)
+                    Items["Panel"].Instance.Size = UDim2New(0, math.max(150, Columns * 44 + 12), 0, 0)
                 end
 
                 if #List == 0 then
@@ -3043,7 +3043,7 @@ local Library do
                     local Slot = Instances:Create("Frame", {
                         Parent = Items["Content"].Instance,
                         Name = "\0",
-                        Size = UDim2New(0, 30, 0, 30),
+                        Size = UDim2New(0, 40, 0, 40),
                         BorderSizePixel = 0,
                         LayoutOrder = Index,
                         BackgroundColor3 = FromRGB(20, 20, 20)
@@ -3066,8 +3066,8 @@ local Library do
                         Instances:Create("ImageLabel", {
                             Parent = Slot.Instance,
                             Name = "\0",
-                            Position = UDim2New(0, 3, 0, 3),
-                            Size = UDim2New(1, -6, 1, -6),
+                            Position = UDim2New(0, 4, 0, 4),
+                            Size = UDim2New(1, -8, 1, -8),
                             BackgroundTransparency = 1,
                             BorderSizePixel = 0,
                             ScaleType = Enum.ScaleType.Fit,
@@ -3103,7 +3103,7 @@ local Library do
             return Hotbar
         end
 
-        -- Ammo indicator: detecta la municion del arma (Tool) equipada
+        -- Ammo indicator: copia del Player indicator, muestra la municion (actual/maximo) del arma equipada
         Library.AmmoIndicator = function(self)
             local Ammo = {
                 Tool = nil,
@@ -3113,7 +3113,7 @@ local Library do
                 Signature = nil
             }
 
-            local Items = Library:CreatePanel("Ammo", 170, UDim2New(0.014, 0, 0.68, 0)) do
+            local Items = Library:CreatePanel("Ammo", 170, UDim2New(0.014, 0, 0.68, 0), nil, Vector2New(150, 75)) do
                 Items["Row"] = Instances:Create("Frame", {
                     Parent = Items["Content"].Instance,
                     Name = "\0",
@@ -3124,15 +3124,52 @@ local Library do
                     BackgroundColor3 = FromRGB(255, 255, 255)
                 })
 
+                Items["Icon"] = Instances:Create("ImageLabel", {
+                    Parent = Items["Row"].Instance,
+                    Name = "\0",
+                    Size = UDim2New(0, 34, 0, 34),
+                    BorderColor3 = FromRGB(0, 0, 0),
+                    BorderSizePixel = 0,
+                    ScaleType = Enum.ScaleType.Fit,
+                    Image = "",
+                    BackgroundColor3 = FromRGB(20, 20, 20)
+                })
+
+                Instances:Create("UICorner", {
+                    Parent = Items["Icon"].Instance,
+                    Name = "\0",
+                    CornerRadius = UDimNew(0, 3)
+                })
+
+                Instances:Create("UIStroke", {
+                    Parent = Items["Icon"].Instance,
+                    Name = "\0",
+                    Color = FromRGB(35, 35, 35),
+                    ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+                })
+
+                Items["IconText"] = Instances:Create("TextLabel", {
+                    Parent = Items["Icon"].Instance,
+                    Name = "\0",
+                    FontFace = Library.SubFont,
+                    TextColor3 = FromRGB(119, 119, 119),
+                    Text = "",
+                    Size = UDim2New(1, 0, 1, 0),
+                    BackgroundTransparency = 1,
+                    BorderSizePixel = 0,
+                    TextSize = 14,
+                    BackgroundColor3 = FromRGB(255, 255, 255)
+                })
+
                 Items["Name"] = Instances:Create("TextLabel", {
                     Parent = Items["Row"].Instance,
                     Name = "\0",
                     FontFace = Library.SubFont,
                     TextColor3 = FromRGB(221, 221, 221),
                     BorderColor3 = FromRGB(0, 0, 0),
-                    Text = "no weapon",
-                    Position = UDim2New(0, 0, 0, 2),
-                    Size = UDim2New(1, -64, 0, 14),
+                    Text = "Ammo",
+                    Position = UDim2New(0, 42, 0, 2),
+                    Size = UDim2New(1, -92, 0, 14),
                     BackgroundTransparency = 1,
                     TextXAlignment = Enum.TextXAlignment.Left,
                     TextTruncate = Enum.TextTruncate.AtEnd,
@@ -3150,7 +3187,7 @@ local Library do
                     Text = "-",
                     AnchorPoint = Vector2New(1, 0),
                     Position = UDim2New(1, 0, 0, 2),
-                    Size = UDim2New(0, 60, 0, 14),
+                    Size = UDim2New(0, 48, 0, 14),
                     BackgroundTransparency = 1,
                     TextXAlignment = Enum.TextXAlignment.Right,
                     BorderSizePixel = 0,
@@ -3158,13 +3195,13 @@ local Library do
                     BackgroundColor3 = FromRGB(255, 255, 255)
                 })
 
-                -- Misma barra que los sliders (stroke + gradientes)
+                -- Misma barra que la de vida / sliders (stroke + gradientes)
                 Items["Bar"] = Instances:Create("Frame", {
                     Parent = Items["Row"].Instance,
                     Name = "\0",
-                    Position = UDim2New(0, 0, 0, 21),
+                    Position = UDim2New(0, 42, 0, 21),
                     BorderColor3 = FromRGB(0, 0, 0),
-                    Size = UDim2New(1, 0, 0, 10),
+                    Size = UDim2New(1, -42, 0, 10),
                     BorderSizePixel = 0,
                     ClipsDescendants = true,
                     BackgroundColor3 = FromRGB(20, 20, 20)
@@ -3244,24 +3281,42 @@ local Library do
 
                 local ScanObject = function(Object)
                     for Name, Value in Object:GetAttributes() do
-                        if type(Value) == "number" then
+                        if type(Value) == "number" or type(Value) == "string" then
                             Consider(Name, function()
                                 return Object:GetAttribute(Name)
                             end)
                         end
                     end
 
-                    if Object:IsA("IntValue") or Object:IsA("NumberValue") then
+                    if Object:IsA("IntValue") or Object:IsA("NumberValue") or Object:IsA("StringValue") then
                         Consider(Object.Name, function()
                             return Object.Value
                         end)
                     end
                 end
 
+                -- 1) el arma equipada y todo lo que tiene dentro
                 ScanObject(Tool)
 
                 for Index, Descendant in Tool:GetDescendants() do
                     ScanObject(Descendant)
+                end
+
+                -- 2) si el arma no tiene nada, buscar en el personaje y el jugador
+                if #CurrentList == 0 then
+                    local Others = { LocalPlayer, LocalPlayer.Character }
+
+                    for Index, Other in Others do
+                        if Other then
+                            ScanObject(Other)
+
+                            for _, Child in Other:GetChildren() do
+                                if not Child:IsA("Tool") and not Child:IsA("Backpack") then
+                                    ScanObject(Child)
+                                end
+                            end
+                        end
+                    end
                 end
 
                 for Index, Source in CurrentList do
@@ -3277,13 +3332,33 @@ local Library do
                 return Result
             end
 
+            -- devuelve actual y (si el valor es tipo "3/3") el maximo
             local Read = function(Source)
                 if not Source then
                     return nil
                 end
 
                 local Success, Value = pcall(Source.Get)
-                return Success and tonumber(Value) or nil
+
+                if not Success then
+                    return nil
+                end
+
+                if type(Value) == "number" then
+                    return Value
+                end
+
+                if type(Value) == "string" then
+                    local Current, Maximum = string.match(Value, "(%d+)%s*/%s*(%d+)")
+
+                    if Current then
+                        return tonumber(Current), tonumber(Maximum)
+                    end
+
+                    return tonumber(string.match(Value, "%d+"))
+                end
+
+                return nil
             end
 
             function Ammo:SetVisibility(Bool)
@@ -3305,18 +3380,22 @@ local Library do
                     Ammo.LastScan = Now
                 end
 
-                local Name = Tool and Tool.Name or "no weapon"
-                local Current = Tool and Read(Ammo.Sources.Current) or nil
-                local Max = Tool and Read(Ammo.Sources.Max) or nil
+                local Name = Tool and Tool.Name or ""
+                local Texture = Tool and Tool.TextureId or ""
+                local Current, Max = nil, nil
 
-                if Current then
-                    if not Max or Max <= 0 then
-                        Ammo.TrackedMax = math.max(Ammo.TrackedMax, Current)
-                        Max = Ammo.TrackedMax
-                    end
+                if Tool then
+                    local StringMax
+                    Current, StringMax = Read(Ammo.Sources.Current)
+                    Max = Read(Ammo.Sources.Max) or StringMax
                 end
 
-                local Signature = StringFormat("%s|%s|%s", Name, tostring(Current), tostring(Max))
+                if Current and (not Max or Max <= 0) then
+                    Ammo.TrackedMax = math.max(Ammo.TrackedMax, Current)
+                    Max = Ammo.TrackedMax
+                end
+
+                local Signature = StringFormat("%s|%s|%s|%s", Name, Texture, tostring(Current), tostring(Max))
 
                 if Signature == Ammo.Signature then
                     return
@@ -3324,12 +3403,14 @@ local Library do
 
                 Ammo.Signature = Signature
 
-                Items["Name"].Instance.Text = Name
+                -- icono del arma (o sus 3 primeras letras si no tiene textura)
+                Items["Icon"].Instance.Image = Texture
+                Items["IconText"].Instance.Text = Texture == "" and string.upper(string.sub(Name, 1, 3)) or ""
 
                 if Current then
                     local Ratio = Max and Max > 0 and MathClamp(Current / Max, 0, 1) or 0
 
-                    Items["Count"].Instance.Text = StringFormat("%d / %d", MathFloor(Current), MathFloor(Max or 0))
+                    Items["Count"].Instance.Text = StringFormat("%d/%d", MathFloor(Current), MathFloor(Max or 0))
                     Items["Count"].Instance.TextColor3 = Current <= 0 and FromRGB(255, 70, 70) or FromRGB(119, 119, 119)
                     Items["Fill"]:Tween(TweenInfo.new(0.2, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), {Size = UDim2New(Ratio, 0, 1, 0)})
                 else
