@@ -810,7 +810,7 @@ local Library do
         end
     end
 
-    -- Custom font (SmallestPixel en toda la UI)
+    -- Custom font (ProggyClean en toda la UI)
     local CustomFont = { } do
         function CustomFont:New(Name, Weight, Style, Data)
             local TtfPath = `{Library.Folders.Fonts}/{Data.Id}.ttf`
@@ -820,6 +820,9 @@ local Library do
             if not isfile(TtfPath) or #readfile(TtfPath) < 1000 then
                 writefile(TtfPath, game:HttpGet(Data.Url))
             end
+
+            -- diagnostico: ProggyClean.ttf pesa 41208 bytes
+            print(`[Pandora] Fuente cargada: {Name} ({#readfile(TtfPath)} bytes)`)
 
             local FontData = {
                 name = Name,
@@ -837,9 +840,9 @@ local Library do
             return Font.new(getcustomasset(FontPath))
         end
 
-        Library.SubFont = CustomFont:New("SmallestPixel", 400, "Regular", {
-            Id = "SmallestPixel_v2",
-            Url = "https://github.com/sametexe001/luas/raw/refs/heads/main/fonts/smallest_pixel-7.ttf"
+        Library.SubFont = CustomFont:New("ProggyClean", 400, "Regular", {
+            Id = "ProggyClean_v2",
+            Url = "https://github.com/i77lhm/storage/raw/refs/heads/main/fonts/ProggyClean.ttf"
         })
 
         Library.Font = Library.SubFont
