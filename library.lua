@@ -3744,6 +3744,15 @@ local Library do
         Library.Window = function(self, Data)
             Data = Data or { }
 
+            -- Seguro anti-duplicado: si ya hay una ventana viva, se reutiliza en vez de crear otra
+            local Existing = Library.WindowObj
+            if Existing and Existing.Items and Existing.Items["MainFrame"] and Existing.Items["MainFrame"].Instance and Existing.Items["MainFrame"].Instance.Parent then
+                warn("[Pandora] Library:Window() llamado otra vez, se reutiliza la ventana existente. Quien lo llamo:\n" .. debug.traceback())
+                return Existing
+            end
+
+            print("[Pandora] Ventana creada. Quien la llamo:\n" .. debug.traceback())
+
             local Window = {
                 Logo = Data.Logo or Data.logo or "rbxassetid://90459883253339",
                 Build = Data.Build or Data.build or "live",
@@ -4060,7 +4069,8 @@ local Library do
             Window:SetCenter()
             task.wait()
             Window:SetOpen(true)
-            return setmetatable(Window, Library)
+            Library.WindowObj = setmetatable(Window, Library)
+            return Library.WindowObj
         end
 
         Library.Page = function(self, Data)
