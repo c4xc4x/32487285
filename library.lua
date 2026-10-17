@@ -591,6 +591,13 @@ local Library do
                 Resizing = true
                 CurrentSide = Side
 
+                -- paneles con tamaño automatico: pasan a tamaño fijo en pixeles
+                if Gui.AutomaticSize ~= Enum.AutomaticSize.None then
+                    local Absolute = Gui.AbsoluteSize
+                    Gui.AutomaticSize = Enum.AutomaticSize.None
+                    Gui.Size = UDim2FromOffset(Absolute.X, Absolute.Y)
+                end
+
                 StartMouse = UserInputService:GetMouseLocation()
                 StartPosition = Gui.Position
                 StartSize = Vector2New(Gui.Size.X.Offset, Gui.Size.Y.Offset)
@@ -2437,11 +2444,12 @@ local Library do
                 Items["KeybindsList"] = Instances:Create("Frame", {
                     Parent = Library.Holder.Instance,
                     Name = "\0",
-                    Size = UDim2New(0, 0, 0, 35),
+                    Size = UDim2New(0, 180, 0, 35),
                     Position = UDim2New(0.014184396713972092, 0, 0.3557213842868805, 0),
                     BorderColor3 = FromRGB(0, 0, 0),
                     BorderSizePixel = 0,
-                    AutomaticSize = Enum.AutomaticSize.XY,
+                    ClipsDescendants = true,
+                    AutomaticSize = Enum.AutomaticSize.Y,
                     BackgroundColor3 = FromRGB(26, 26, 26)
                 })
                 
@@ -2462,7 +2470,7 @@ local Library do
                     Parent = Items["KeybindsList"].Instance,
                     Name = "\0",
                     BorderColor3 = FromRGB(0, 0, 0),
-                    Size = UDim2New(0, 150, 0, 25),
+                    Size = UDim2New(1, 0, 0, 25),
                     BorderSizePixel = 0,
                     BackgroundColor3 = FromRGB(26, 26, 26)
                 })
@@ -2535,7 +2543,7 @@ local Library do
                     AnchorPoint = Vector2New(0, 0.5),
                     BackgroundTransparency = 1,
                     Position = UDim2New(0, 0, 0.5, -2),
-                    Size = UDim2New(0, 150, 1, 0),
+                    Size = UDim2New(1, 0, 1, 0),
                     BorderSizePixel = 0,
                     TextSize = 14,
                     BackgroundColor3 = FromRGB(255, 255, 255)
@@ -2570,7 +2578,7 @@ local Library do
             end
 
             Items["KeybindsList"]:MakeDraggable()
-            Items["KeybindsList"]:MakeScalable(0.6, 2.5)
+            Items["KeybindsList"]:MakeResizeable(Vector2New(130, 50), Vector2New(9999, 9999))
 
             function KeybindList:SetVisibility(Bool)
                 Items["KeybindsList"].Instance.Visible = Bool
@@ -2588,7 +2596,7 @@ local Library do
                     BackgroundTransparency = 1,
                     TextXAlignment = Enum.TextXAlignment.Left,
                     BorderSizePixel = 0,
-                    AutomaticSize = Enum.AutomaticSize.X,
+                    ClipsDescendants = true,
                     TextSize = 14,
                     BackgroundColor3 = FromRGB(255, 255, 255)
                 })
@@ -2642,6 +2650,7 @@ local Library do
                     AnchorPoint = AnchorPoint or Vector2New(0, 0),
                     BorderColor3 = FromRGB(0, 0, 0),
                     BorderSizePixel = 0,
+                    ClipsDescendants = true,
                     AutomaticSize = Enum.AutomaticSize.Y,
                     BackgroundColor3 = FromRGB(26, 26, 26)
                 })
@@ -2765,7 +2774,7 @@ local Library do
             end
 
             Items["Panel"]:MakeDraggable()
-            Items["Panel"]:MakeScalable(0.6, 2.5)
+            Items["Panel"]:MakeResizeable(Vector2New(110, 45), Vector2New(9999, 9999))
 
             return Items
         end
@@ -2860,7 +2869,15 @@ local Library do
                     Parent = Items["Bar"].Instance,
                     Name = "\0",
                     Color = FromRGB(35, 35, 35),
+                    LineJoinMode = Enum.LineJoinMode.Miter,
                     ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+                })
+
+                Instances:Create("UIGradient", {
+                    Parent = Items["Bar"].Instance,
+                    Name = "\0",
+                    Rotation = 90,
+                    Color = RGBSequence{RGBSequenceKeypoint(0, FromRGB(255, 255, 255)), RGBSequenceKeypoint(1, FromRGB(195, 195, 195))}
                 })
 
                 Items["Fill"] = Instances:Create("Frame", {
@@ -2963,8 +2980,10 @@ local Library do
                 end
                 Hotbar.Slots = { }
 
-                local Columns = MathClamp(#List, 1, 10)
-                Items["Panel"].Instance.Size = UDim2New(0, math.max(150, Columns * 34 + 12), 0, 0)
+                if Items["Panel"].Instance.AutomaticSize ~= Enum.AutomaticSize.None then
+                    local Columns = MathClamp(#List, 1, 10)
+                    Items["Panel"].Instance.Size = UDim2New(0, math.max(150, Columns * 34 + 12), 0, 0)
+                end
 
                 if #List == 0 then
                     local Empty = Instances:Create("TextLabel", {
@@ -3046,6 +3065,246 @@ local Library do
 
             Library.HotbarObj = Hotbar
             return Hotbar
+        end
+
+        -- Ammo indicator: detecta la municion del arma (Tool) equipada
+        Library.AmmoIndicator = function(self)
+            local Ammo = {
+                Tool = nil,
+                Sources = { },
+                TrackedMax = 0,
+                LastScan = 0,
+                Signature = nil
+            }
+
+            local Items = Library:CreatePanel("Ammo", 170, UDim2New(0.014, 0, 0.68, 0)) do
+                Items["Row"] = Instances:Create("Frame", {
+                    Parent = Items["Content"].Instance,
+                    Name = "\0",
+                    BackgroundTransparency = 1,
+                    BorderColor3 = FromRGB(0, 0, 0),
+                    Size = UDim2New(1, 0, 0, 34),
+                    BorderSizePixel = 0,
+                    BackgroundColor3 = FromRGB(255, 255, 255)
+                })
+
+                Items["Name"] = Instances:Create("TextLabel", {
+                    Parent = Items["Row"].Instance,
+                    Name = "\0",
+                    FontFace = Library.SubFont,
+                    TextColor3 = FromRGB(221, 221, 221),
+                    BorderColor3 = FromRGB(0, 0, 0),
+                    Text = "no weapon",
+                    Position = UDim2New(0, 0, 0, 2),
+                    Size = UDim2New(1, -64, 0, 14),
+                    BackgroundTransparency = 1,
+                    TextXAlignment = Enum.TextXAlignment.Left,
+                    TextTruncate = Enum.TextTruncate.AtEnd,
+                    BorderSizePixel = 0,
+                    TextSize = 14,
+                    BackgroundColor3 = FromRGB(255, 255, 255)
+                })
+
+                Items["Count"] = Instances:Create("TextLabel", {
+                    Parent = Items["Row"].Instance,
+                    Name = "\0",
+                    FontFace = Library.SubFont,
+                    TextColor3 = FromRGB(119, 119, 119),
+                    BorderColor3 = FromRGB(0, 0, 0),
+                    Text = "-",
+                    AnchorPoint = Vector2New(1, 0),
+                    Position = UDim2New(1, 0, 0, 2),
+                    Size = UDim2New(0, 60, 0, 14),
+                    BackgroundTransparency = 1,
+                    TextXAlignment = Enum.TextXAlignment.Right,
+                    BorderSizePixel = 0,
+                    TextSize = 14,
+                    BackgroundColor3 = FromRGB(255, 255, 255)
+                })
+
+                -- Misma barra que los sliders (stroke + gradientes)
+                Items["Bar"] = Instances:Create("Frame", {
+                    Parent = Items["Row"].Instance,
+                    Name = "\0",
+                    Position = UDim2New(0, 0, 0, 21),
+                    BorderColor3 = FromRGB(0, 0, 0),
+                    Size = UDim2New(1, 0, 0, 10),
+                    BorderSizePixel = 0,
+                    ClipsDescendants = true,
+                    BackgroundColor3 = FromRGB(20, 20, 20)
+                })
+
+                Instances:Create("UIStroke", {
+                    Parent = Items["Bar"].Instance,
+                    Name = "\0",
+                    Color = FromRGB(35, 35, 35),
+                    LineJoinMode = Enum.LineJoinMode.Miter,
+                    ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+                })
+
+                Instances:Create("UIGradient", {
+                    Parent = Items["Bar"].Instance,
+                    Name = "\0",
+                    Rotation = 90,
+                    Color = RGBSequence{RGBSequenceKeypoint(0, FromRGB(255, 255, 255)), RGBSequenceKeypoint(1, FromRGB(195, 195, 195))}
+                })
+
+                Items["Fill"] = Instances:Create("Frame", {
+                    Parent = Items["Bar"].Instance,
+                    Name = "\0",
+                    BorderColor3 = FromRGB(0, 0, 0),
+                    Size = UDim2New(0, 0, 1, 0),
+                    BorderSizePixel = 0,
+                    BackgroundColor3 = FromRGB(166, 147, 243)
+                })  Items["Fill"]:AddToTheme({BackgroundColor3 = "Accent"})
+
+                Instances:Create("UIGradient", {
+                    Parent = Items["Fill"].Instance,
+                    Name = "\0",
+                    Rotation = 90,
+                    Color = RGBSequence{RGBSequenceKeypoint(0, FromRGB(255, 255, 255)), RGBSequenceKeypoint(1, FromRGB(195, 195, 195))}
+                })
+            end
+
+            local AmmoPatterns = {"ammo", "clip", "mag", "bullet", "rounds"}
+            local MaxPatterns = {"max", "size", "capacity"}
+            local IgnorePatterns = {"magnitude", "reserve", "spare", "total", "stored", "damage", "speed", "pickup"}
+            local PreferredNames = {"ammo", "currentammo", "ammocount", "clip", "currentclip", "mag", "magazine", "bullets"}
+
+            local ContainsAny = function(Text, List)
+                Text = StringLower(Text)
+
+                for Index = 1, #List do
+                    if StringFind(Text, List[Index], 1, true) then
+                        return true
+                    end
+                end
+
+                return false
+            end
+
+            local Scan = function(Tool)
+                local Result = { Current = nil, Max = nil }
+
+                if not Tool then
+                    return Result
+                end
+
+                local CurrentList, MaxList = { }, { }
+
+                local Consider = function(Name, Getter)
+                    if not ContainsAny(Name, AmmoPatterns) or ContainsAny(Name, IgnorePatterns) then
+                        return
+                    end
+
+                    local Source = {Name = StringLower(Name), Get = Getter}
+
+                    if ContainsAny(Name, MaxPatterns) then
+                        TableInsert(MaxList, Source)
+                    else
+                        TableInsert(CurrentList, Source)
+                    end
+                end
+
+                local ScanObject = function(Object)
+                    for Name, Value in Object:GetAttributes() do
+                        if type(Value) == "number" then
+                            Consider(Name, function()
+                                return Object:GetAttribute(Name)
+                            end)
+                        end
+                    end
+
+                    if Object:IsA("IntValue") or Object:IsA("NumberValue") then
+                        Consider(Object.Name, function()
+                            return Object.Value
+                        end)
+                    end
+                end
+
+                ScanObject(Tool)
+
+                for Index, Descendant in Tool:GetDescendants() do
+                    ScanObject(Descendant)
+                end
+
+                for Index, Source in CurrentList do
+                    if TableFind(PreferredNames, Source.Name) then
+                        Result.Current = Source
+                        break
+                    end
+                end
+
+                Result.Current = Result.Current or CurrentList[1]
+                Result.Max = MaxList[1]
+
+                return Result
+            end
+
+            local Read = function(Source)
+                if not Source then
+                    return nil
+                end
+
+                local Success, Value = pcall(Source.Get)
+                return Success and tonumber(Value) or nil
+            end
+
+            function Ammo:SetVisibility(Bool)
+                Items["Panel"].Instance.Visible = Bool
+            end
+
+            Library:Connect(RunService.RenderStepped, function()
+                local Character = LocalPlayer.Character
+                local Tool = Character and Character:FindFirstChildOfClass("Tool")
+                local Now = os.clock()
+
+                if Tool ~= Ammo.Tool then
+                    Ammo.Tool = Tool
+                    Ammo.Sources = Scan(Tool)
+                    Ammo.TrackedMax = 0
+                    Ammo.LastScan = Now
+                elseif Tool and not Ammo.Sources.Current and Now - Ammo.LastScan > 1 then
+                    Ammo.Sources = Scan(Tool)
+                    Ammo.LastScan = Now
+                end
+
+                local Name = Tool and Tool.Name or "no weapon"
+                local Current = Tool and Read(Ammo.Sources.Current) or nil
+                local Max = Tool and Read(Ammo.Sources.Max) or nil
+
+                if Current then
+                    if not Max or Max <= 0 then
+                        Ammo.TrackedMax = math.max(Ammo.TrackedMax, Current)
+                        Max = Ammo.TrackedMax
+                    end
+                end
+
+                local Signature = StringFormat("%s|%s|%s", Name, tostring(Current), tostring(Max))
+
+                if Signature == Ammo.Signature then
+                    return
+                end
+
+                Ammo.Signature = Signature
+
+                Items["Name"].Instance.Text = Name
+
+                if Current then
+                    local Ratio = Max and Max > 0 and MathClamp(Current / Max, 0, 1) or 0
+
+                    Items["Count"].Instance.Text = StringFormat("%d / %d", MathFloor(Current), MathFloor(Max or 0))
+                    Items["Count"].Instance.TextColor3 = Current <= 0 and FromRGB(255, 70, 70) or FromRGB(119, 119, 119)
+                    Items["Fill"]:Tween(TweenInfo.new(0.2, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), {Size = UDim2New(Ratio, 0, 1, 0)})
+                else
+                    Items["Count"].Instance.Text = Tool and "n/a" or "-"
+                    Items["Count"].Instance.TextColor3 = FromRGB(119, 119, 119)
+                    Items["Fill"]:Tween(TweenInfo.new(0.2, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), {Size = UDim2New(0, 0, 1, 0)})
+                end
+            end)
+
+            Library.AmmoObj = Ammo
+            return Ammo
         end
 
         -- Unicas notificaciones: targetted / untargetted / killed / error
@@ -3433,7 +3692,7 @@ local Library do
                     BackgroundTransparency = 1,
                     Position = UDim2New(0, 0, 0, 46),
                     BorderColor3 = FromRGB(0, 0, 0),
-                    Size = UDim2New(0, 54, 1, -71),
+                    Size = UDim2New(0, 68, 1, -71),
                     BorderSizePixel = 0,
                     BackgroundColor3 = FromRGB(255, 255, 255)
                 })
@@ -3576,9 +3835,9 @@ local Library do
                     Name = "\0",
                     Visible = false,
                     BackgroundTransparency = 1,
-                    Position = UDim2New(0, 55, 0, 45),
+                    Position = UDim2New(0, 69, 0, 45),
                     BorderColor3 = FromRGB(0, 0, 0),
-                    Size = UDim2New(1, -55, 1, -70),
+                    Size = UDim2New(1, -69, 1, -70),
                     BorderSizePixel = 0,
                     BackgroundColor3 = FromRGB(255, 255, 255)
                 })
@@ -3616,14 +3875,9 @@ local Library do
             local Debounce = false
 
             function Page:Turn(Bool)
-                if Debounce then 
-                    return 
-                end
-
-                Page.Active = Bool 
+                Page.Active = Bool
                 
-                Debounce = true
-                Items["PageContent"].Instance.Visible = Bool 
+                Items["PageContent"].Instance.Visible = Bool
                 Items["PageContent"].Instance.Parent = Bool and Page.Window.Items["MainFrame"].Instance or Library.UnusedHolder.Instance
                 Items["SubPages"].Instance.Visible = Bool
 
@@ -3636,31 +3890,6 @@ local Library do
                     end})
                     Items["Icon"]:Tween(nil, {ImageColor3 = FromRGB(74, 74, 74)})
                 end
-
-                local AllInstances = Items["PageContent"].Instance:GetDescendants()
-                TableInsert(AllInstances, Items["PageContent"].Instance)
-                
-                local NewTween 
-
-                for Index, Value in AllInstances do 
-                    local TransparencyProperty = Tween:GetProperty(Value)
-
-                    if not TransparencyProperty then 
-                        continue
-                    end
-
-                    if type(TransparencyProperty) == "table" then 
-                        for _, Property in TransparencyProperty do 
-                            NewTween = Tween:FadeItem(Value, Property, Bool, Library.FadeSpeed)
-                        end
-                    else
-                        NewTween = Tween:FadeItem(Value, TransparencyProperty, Bool, Library.FadeSpeed)
-                    end
-                end
-
-                Library:Connect(NewTween.Tween.Completed, function()
-                    Debounce = false
-                end)
             end
 
             Items["Inactive"]:Connect("MouseButton1Down", function()
@@ -3811,14 +4040,9 @@ local Library do
             local Debounce = false
 
             function Page:Turn(Bool)
-                if Debounce then 
-                    return 
-                end
-
-                Page.Active = Bool 
+                Page.Active = Bool
                 
-                Debounce = true
-                Items["PageContent"].Instance.Visible = Bool 
+                Items["PageContent"].Instance.Visible = Bool
                 Items["PageContent"].Instance.Parent = Bool and Page.Page.Items["PageContent"].Instance or Library.UnusedHolder.Instance
 
                 if Page.Active then
@@ -3836,31 +4060,6 @@ local Library do
                     Items["Accent2"]:Tween(TweenInfo.new(0.4, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {BackgroundTransparency = 1, Size = UDim2New(0, 1, 0, 0)})
                     Items["Background"]:Tween(nil, {BackgroundTransparency = 1})
                 end
-
-                local AllInstances = Items["PageContent"].Instance:GetDescendants()
-                TableInsert(AllInstances, Items["PageContent"].Instance)
-                
-                local NewTween 
-
-                for Index, Value in AllInstances do 
-                    local TransparencyProperty = Tween:GetProperty(Value)
-
-                    if not TransparencyProperty then 
-                        continue
-                    end
-
-                    if type(TransparencyProperty) == "table" then 
-                        for _, Property in TransparencyProperty do 
-                            NewTween = Tween:FadeItem(Value, Property, Bool, Library.FadeSpeed)
-                        end
-                    else
-                        NewTween = Tween:FadeItem(Value, TransparencyProperty, Bool, Library.FadeSpeed)
-                    end
-                end
-
-                Library:Connect(NewTween.Tween.Completed, function()
-                    Debounce = false
-                end)
             end
 
             Items["Inactive"]:Connect("MouseButton1Down", function()
@@ -5869,6 +6068,12 @@ local Library do
                 if Library.IndicatorObj then
                     MenuSection:Toggle({Name = "Player Indicator", Flag = "Player Indicator", Default = true, Callback = function(Value)
                         Library.IndicatorObj:SetVisibility(Value)
+                    end})
+                end
+
+                if Library.AmmoObj then
+                    MenuSection:Toggle({Name = "Ammo", Flag = "Ammo", Default = true, Callback = function(Value)
+                        Library.AmmoObj:SetVisibility(Value)
                     end})
                 end
 
