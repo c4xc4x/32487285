@@ -4,9 +4,7 @@
 local LoadingTick = os.clock()
 
 if getgenv().Library then
-    pcall(function()
-        getgenv().Library:Unload()
-    end)
+    getgenv().Library:Unload()
 end
 
 local Library do 
@@ -812,7 +810,7 @@ local Library do
         end
     end
 
-    -- Custom font (ProggyClean en toda la UI)
+    -- Custom font (SmallestPixel en toda la UI)
     local CustomFont = { } do
         function CustomFont:New(Name, Weight, Style, Data)
             local TtfPath = `{Library.Folders.Fonts}/{Data.Id}.ttf`
@@ -822,9 +820,6 @@ local Library do
             if not isfile(TtfPath) or #readfile(TtfPath) < 1000 then
                 writefile(TtfPath, game:HttpGet(Data.Url))
             end
-
-            -- diagnostico: ProggyClean.ttf pesa 41208 bytes
-            print(`[Pandora] Fuente cargada: {Name} ({#readfile(TtfPath)} bytes)`)
 
             local FontData = {
                 name = Name,
@@ -842,23 +837,12 @@ local Library do
             return Font.new(getcustomasset(FontPath))
         end
 
-        Library.SubFont = CustomFont:New("ProggyClean", 400, "Regular", {
-            Id = "ProggyClean_v2",
-            Url = "https://github.com/i77lhm/storage/raw/refs/heads/main/fonts/ProggyClean.ttf"
+        Library.SubFont = CustomFont:New("SmallestPixel", 400, "Regular", {
+            Id = "SmallestPixel_v2",
+            Url = "https://github.com/sametexe001/luas/raw/refs/heads/main/fonts/smallest_pixel-7.ttf"
         })
 
         Library.Font = Library.SubFont
-    end
-
-    -- Borra restos de ejecuciones anteriores (evita ventanas duplicadas)
-    for Index, Parent in {gethui(), CoreGui} do
-        pcall(function()
-            for _, Gui in Parent:GetChildren() do
-                if Gui:GetAttribute("PandoraUI") then
-                    Gui:Destroy()
-                end
-            end
-        end)
     end
 
     Library.Holder = Instances:Create("ScreenGui", {
@@ -877,9 +861,6 @@ local Library do
         Enabled = false,
         ResetOnSpawn = false
     })
-
-    Library.Holder.Instance:SetAttribute("PandoraUI", true)
-    Library.UnusedHolder.Instance:SetAttribute("PandoraUI", true)
 
     Library.NotifHolder = Instances:Create("Frame", {
         Parent = Library.Holder.Instance,
@@ -911,25 +892,15 @@ local Library do
 
     Library.Unload = function(self)
         for Index, Value in self.Connections do 
-            pcall(function()
-                Value.Connection:Disconnect()
-            end)
+            Value.Connection:Disconnect()
         end
 
         for Index, Value in self.Threads do 
-            pcall(coroutine.close, Value)
+            coroutine.close(Value)
         end
 
         if self.Holder then 
-            pcall(function()
-                self.Holder:Clean()
-            end)
-        end
-
-        if self.UnusedHolder then
-            pcall(function()
-                self.UnusedHolder:Clean()
-            end)
+            self.Holder:Clean()
         end
 
         Library = nil 
@@ -1223,15 +1194,14 @@ local Library do
                 Instances:Create("UICorner", {
                     Parent = Items["ColorpickerWindow"].Instance,
                     Name = "\0",
-                    CornerRadius = UDimNew(0, 0)
+                    CornerRadius = UDimNew(0, 4)
                 })
                 
                 Instances:Create("UIStroke", {
                     Parent = Items["ColorpickerWindow"].Instance,
                     Name = "\0",
                     Color = FromRGB(35, 35, 35),
-                    ApplyStrokeMode = Enum.ApplyStrokeMode.Border,
-                    LineJoinMode = Enum.LineJoinMode.Miter
+                    ApplyStrokeMode = Enum.ApplyStrokeMode.Border
                 })
                 
                 Items["Alpha"] = Instances:Create("TextButton", {
@@ -1253,7 +1223,7 @@ local Library do
                 Instances:Create("UICorner", {
                     Parent = Items["Alpha"].Instance,
                     Name = "\0",
-                    CornerRadius = UDimNew(0, 0)
+                    CornerRadius = UDimNew(0, 3)
                 })
                 
                 Items["Checkers"] = Instances:Create("ImageLabel", {
@@ -1279,7 +1249,7 @@ local Library do
                 Instances:Create("UICorner", {
                     Parent = Items["Checkers"].Instance,
                     Name = "\0",
-                    CornerRadius = UDimNew(0, 0)
+                    CornerRadius = UDimNew(0, 3)
                 })
                 
                 Items["AlphaDragger"] = Instances:Create("Frame", {
@@ -1296,8 +1266,7 @@ local Library do
                     Parent = Items["AlphaDragger"].Instance,
                     Name = "\0",
                     Color = FromRGB(35, 35, 35),
-                    ApplyStrokeMode = Enum.ApplyStrokeMode.Border,
-                    LineJoinMode = Enum.LineJoinMode.Miter
+                    ApplyStrokeMode = Enum.ApplyStrokeMode.Border
                 })
                 
                 Items["Palette"] = Instances:Create("TextButton", {
@@ -1333,7 +1302,7 @@ local Library do
                 Instances:Create("UICorner", {
                     Parent = Items["Saturation"].Instance,
                     Name = "\0",
-                    CornerRadius = UDimNew(0, 0)
+                    CornerRadius = UDimNew(0, 4)
                 })
                 
                 Items["Value"] = Instances:Create("Frame", {
@@ -1355,13 +1324,13 @@ local Library do
                 Instances:Create("UICorner", {
                     Parent = Items["Value"].Instance,
                     Name = "\0",
-                    CornerRadius = UDimNew(0, 0)
+                    CornerRadius = UDimNew(0, 4)
                 })
                 
                 Instances:Create("UICorner", {
                     Parent = Items["Palette"].Instance,
                     Name = "\0",
-                    CornerRadius = UDimNew(0, 0)
+                    CornerRadius = UDimNew(0, 4)
                 })
                 
                 Items["PaletteDragger"] = Instances:Create("Frame", {
@@ -1378,8 +1347,7 @@ local Library do
                     Parent = Items["PaletteDragger"].Instance,
                     Name = "\0",
                     Color = FromRGB(35, 35, 35),
-                    ApplyStrokeMode = Enum.ApplyStrokeMode.Border,
-                    LineJoinMode = Enum.LineJoinMode.Miter
+                    ApplyStrokeMode = Enum.ApplyStrokeMode.Border
                 })
                 
                 Items["Hue"] = Instances:Create("TextButton", {
@@ -1401,7 +1369,7 @@ local Library do
                 Instances:Create("UICorner", {
                     Parent = Items["Hue"].Instance,
                     Name = "\0",
-                    CornerRadius = UDimNew(0, 0)
+                    CornerRadius = UDimNew(0, 4)
                 })
                 
                 Items["HueInline"] = Instances:Create("TextButton", {
@@ -1421,7 +1389,7 @@ local Library do
                 Instances:Create("UICorner", {
                     Parent = Items["HueInline"].Instance,
                     Name = "\0",
-                    CornerRadius = UDimNew(0, 0)
+                    CornerRadius = UDimNew(0, 4)
                 })
                 
                 Instances:Create("UIGradient", {
@@ -1444,8 +1412,7 @@ local Library do
                     Parent = Items["HueDragger"].Instance,
                     Name = "\0",
                     Color = FromRGB(35, 35, 35),
-                    ApplyStrokeMode = Enum.ApplyStrokeMode.Border,
-                    LineJoinMode = Enum.LineJoinMode.Miter
+                    ApplyStrokeMode = Enum.ApplyStrokeMode.Border
                 })                
 
                 Items["RainbowButton"] = Instances:Create("TextButton", {
@@ -1476,15 +1443,14 @@ local Library do
                 Instances:Create("UICorner", {
                     Parent = Items["RainbowIndicator"].Instance,
                     Name = "\0",
-                    CornerRadius = UDimNew(0, 0)
+                    CornerRadius = UDimNew(0, 2)
                 })
 
                 Instances:Create("UIStroke", {
                     Parent = Items["RainbowIndicator"].Instance,
                     Name = "\0",
                     Color = FromRGB(35, 35, 35),
-                    ApplyStrokeMode = Enum.ApplyStrokeMode.Border,
-                    LineJoinMode = Enum.LineJoinMode.Miter
+                    ApplyStrokeMode = Enum.ApplyStrokeMode.Border
                 })
 
                 Items["RainbowText"] = Instances:Create("TextLabel", {
@@ -2379,15 +2345,14 @@ local Library do
                 Instances:Create("UICorner", {
                     Parent = Items["Notification"].Instance,
                     Name = "\0",
-                    CornerRadius = UDimNew(0, 0)
+                    CornerRadius = UDimNew(0, 2)
                 })
                 
                 Instances:Create("UIStroke", {
                     Parent = Items["Notification"].Instance,
                     Name = "\0",
                     Color = FromRGB(35, 35, 35),
-                    ApplyStrokeMode = Enum.ApplyStrokeMode.Border,
-                    LineJoinMode = Enum.LineJoinMode.Miter
+                    ApplyStrokeMode = Enum.ApplyStrokeMode.Border
                 })
                 
                 Items["Accent1"] = Instances:Create("Frame", {
@@ -2527,15 +2492,14 @@ local Library do
                 Instances:Create("UICorner", {
                     Parent = Items["KeybindsList"].Instance,
                     Name = "\0",
-                    CornerRadius = UDimNew(0, 0)
+                    CornerRadius = UDimNew(0, 4)
                 })
                 
                 Instances:Create("UIStroke", {
                     Parent = Items["KeybindsList"].Instance,
                     Name = "\0",
                     Color = FromRGB(35, 35, 35),
-                    ApplyStrokeMode = Enum.ApplyStrokeMode.Border,
-                    LineJoinMode = Enum.LineJoinMode.Miter
+                    ApplyStrokeMode = Enum.ApplyStrokeMode.Border
                 })
                 
                 Items["Top"] = Instances:Create("Frame", {
@@ -2731,15 +2695,14 @@ local Library do
                 Instances:Create("UICorner", {
                     Parent = Items["Panel"].Instance,
                     Name = "\0",
-                    CornerRadius = UDimNew(0, 0)
+                    CornerRadius = UDimNew(0, 4)
                 })
 
                 Instances:Create("UIStroke", {
                     Parent = Items["Panel"].Instance,
                     Name = "\0",
                     Color = FromRGB(35, 35, 35),
-                    ApplyStrokeMode = Enum.ApplyStrokeMode.Border,
-                    LineJoinMode = Enum.LineJoinMode.Miter
+                    ApplyStrokeMode = Enum.ApplyStrokeMode.Border
                 })
 
                 Items["Top"] = Instances:Create("Frame", {
@@ -2884,15 +2847,14 @@ local Library do
                 Instances:Create("UICorner", {
                     Parent = Items["Avatar"].Instance,
                     Name = "\0",
-                    CornerRadius = UDimNew(0, 0)
+                    CornerRadius = UDimNew(0, 3)
                 })
 
                 Instances:Create("UIStroke", {
                     Parent = Items["Avatar"].Instance,
                     Name = "\0",
                     Color = FromRGB(35, 35, 35),
-                    ApplyStrokeMode = Enum.ApplyStrokeMode.Border,
-                    LineJoinMode = Enum.LineJoinMode.Miter
+                    ApplyStrokeMode = Enum.ApplyStrokeMode.Border
                 })
 
                 Items["Name"] = Instances:Create("TextLabel", {
@@ -3091,15 +3053,14 @@ local Library do
                     Instances:Create("UICorner", {
                         Parent = Slot.Instance,
                         Name = "\0",
-                        CornerRadius = UDimNew(0, 0)
+                        CornerRadius = UDimNew(0, 3)
                     })
 
                     Instances:Create("UIStroke", {
                         Parent = Slot.Instance,
                         Name = "\0",
                         Color = FromRGB(35, 35, 35),
-                        ApplyStrokeMode = Enum.ApplyStrokeMode.Border,
-                        LineJoinMode = Enum.LineJoinMode.Miter
+                        ApplyStrokeMode = Enum.ApplyStrokeMode.Border
                     })
 
                     if Value.Icon and Value.Icon ~= "" then
@@ -3178,15 +3139,14 @@ local Library do
                 Instances:Create("UICorner", {
                     Parent = Items["Icon"].Instance,
                     Name = "\0",
-                    CornerRadius = UDimNew(0, 0)
+                    CornerRadius = UDimNew(0, 3)
                 })
 
                 Instances:Create("UIStroke", {
                     Parent = Items["Icon"].Instance,
                     Name = "\0",
                     Color = FromRGB(35, 35, 35),
-                    ApplyStrokeMode = Enum.ApplyStrokeMode.Border,
-                    LineJoinMode = Enum.LineJoinMode.Miter
+                    ApplyStrokeMode = Enum.ApplyStrokeMode.Border
                 })
 
                 Items["IconText"] = Instances:Create("TextLabel", {
@@ -3570,15 +3530,14 @@ local Library do
                 Instances:Create("UICorner", {
                     Parent = Items["Watermark"].Instance,
                     Name = "\0",
-                    CornerRadius = UDimNew(0, 0)
+                    CornerRadius = UDimNew(0, 4)
                 })
                 
                 Instances:Create("UIStroke", {
                     Parent = Items["Watermark"].Instance,
                     Name = "\0",
                     Color = FromRGB(35, 35, 35),
-                    ApplyStrokeMode = Enum.ApplyStrokeMode.Border,
-                    LineJoinMode = Enum.LineJoinMode.Miter
+                    ApplyStrokeMode = Enum.ApplyStrokeMode.Border
                 })
                 
                 
@@ -3744,15 +3703,6 @@ local Library do
         Library.Window = function(self, Data)
             Data = Data or { }
 
-            -- Seguro anti-duplicado: si ya hay una ventana viva, se reutiliza en vez de crear otra
-            local Existing = Library.WindowObj
-            if Existing and Existing.Items and Existing.Items["MainFrame"] and Existing.Items["MainFrame"].Instance and Existing.Items["MainFrame"].Instance.Parent then
-                warn("[Pandora] Library:Window() llamado otra vez, se reutiliza la ventana existente. Quien lo llamo:\n" .. debug.traceback())
-                return Existing
-            end
-
-            print("[Pandora] Ventana creada. Quien la llamo:\n" .. debug.traceback())
-
             local Window = {
                 Logo = Data.Logo or Data.logo or "rbxassetid://90459883253339",
                 Build = Data.Build or Data.build or "live",
@@ -3780,7 +3730,7 @@ local Library do
                 Instances:Create("UICorner", {
                     Parent = Items["MainFrame"].Instance,
                     Name = "\0",
-                    CornerRadius = UDimNew(0, 0)
+                    CornerRadius = UDimNew(0, 4)
                 })
                 
                 Items["Bottom"] = Instances:Create("Frame", {
@@ -3797,7 +3747,7 @@ local Library do
                 Instances:Create("UICorner", {
                     Parent = Items["Bottom"].Instance,
                     Name = "\0",
-                    CornerRadius = UDimNew(0, 0)
+                    CornerRadius = UDimNew(0, 4)
                 })
                 
                 Instances:Create("Frame", {
@@ -3858,8 +3808,7 @@ local Library do
                     Parent = Items["MainFrame"].Instance,
                     Name = "\0",
                     Color = FromRGB(35, 35, 35),
-                    ApplyStrokeMode = Enum.ApplyStrokeMode.Border,
-                    LineJoinMode = Enum.LineJoinMode.Miter
+                    ApplyStrokeMode = Enum.ApplyStrokeMode.Border
                 })
                 
                 Items["Top"] = Instances:Create("Frame", {
@@ -3874,7 +3823,7 @@ local Library do
                 Instances:Create("UICorner", {
                     Parent = Items["Top"].Instance,
                     Name = "\0",
-                    CornerRadius = UDimNew(0, 0)
+                    CornerRadius = UDimNew(0, 4)
                 })
                 
                 Instances:Create("Frame", {
@@ -4069,8 +4018,7 @@ local Library do
             Window:SetCenter()
             task.wait()
             Window:SetOpen(true)
-            Library.WindowObj = setmetatable(Window, Library)
-            return Library.WindowObj
+            return setmetatable(Window, Library)
         end
 
         Library.Page = function(self, Data)
@@ -4475,7 +4423,7 @@ local Library do
                 Instances:Create("UICorner", {
                     Parent = Items["Top"].Instance,
                     Name = "\0",
-                    CornerRadius = UDimNew(0, 0)
+                    CornerRadius = UDimNew(0, 4)
                 })
                 
                 Items["Shadow"] = Instances:Create("Frame", {
@@ -4525,7 +4473,7 @@ local Library do
                 Instances:Create("UICorner", {
                     Parent = Items["Background"].Instance,
                     Name = "\0",
-                    CornerRadius = UDimNew(0, 0)
+                    CornerRadius = UDimNew(0, 4)
                 })
                 
                 Items["ShadowBottom"] = Instances:Create("Frame", {
@@ -4661,7 +4609,7 @@ local Library do
                 Instances:Create("UICorner", {
                     Parent = Items["Outline"].Instance,
                     Name = "\0",
-                    CornerRadius = UDimNew(0, 0)
+                    CornerRadius = UDimNew(0, 4)
                 })
 
                 Section.Items = Items
@@ -4731,7 +4679,7 @@ local Library do
                 Instances:Create("UICorner", {
                     Parent = Items["Indicator"].Instance,
                     Name = "\0",
-                    CornerRadius = UDimNew(0, 0)
+                    CornerRadius = UDimNew(0, 2)
                 })
 
                 Items["Text"] = Instances:Create("TextLabel", {
@@ -4957,19 +4905,19 @@ local Library do
                 Instances:Create("UICorner", {
                     Parent = Items["Indicator"].Instance,
                     Name = "\0",
-                    CornerRadius = UDimNew(0, 0)
+                    CornerRadius = UDimNew(0, 3)
                 })
                 
                 Instances:Create("UICorner", {
                     Parent = Items["Inline"].Instance,
                     Name = "\0",
-                    CornerRadius = UDimNew(0, 0)
+                    CornerRadius = UDimNew(0, 3)
                 })
                 
                 Instances:Create("UICorner", {
                     Parent = Items["Outline"].Instance,
                     Name = "\0",
-                    CornerRadius = UDimNew(0, 0)
+                    CornerRadius = UDimNew(0, 3)
                 })                
 
                 Items["ButtonHolder"]:OnHover(function()
@@ -6524,6 +6472,38 @@ end
 -- Ammo se crea solo al cargar la libreria (asi aparece el panel y el toggle en Menu)
 if not Library.AmmoObj then
     Library:AmmoIndicator()
+end
+
+-- UI completa (se construye al cargar). Para usar solo la libreria: getgenv().PandoraNoExample = true
+if not getgenv().PandoraNoExample then
+    local function Try(Name, Fn, ...)
+        local Ok, Result = pcall(Fn, ...)
+        if not Ok then
+            warn(`[Pandora] {Name} fallo: {Result}`)
+            return nil
+        end
+        return Result
+    end
+
+    local KeybindList = Try("KeybindList", Library.KeybindList, Library)
+    local Watermark = Try("Watermark", Library.Watermark, Library, "Pandora")
+
+    Try("PlayerIndicator", Library.PlayerIndicator, Library)
+    Try("Hotbar", Library.Hotbar, Library)
+
+    local Window = Try("Window", Library.Window, Library, {Build = "live"})
+
+    if Window then
+        Try("MainPage", function()
+            local Page = Window:Page({Name = "Main"})
+            local SubPage = Page:SubPage({Name = "General"})
+            local Section = SubPage:Section({Name = "Example"})
+            Section:Toggle({Name = "Example toggle", Flag = "ExampleToggle", Default = false, Callback = function(Value) end})
+            Section:Button({Name = "Example button", Callback = function() Library:Alert("targetted", "Pandora cargado") end})
+        end)
+
+        Try("SettingsPage", Library.CreateSettingsPage, Library, Window, KeybindList, Watermark)
+    end
 end
 
 getgenv().Library = Library
