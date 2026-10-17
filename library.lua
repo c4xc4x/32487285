@@ -6490,37 +6490,5 @@ if not Library.AmmoObj then
     Library:AmmoIndicator()
 end
 
--- UI completa (se construye al cargar). Para usar solo la libreria: getgenv().PandoraNoExample = true
-if not getgenv().PandoraNoExample then
-    local function Try(Name, Fn, ...)
-        local Ok, Result = pcall(Fn, ...)
-        if not Ok then
-            warn(`[Pandora] {Name} fallo: {Result}`)
-            return nil
-        end
-        return Result
-    end
-
-    local KeybindList = Try("KeybindList", Library.KeybindList, Library)
-    local Watermark = Try("Watermark", Library.Watermark, Library, "Pandora")
-
-    Try("PlayerIndicator", Library.PlayerIndicator, Library)
-    Try("Hotbar", Library.Hotbar, Library)
-
-    local Window = Try("Window", Library.Window, Library, {Build = "live"})
-
-    if Window then
-        Try("MainPage", function()
-            local Page = Window:Page({Name = "Main"})
-            local SubPage = Page:SubPage({Name = "General"})
-            local Section = SubPage:Section({Name = "Example"})
-            Section:Toggle({Name = "Example toggle", Flag = "ExampleToggle", Default = false, Callback = function(Value) end})
-            Section:Button({Name = "Example button", Callback = function() Library:Alert("targetted", "Pandora cargado") end})
-        end)
-
-        Try("SettingsPage", Library.CreateSettingsPage, Library, Window, KeybindList, Watermark)
-    end
-end
-
 getgenv().Library = Library
 return Library
