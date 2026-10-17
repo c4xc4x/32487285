@@ -813,28 +813,30 @@ local Library do
     -- Custom font
     local CustomFont = { } do
         function CustomFont:New(Name, Weight, Style, Data)
-            if not isfile(Data.Id) then 
-                writefile(Data.Id, game:HttpGet(Data.Url))
-            end
+            -- Archivos con nombre nuevo + descarga siempre fresca para evitar cache viejo (SmallestPixel)
+            local TtfPath = `{Library.Folders.Fonts}/{Data.Id}.ttf`
+            local FontPath = `{Library.Folders.Fonts}/{Data.Id}.font`
 
-            local Data = {
+            writefile(TtfPath, game:HttpGet(Data.Url))
+
+            local FontData = {
                 name = Name,
                 faces = {
                     {
                         name = Name,
                         weight = Weight,
                         style = Style,
-                        assetId = getcustomasset(Data.Id)
+                        assetId = getcustomasset(TtfPath)
                     }
                 }
             }
 
-            writefile(`{Library.Folders.Fonts}/{Name}.font`, HttpService:JSONEncode(Data))
-            return Font.new(getcustomasset(`{Library.Folders.Fonts}/{Name}.font`))
+            writefile(FontPath, HttpService:JSONEncode(FontData))
+            return Font.new(getcustomasset(FontPath))
         end
 
         Library.Font = CustomFont:New("ProggyClean", 400, "Regular", {
-            Id = "ProggyClean",
+            Id = "ProggyClean_v2",
             Url = "https://github.com/i77lhm/storage/raw/refs/heads/main/fonts/ProggyClean.ttf"
         })
 
