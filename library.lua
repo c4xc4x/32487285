@@ -77,6 +77,8 @@ local Library do
 
         FadeSpeed = 0.4,
 
+        RainbowSpeed = 0.2,
+
         Folders = {
             Directory = "Pandora",
             Configs = "Pandora/Configs",
@@ -440,7 +442,7 @@ local Library do
                 NewX = MathClamp(NewX, 0, ScreenSize.X - GuiSize.X)
                 NewY = MathClamp(NewY, 0, ScreenSize.Y - GuiSize.Y)
         
-                self:Tween(TweenInfo.new(0.35, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), {Position = UDim2New(0, NewX, 0, NewY)})
+                self:Tween(TweenInfo.new(0.06, Enum.EasingStyle.Linear), {Position = UDim2New(0, NewX, 0, NewY)})
             end
         
             local InputChanged
@@ -615,8 +617,8 @@ local Library do
                     h = Minimum.Y
                 end
             
-                self:Tween(TweenInfo.new(0.35, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), {Position = UDim2FromOffset(x, y)})
-                self:Tween(TweenInfo.new(0.35, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), {Size = UDim2FromOffset(w, h)})
+                self:Tween(TweenInfo.new(0.05, Enum.EasingStyle.Linear), {Position = UDim2FromOffset(x, y)})
+                self:Tween(TweenInfo.new(0.05, Enum.EasingStyle.Linear), {Size = UDim2FromOffset(w, h)})
             end)
         end
 
@@ -835,7 +837,7 @@ local Library do
                 if type(Value) == "table" and Value.Key then
                     Config[Index] = {Key = tostring(Value.Key), Mode = Value.Mode}
                 elseif type(Value) == "table" and Value.Color then
-                    Config[Index] = {Color = "#" .. Value.HexValue, Alpha = Value.Alpha}
+                    Config[Index] = {Color = "#" .. Value.HexValue, Alpha = Value.Alpha, Rainbow = Value.Rainbow}
                 else
                     Config[Index] = Value
                 end
@@ -859,7 +861,7 @@ local Library do
                 if type(Value) == "table" and Value.Key then 
                     SetFunction(Value)
                 elseif type(Value) == "table" and Value.Color then
-                    SetFunction(Value.Color, Value.Alpha)
+                    SetFunction(Value.Color, Value.Alpha, Value.Rainbow)
                 else
                     SetFunction(Value)
                 end
@@ -972,6 +974,8 @@ local Library do
                 Color = FromRGB(255, 255, 255),
                 HexValue = "#ffffff",
 
+                Rainbow = false,
+
                 IsOpen = false
             }
 
@@ -1002,7 +1006,7 @@ local Library do
                     Visible = false,
                     Position = UDim2New(0, 1123, 0, 238),
                     BorderColor3 = FromRGB(0, 0, 0),
-                    Size = UDim2New(0, 192, 0, 210),
+                    Size = UDim2New(0, 192, 0, 232),
                     BorderSizePixel = 0,
                     BackgroundColor3 = FromRGB(20, 20, 20)
                 })
@@ -1029,7 +1033,7 @@ local Library do
                     Text = "",
                     AutoButtonColor = false,
                     AnchorPoint = Vector2New(0, 1),
-                    Position = UDim2New(0, 8, 1, -8),
+                    Position = UDim2New(0, 8, 1, -29),
                     Size = UDim2New(1, -16, 0, 15),
                     BorderSizePixel = 0,
                     TextSize = 14,
@@ -1094,7 +1098,7 @@ local Library do
                     Text = "",
                     AutoButtonColor = false,
                     Position = UDim2New(0, 8, 0, 8),
-                    Size = UDim2New(1, -39, 1, -39),
+                    Size = UDim2New(1, -39, 1, -58),
                     BorderSizePixel = 0,
                     TextSize = 14,
                     BackgroundColor3 = FromRGB(255, 240, 123)
@@ -1176,7 +1180,7 @@ local Library do
                     AutoButtonColor = false,
                     AnchorPoint = Vector2New(1, 0),
                     Position = UDim2New(1, -8, 0, 8),
-                    Size = UDim2New(0, 15, 1, -39),
+                    Size = UDim2New(0, 15, 1, -58),
                     BorderSizePixel = 0,
                     TextSize = 14,
                     BackgroundColor3 = FromRGB(255, 255, 255)
@@ -1230,13 +1234,68 @@ local Library do
                     Color = FromRGB(35, 35, 35),
                     ApplyStrokeMode = Enum.ApplyStrokeMode.Border
                 })                
+
+                Items["RainbowButton"] = Instances:Create("TextButton", {
+                    Parent = Items["ColorpickerWindow"].Instance,
+                    Name = "\0",
+                    Text = "",
+                    AutoButtonColor = false,
+                    BackgroundTransparency = 1,
+                    BorderSizePixel = 0,
+                    AnchorPoint = Vector2New(0, 1),
+                    Position = UDim2New(0, 8, 1, -8),
+                    Size = UDim2New(1, -16, 0, 13),
+                    BackgroundColor3 = FromRGB(255, 255, 255)
+                })
+
+                Items["RainbowIndicator"] = Instances:Create("Frame", {
+                    Parent = Items["RainbowButton"].Instance,
+                    Name = "\0",
+                    AnchorPoint = Vector2New(0, 0.5),
+                    Position = UDim2New(0, 0, 0.5, 0),
+                    Size = UDim2New(0, 9, 0, 9),
+                    BorderSizePixel = 0,
+                    BackgroundColor3 = FromRGB(20, 20, 20)
+                })  Items["RainbowIndicator"]:AddToTheme({BackgroundColor3 = function()
+                    return FromRGB(20, 20, 20)
+                end})
+
+                Instances:Create("UICorner", {
+                    Parent = Items["RainbowIndicator"].Instance,
+                    Name = "\0",
+                    CornerRadius = UDimNew(0, 2)
+                })
+
+                Instances:Create("UIStroke", {
+                    Parent = Items["RainbowIndicator"].Instance,
+                    Name = "\0",
+                    Color = FromRGB(35, 35, 35),
+                    ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+                })
+
+                Items["RainbowText"] = Instances:Create("TextLabel", {
+                    Parent = Items["RainbowButton"].Instance,
+                    Name = "\0",
+                    FontFace = Library.Font,
+                    TextColor3 = FromRGB(221, 221, 221),
+                    Text = "Rainbow",
+                    AnchorPoint = Vector2New(0, 0.5),
+                    Position = UDim2New(0, 17, 0.5, -2),
+                    Size = UDim2New(0, 0, 0, 13),
+                    AutomaticSize = Enum.AutomaticSize.X,
+                    BackgroundTransparency = 1,
+                    BorderSizePixel = 0,
+                    TextXAlignment = Enum.TextXAlignment.Left,
+                    TextSize = 14,
+                    BackgroundColor3 = FromRGB(255, 255, 255)
+                })
             end
 
             function Colorpicker:Get()
                 return Colorpicker.Color, Colorpicker.Alpha
             end
 
-            function Colorpicker:Update(IsFromAlpha)
+            function Colorpicker:Update(IsFromAlpha, Instant)
                 local Hue, Saturation, Value = Colorpicker.Hue, Colorpicker.Saturation, Colorpicker.Value
                 Colorpicker.Color = FromHSV(Hue, Saturation, Value)
                 Colorpicker.HexValue = Colorpicker.Color:ToHex()
@@ -1244,14 +1303,24 @@ local Library do
                 Library.Flags[Colorpicker.Flag] = {
                     Alpha = Colorpicker.Alpha,
                     Color = Colorpicker.Color,
-                    HexValue = Colorpicker.HexValue
+                    HexValue = Colorpicker.HexValue,
+                    Rainbow = Colorpicker.Rainbow
                 }
 
-                Items["ColorpickerButton"]:Tween(nil, {BackgroundColor3 = Colorpicker.Color})
-                Items["Palette"]:Tween(nil, {BackgroundColor3 = FromHSV(Hue, 1, 1)})
+                if Instant then
+                    Items["ColorpickerButton"].Instance.BackgroundColor3 = Colorpicker.Color
+                    Items["Palette"].Instance.BackgroundColor3 = FromHSV(Hue, 1, 1)
 
-                if not IsFromAlpha then 
-                    Items["Alpha"]:Tween(nil, {BackgroundColor3 = Colorpicker.Color})
+                    if not IsFromAlpha then
+                        Items["Alpha"].Instance.BackgroundColor3 = Colorpicker.Color
+                    end
+                else
+                    Items["ColorpickerButton"]:Tween(nil, {BackgroundColor3 = Colorpicker.Color})
+                    Items["Palette"]:Tween(nil, {BackgroundColor3 = FromHSV(Hue, 1, 1)})
+
+                    if not IsFromAlpha then 
+                        Items["Alpha"]:Tween(nil, {BackgroundColor3 = Colorpicker.Color})
+                    end
                 end
 
                 if Data.Callback then 
@@ -1409,10 +1478,57 @@ local Library do
                 end)
             end
 
-            function Colorpicker:Set(Color, Alpha)
+            local RainbowEntry
+
+            function Colorpicker:SetRainbow(Bool)
+                Colorpicker.Rainbow = Bool
+
+                if Bool then
+                    Items["RainbowIndicator"]:ChangeItemTheme({BackgroundColor3 = "Accent"})
+                    Items["RainbowIndicator"]:Tween(nil, {BackgroundColor3 = Library.Theme.Accent})
+
+                    -- si el color es blanco/negro/gris no se veria nada, asi que lo saturo
+                    if Colorpicker.Saturation < 0.2 or Colorpicker.Value < 0.2 then
+                        Colorpicker.Saturation = 1
+                        Colorpicker.Value = 1
+                        Items["PaletteDragger"].Instance.Position = UDim2New(0, 0, 0, 0)
+                    end
+
+                    if not RainbowEntry then
+                        RainbowEntry = {
+                            Connection = RunService.RenderStepped:Connect(function()
+                                Colorpicker.Hue = (os.clock() * Library.RainbowSpeed) % 1
+                                Items["HueDragger"].Instance.Position = UDim2New(0, 0, MathClamp(Colorpicker.Hue, 0, 0.995), 0)
+                                Colorpicker:Update(false, true)
+                            end)
+                        }
+
+                        TableInsert(Library.Connections, RainbowEntry)
+                    end
+                else
+                    Items["RainbowIndicator"]:ChangeItemTheme({BackgroundColor3 = function()
+                        return FromRGB(20, 20, 20)
+                    end})
+                    Items["RainbowIndicator"]:Tween(nil, {BackgroundColor3 = FromRGB(20, 20, 20)})
+
+                    if RainbowEntry then
+                        RainbowEntry.Connection:Disconnect()
+
+                        local Index = TableFind(Library.Connections, RainbowEntry)
+                        if Index then
+                            TableRemove(Library.Connections, Index)
+                        end
+
+                        RainbowEntry = nil
+                        Colorpicker:Update()
+                    end
+                end
+            end
+
+            function Colorpicker:Set(Color, Alpha, Rainbow)
                 if type(Color) == "table" then
-                    Color = FromRGB(Color[1], Color[2], Color[3])
                     Alpha = Color[4]
+                    Color = FromRGB(Color[1], Color[2], Color[3])
                 elseif type(Color) == "string" then
                     Color = FromHex(Color)
                 end 
@@ -1431,6 +1547,7 @@ local Library do
                 Items["HueDragger"]:Tween(TweenInfo.new(0.35, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), {Position = UDim2New(0, 0, HuePositionY, 0)})
                 Items["AlphaDragger"]:Tween(TweenInfo.new(0.35, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), {Position = UDim2New(AlphaPositionX, 0, 0, 0)})
                 Colorpicker:Update()
+                Colorpicker:SetRainbow(Rainbow == true)
             end
 
             Items["Palette"]:Connect("InputBegan", function(Input)
@@ -1529,13 +1646,17 @@ local Library do
             Items["ColorpickerButton"]:Connect("MouseButton1Down", function()
                 Colorpicker:SetOpen(not Colorpicker.IsOpen)
             end)
+
+            Items["RainbowButton"]:Connect("MouseButton1Down", function()
+                Colorpicker:SetRainbow(not Colorpicker.Rainbow)
+            end)
             
             if Data.Default then
                 Colorpicker:Set(Data.Default, Data.Alpha)
             end
 
-            Library.SetFlags[Colorpicker.Flag] = function(Value, Alpha)
-                Colorpicker:Set(Value, Alpha)
+            Library.SetFlags[Colorpicker.Flag] = function(Value, Alpha, Rainbow)
+                Colorpicker:Set(Value, Alpha, Rainbow)
             end
 
             return Colorpicker, Items 
@@ -3046,13 +3167,32 @@ local Library do
                     ScaleType = Enum.ScaleType.Fit,
                     BorderColor3 = FromRGB(0, 0, 0),
                     Image = Page.Icon,
-                    AnchorPoint = Vector2New(0.5, 0.5),
-                    Size = UDim2New(0, 28, 0, 28),
+                    AnchorPoint = Vector2New(0, 0.5),
+                    Size = UDim2New(0, 20, 0, 20),
                     BackgroundTransparency = 1,
-                    Position = UDim2New(0.5, 0, 0.5, 0),
+                    Position = UDim2New(0, 16, 0.5, 0),
                     BorderSizePixel = 0,
                     BackgroundColor3 = FromRGB(255, 255, 255)
                 })  Items["Icon"]:AddToTheme({ImageColor3 = function()
+                    return FromRGB(74, 74, 74)
+                end})
+
+                Items["Text"] = Instances:Create("TextLabel", {
+                    Parent = Items["Inactive"].Instance,
+                    Name = "\0",
+                    FontFace = Library.Font,
+                    TextColor3 = FromRGB(74, 74, 74),
+                    Text = Page.Name,
+                    AnchorPoint = Vector2New(0, 0.5),
+                    Position = UDim2New(0, 44, 0.5, -2),
+                    Size = UDim2New(0, 0, 0, 15),
+                    AutomaticSize = Enum.AutomaticSize.X,
+                    BackgroundTransparency = 1,
+                    BorderSizePixel = 0,
+                    TextXAlignment = Enum.TextXAlignment.Left,
+                    TextSize = 14,
+                    BackgroundColor3 = FromRGB(255, 255, 255)
+                })  Items["Text"]:AddToTheme({TextColor3 = function()
                     return FromRGB(74, 74, 74)
                 end})
                 
@@ -3131,6 +3271,8 @@ local Library do
                 if Page.Active then
                     Items["Icon"]:ChangeItemTheme({ImageColor3 = "Accent"})
                     Items["Icon"]:Tween(nil, {ImageColor3 = Library.Theme.Accent})
+                    Items["Text"]:ChangeItemTheme({TextColor3 = "Accent"})
+                    Items["Text"]:Tween(nil, {TextColor3 = Library.Theme.Accent})
                     Items["Accent1"]:Tween(TweenInfo.new(0.4, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {BackgroundTransparency = 0, Size = UDim2New(0, 1, 1, 0)})
                     Items["Accent2"]:Tween(TweenInfo.new(0.4, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {BackgroundTransparency = 0, Size = UDim2New(0, 1, 1, 0)})
                     Items["Background"]:Tween(nil, {BackgroundTransparency = 0})
@@ -3139,6 +3281,10 @@ local Library do
                         return FromRGB(74, 74, 74)
                     end})
                     Items["Icon"]:Tween(nil, {ImageColor3 = FromRGB(74, 74, 74)})
+                    Items["Text"]:ChangeItemTheme({TextColor3 = function()
+                        return FromRGB(74, 74, 74)
+                    end})
+                    Items["Text"]:Tween(nil, {TextColor3 = FromRGB(74, 74, 74)})
                     Items["Accent1"]:Tween(TweenInfo.new(0.4, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {BackgroundTransparency = 1, Size = UDim2New(0, 1, 0, 0)})
                     Items["Accent2"]:Tween(TweenInfo.new(0.4, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {BackgroundTransparency = 1, Size = UDim2New(0, 1, 0, 0)})
                     Items["Background"]:Tween(nil, {BackgroundTransparency = 1})
@@ -3318,12 +3464,22 @@ local Library do
                     AnchorPoint = Vector2New(0, 0.5),
                     Size = UDim2New(0, 0, 0, 15),
                     BackgroundTransparency = 1,
-                    Position = UDim2New(0, 6, 0.5, -2),
+                    Position = UDim2New(0, 14, 0.5, -2),
                     BorderSizePixel = 0,
                     AutomaticSize = Enum.AutomaticSize.X,
                     TextSize = 14,
                     BackgroundColor3 = FromRGB(255, 255, 255)
                 })
+                
+                Items["TitleAccent"] = Instances:Create("Frame", {
+                    Parent = Items["Top"].Instance,
+                    Name = "\0",
+                    AnchorPoint = Vector2New(0, 0.5),
+                    Position = UDim2New(0, 6, 0.5, -1),
+                    Size = UDim2New(0, 2, 0, 9),
+                    BorderSizePixel = 0,
+                    BackgroundColor3 = FromRGB(166, 147, 243)
+                })  Items["TitleAccent"]:AddToTheme({BackgroundColor3 = "Accent"})
                 
                 Instances:Create("UICorner", {
                     Parent = Items["Background"].Instance,
@@ -3531,6 +3687,12 @@ local Library do
                     Color = RGBSequence{RGBSequenceKeypoint(0, FromRGB(255, 255, 255)), RGBSequenceKeypoint(1, FromRGB(195, 195, 195))}
                 })
                 
+                Instances:Create("UICorner", {
+                    Parent = Items["Indicator"].Instance,
+                    Name = "\0",
+                    CornerRadius = UDimNew(0, 2)
+                })
+
                 Items["Text"] = Instances:Create("TextLabel", {
                     Parent = Items["Toggle"].Instance,
                     Name = "\0",
@@ -3923,7 +4085,7 @@ local Library do
                 Slider.Value = Library:Round(MathClamp(Value, Slider.Min, Slider.Max), Slider.Decimals)
                 Library.Flags[Slider.Flag] = Slider.Value
 
-                Items["Accent"]:Tween(TweenInfo.new(Library.Tween.Time, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), {Size = UDim2New((Slider.Value - Slider.Min) / (Slider.Max - Slider.Min), 0, 1, 0)})
+                Items["Accent"]:Tween(TweenInfo.new(0.1, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), {Size = UDim2New((Slider.Value - Slider.Min) / (Slider.Max - Slider.Min), 0, 1, 0)})
                 Items["Value"].Instance.Text = StringFormat("%s%s", Slider.Value, Slider.Suffix)
 
                 if Slider.Callback then 
@@ -5176,6 +5338,18 @@ local Library do
                     Decimals = 0.01,
                     Callback = function(Value)
                         Library.FadeSpeed = Value
+                    end
+                })
+
+                MenuSection:Slider({
+                    Name = "Rainbow speed",
+                    Flag = "Rainbow speed",
+                    Default = Library.RainbowSpeed,
+                    Min = 0.05,
+                    Max = 1,
+                    Decimals = 0.01,
+                    Callback = function(Value)
+                        Library.RainbowSpeed = Value
                     end
                 })
 
