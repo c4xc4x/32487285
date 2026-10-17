@@ -842,6 +842,9 @@ local Library do
             Id = "SmallestPixel",
             Url = "https://github.com/sametexe001/luas/raw/refs/heads/main/fonts/smallest_pixel-7.ttf"
         })
+
+        -- Todo el UI usa SmallestPixel (Library.Font apunta a la misma fuente)
+        Library.Font = Library.SubFont
     end
 
     Library.Holder = Instances:Create("ScreenGui", {
@@ -1162,7 +1165,7 @@ local Library do
                 Items["ColorpickerButton"] = Instances:Create("TextButton", {
                     Parent = Data.Parent.Instance,
                     Name = "\0",
-                    FontFace = Library.Font,
+                    FontFace = Library.SubFont,
                     TextColor3 = FromRGB(0, 0, 0),
                     BorderColor3 = FromRGB(0, 0, 0),
                     Text = "",
@@ -1206,7 +1209,7 @@ local Library do
                 Items["Alpha"] = Instances:Create("TextButton", {
                     Parent = Items["ColorpickerWindow"].Instance,
                     Name = "\0",
-                    FontFace = Library.Font,
+                    FontFace = Library.SubFont,
                     TextColor3 = FromRGB(0, 0, 0),
                     BorderColor3 = FromRGB(0, 0, 0),
                     Text = "",
@@ -1271,7 +1274,7 @@ local Library do
                 Items["Palette"] = Instances:Create("TextButton", {
                     Parent = Items["ColorpickerWindow"].Instance,
                     Name = "\0",
-                    FontFace = Library.Font,
+                    FontFace = Library.SubFont,
                     TextColor3 = FromRGB(0, 0, 0),
                     BorderColor3 = FromRGB(0, 0, 0),
                     Text = "",
@@ -1352,7 +1355,7 @@ local Library do
                 Items["Hue"] = Instances:Create("TextButton", {
                     Parent = Items["ColorpickerWindow"].Instance,
                     Name = "\0",
-                    FontFace = Library.Font,
+                    FontFace = Library.SubFont,
                     TextColor3 = FromRGB(0, 0, 0),
                     BorderColor3 = FromRGB(0, 0, 0),
                     Text = "",
@@ -1374,7 +1377,7 @@ local Library do
                 Items["HueInline"] = Instances:Create("TextButton", {
                     Parent = Items["Hue"].Instance,
                     Name = "\0",
-                    FontFace = Library.Font,
+                    FontFace = Library.SubFont,
                     TextColor3 = FromRGB(0, 0, 0),
                     BorderColor3 = FromRGB(0, 0, 0),
                     Text = "",
@@ -1455,7 +1458,7 @@ local Library do
                 Items["RainbowText"] = Instances:Create("TextLabel", {
                     Parent = Items["RainbowButton"].Instance,
                     Name = "\0",
-                    FontFace = Library.Font,
+                    FontFace = Library.SubFont,
                     TextColor3 = FromRGB(221, 221, 221),
                     Text = "Rainbow",
                     AnchorPoint = Vector2New(0, 0.5),
@@ -1933,7 +1936,7 @@ local Library do
                 ModeItems[Name] = Instances:Create("TextButton", {
                     Parent = Items["KeybindWindow"].Instance,
                     Name = "\0",
-                    FontFace = Library.Font,
+                    FontFace = Library.SubFont,
                     TextColor3 = FromRGB(0, 0, 0),
                     BorderColor3 = FromRGB(0, 0, 0),
                     Text = "",
@@ -1973,7 +1976,7 @@ local Library do
                 ModeItems["Text"] = Instances:Create("TextLabel", {
                     Parent = ModeItems[Name].Instance,
                     Name = "\0",
-                    FontFace = Library.Font,
+                    FontFace = Library.SubFont,
                     TextColor3 = FromRGB(166, 147, 243),
                     BorderColor3 = FromRGB(0, 0, 0),
                     Text = Name,
@@ -2395,7 +2398,7 @@ local Library do
                 Items["Text"] = Instances:Create("TextLabel", {
                     Parent = Items["Notification"].Instance,
                     Name = "\0",
-                    FontFace = Library.Font,
+                    FontFace = Library.SubFont,
                     Position = UDim2New(0, 0, 0, -4),
                     TextColor3 = FromRGB(221, 221, 221),
                     BorderColor3 = FromRGB(0, 0, 0),
@@ -3788,7 +3791,7 @@ local Library do
                 Items["BuildText"] = Instances:Create("TextLabel", {
                     Parent = Items["Bottom"].Instance,
                     Name = "\0",
-                    FontFace = Library.Font,
+                    FontFace = Library.SubFont,
                     RichText = true,
                     TextColor3 = FromRGB(74, 74, 74),
                     BorderColor3 = FromRGB(0, 0, 0),
@@ -4046,7 +4049,7 @@ local Library do
                 Items["Inactive"] = Instances:Create("TextButton", {
                     Parent = Page.Window.Items["SubPages"].Instance,
                     Name = "\0",
-                    FontFace = Library.Font,
+                    FontFace = Library.SubFont,
                     TextColor3 = FromRGB(0, 0, 0),
                     BorderColor3 = FromRGB(0, 0, 0),
                     Text = "",
@@ -4165,7 +4168,7 @@ local Library do
                 Items["Inactive"] = Instances:Create("TextButton", {
                     Parent = Page.Page.Items["SubPages"].Instance,
                     Name = "\0",
-                    FontFace = Library.Font,
+                    FontFace = Library.SubFont,
                     TextColor3 = FromRGB(0, 0, 0),
                     BorderColor3 = FromRGB(0, 0, 0),
                     Text = "",
@@ -4445,7 +4448,7 @@ local Library do
                 Items["Text"] = Instances:Create("TextLabel", {
                     Parent = Items["Top"].Instance,
                     Name = "\0",
-                    FontFace = Library.Font,
+                    FontFace = Library.SubFont,
                     TextColor3 = FromRGB(119, 119, 119),
                     BorderColor3 = FromRGB(0, 0, 0),
                     Text = Section.Name,
@@ -4684,7 +4687,7 @@ local Library do
                 Items["Text"] = Instances:Create("TextLabel", {
                     Parent = Items["Toggle"].Instance,
                     Name = "\0",
-                    FontFace = Library.Font,
+                    FontFace = Library.SubFont,
                     TextColor3 = FromRGB(221, 221, 221),
                     BorderColor3 = FromRGB(0, 0, 0),
                     Text = Toggle.Name,
@@ -4887,7 +4890,7 @@ local Library do
                 Items["Value"] = Instances:Create("TextLabel", {
                     Parent = Items["Indicator"].Instance,
                     Name = "\0",
-                    FontFace = Library.Font,
+                    FontFace = Library.SubFont,
                     TextColor3 = FromRGB(221, 221, 221),
                     BorderColor3 = FromRGB(0, 0, 0),
                     Text = Button.Name,
@@ -5024,7 +5027,7 @@ local Library do
                 Items["Text"] = Instances:Create("TextLabel", {
                     Parent = Items["Slider"].Instance,
                     Name = "\0",
-                    FontFace = Library.Font,
+                    FontFace = Library.SubFont,
                     TextColor3 = FromRGB(221, 221, 221),
                     BorderColor3 = FromRGB(0, 0, 0),
                     Text = Slider.Name,
@@ -5041,7 +5044,7 @@ local Library do
                 Items["Value"] = Instances:Create("TextLabel", {
                     Parent = Items["Slider"].Instance,
                     Name = "\0",
-                    FontFace = Library.Font,
+                    FontFace = Library.SubFont,
                     TextColor3 = FromRGB(221, 221, 221),
                     BorderColor3 = FromRGB(0, 0, 0),
                     Text = "",
@@ -5218,7 +5221,7 @@ local Library do
                 Items["Value"] = Instances:Create("TextLabel", {
                     Parent = Items["Indicator"].Instance,
                     Name = "\0",
-                    FontFace = Library.Font,
+                    FontFace = Library.SubFont,
                     TextColor3 = FromRGB(74, 74, 74),
                     BorderColor3 = FromRGB(0, 0, 0),
                     Text = "--",
@@ -5236,7 +5239,7 @@ local Library do
                 Items["Text"] = Instances:Create("TextLabel", {
                     Parent = Items["Dropdown"].Instance,
                     Name = "\0",
-                    FontFace = Library.Font,
+                    FontFace = Library.SubFont,
                     TextColor3 = FromRGB(221, 221, 221),
                     BorderColor3 = FromRGB(0, 0, 0),
                     Text = Dropdown.Name,
@@ -5367,7 +5370,7 @@ local Library do
                         Name = "\0",
                         Text = "",
                         AutoButtonColor = false,
-                        FontFace = Library.Font,
+                        FontFace = Library.SubFont,
                         TextColor3 = FromRGB(0, 0, 0),
                         TextTransparency = 1,
                         Size = UDim2New(1, 0, 0, 25),
@@ -5408,7 +5411,7 @@ local Library do
                     OptionItems["Text"] = Instances:Create("TextLabel", {
                         Parent = OptionItems["Disabled"].Instance,
                         Name = "\0",
-                        FontFace = Library.Font,
+                        FontFace = Library.SubFont,
                         TextColor3 = FromRGB(74, 74, 74),
                         BorderColor3 = FromRGB(0, 0, 0),
                         Text = Option,
@@ -5686,7 +5689,7 @@ local Library do
                 Items["Text"] = Instances:Create("TextLabel", {
                     Parent = Items["Label"].Instance,
                     Name = "\0",
-                    FontFace = Library.Font,
+                    FontFace = Library.SubFont,
                     TextColor3 = FromRGB(74, 74, 74),
                     BorderColor3 = FromRGB(0, 0, 0),
                     Text = Label.Name,
@@ -5821,7 +5824,7 @@ local Library do
                 Items["Input"] = Instances:Create("TextBox", {
                     Parent = Items["Textbox"].Instance,
                     Name = "\0",
-                    FontFace = Library.Font,
+                    FontFace = Library.SubFont,
                     TextColor3 = FromRGB(221, 221, 221),
                     BorderColor3 = FromRGB(0, 0, 0),
                     Text = "",
@@ -5924,7 +5927,7 @@ local Library do
                 Items["Text"] = Instances:Create("TextLabel", {
                     Parent = Items["List"].Instance,
                     Name = "\0",
-                    FontFace = Library.Font,
+                    FontFace = Library.SubFont,
                     TextColor3 = FromRGB(221, 221, 221),
                     BorderColor3 = FromRGB(0, 0, 0),
                     Text = Dropdown.Name,
@@ -5961,7 +5964,7 @@ local Library do
                 Items["Input"] = Instances:Create("TextBox", {
                     Parent = Items["Search"].Instance,
                     Name = "\0",
-                    FontFace = Library.Font,
+                    FontFace = Library.SubFont,
                     TextColor3 = FromRGB(221, 221, 221),
                     BorderColor3 = FromRGB(0, 0, 0),
                     Text = "",
@@ -6028,7 +6031,7 @@ local Library do
                         Name = "\0",
                         Text = "",
                         AutoButtonColor = false,
-                        FontFace = Library.Font,
+                        FontFace = Library.SubFont,
                         TextColor3 = FromRGB(0, 0, 0),
                         TextTransparency = 1,
                         Size = UDim2New(1, 0, 0, 25),
@@ -6069,7 +6072,7 @@ local Library do
                     OptionItems["Text"] = Instances:Create("TextLabel", {
                         Parent = OptionItems["Disabled"].Instance,
                         Name = "\0",
-                        FontFace = Library.Font,
+                        FontFace = Library.SubFont,
                         TextColor3 = FromRGB(74, 74, 74),
                         BorderColor3 = FromRGB(0, 0, 0),
                         Text = Option,
