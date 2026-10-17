@@ -6468,5 +6468,10 @@ local Library do
     end
 end
 
+-- Ammo se crea solo al cargar la libreria (asi aparece el panel y el toggle en Menu)
+if not Library.AmmoObj then
+    Library:AmmoIndicator()
+end
+
 getgenv().Library = Library
 return Library
