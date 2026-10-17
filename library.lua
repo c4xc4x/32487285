@@ -810,40 +810,38 @@ local Library do
         end
     end
 
-    -- Custom font
+    -- Custom font (SmallestPixel en toda la UI)
     local CustomFont = { } do
         function CustomFont:New(Name, Weight, Style, Data)
-            if not isfile(Data.Id) then 
-                writefile(Data.Id, game:HttpGet(Data.Url))
+            local TtfPath = `{Library.Folders.Fonts}/{Data.Id}.ttf`
+            local FontPath = `{Library.Folders.Fonts}/{Data.Id}.font`
+
+            -- solo descarga si el archivo no existe o esta vacio
+            if not isfile(TtfPath) or #readfile(TtfPath) < 1000 then
+                writefile(TtfPath, game:HttpGet(Data.Url))
             end
 
-            local Data = {
+            local FontData = {
                 name = Name,
                 faces = {
                     {
                         name = Name,
                         weight = Weight,
                         style = Style,
-                        assetId = getcustomasset(Data.Id)
+                        assetId = getcustomasset(TtfPath)
                     }
                 }
             }
 
-            writefile(`{Library.Folders.Fonts}/{Name}.font`, HttpService:JSONEncode(Data))
-            return Font.new(getcustomasset(`{Library.Folders.Fonts}/{Name}.font`))
+            writefile(FontPath, HttpService:JSONEncode(FontData))
+            return Font.new(getcustomasset(FontPath))
         end
 
-        Library.Font = CustomFont:New("ProggyClean", 400, "Regular", {
-            Id = "ProggyClean",
-            Url = "https://github.com/i77lhm/storage/raw/refs/heads/main/fonts/ProggyClean.ttf"
-        })
-
         Library.SubFont = CustomFont:New("SmallestPixel", 400, "Regular", {
-            Id = "SmallestPixel",
+            Id = "SmallestPixel_v2",
             Url = "https://github.com/sametexe001/luas/raw/refs/heads/main/fonts/smallest_pixel-7.ttf"
         })
 
-        -- Todo el UI usa SmallestPixel (Library.Font apunta a la misma fuente)
         Library.Font = Library.SubFont
     end
 
@@ -1196,7 +1194,7 @@ local Library do
                 Instances:Create("UICorner", {
                     Parent = Items["ColorpickerWindow"].Instance,
                     Name = "\0",
-                    CornerRadius = UDimNew(0, 4)
+                    CornerRadius = UDimNew(0, 0)
                 })
                 
                 Instances:Create("UIStroke", {
@@ -1225,7 +1223,7 @@ local Library do
                 Instances:Create("UICorner", {
                     Parent = Items["Alpha"].Instance,
                     Name = "\0",
-                    CornerRadius = UDimNew(0, 3)
+                    CornerRadius = UDimNew(0, 0)
                 })
                 
                 Items["Checkers"] = Instances:Create("ImageLabel", {
@@ -1251,7 +1249,7 @@ local Library do
                 Instances:Create("UICorner", {
                     Parent = Items["Checkers"].Instance,
                     Name = "\0",
-                    CornerRadius = UDimNew(0, 3)
+                    CornerRadius = UDimNew(0, 0)
                 })
                 
                 Items["AlphaDragger"] = Instances:Create("Frame", {
@@ -1304,7 +1302,7 @@ local Library do
                 Instances:Create("UICorner", {
                     Parent = Items["Saturation"].Instance,
                     Name = "\0",
-                    CornerRadius = UDimNew(0, 4)
+                    CornerRadius = UDimNew(0, 0)
                 })
                 
                 Items["Value"] = Instances:Create("Frame", {
@@ -1326,13 +1324,13 @@ local Library do
                 Instances:Create("UICorner", {
                     Parent = Items["Value"].Instance,
                     Name = "\0",
-                    CornerRadius = UDimNew(0, 4)
+                    CornerRadius = UDimNew(0, 0)
                 })
                 
                 Instances:Create("UICorner", {
                     Parent = Items["Palette"].Instance,
                     Name = "\0",
-                    CornerRadius = UDimNew(0, 4)
+                    CornerRadius = UDimNew(0, 0)
                 })
                 
                 Items["PaletteDragger"] = Instances:Create("Frame", {
@@ -1371,7 +1369,7 @@ local Library do
                 Instances:Create("UICorner", {
                     Parent = Items["Hue"].Instance,
                     Name = "\0",
-                    CornerRadius = UDimNew(0, 4)
+                    CornerRadius = UDimNew(0, 0)
                 })
                 
                 Items["HueInline"] = Instances:Create("TextButton", {
@@ -1391,7 +1389,7 @@ local Library do
                 Instances:Create("UICorner", {
                     Parent = Items["HueInline"].Instance,
                     Name = "\0",
-                    CornerRadius = UDimNew(0, 4)
+                    CornerRadius = UDimNew(0, 0)
                 })
                 
                 Instances:Create("UIGradient", {
@@ -1445,7 +1443,7 @@ local Library do
                 Instances:Create("UICorner", {
                     Parent = Items["RainbowIndicator"].Instance,
                     Name = "\0",
-                    CornerRadius = UDimNew(0, 2)
+                    CornerRadius = UDimNew(0, 0)
                 })
 
                 Instances:Create("UIStroke", {
@@ -2347,7 +2345,7 @@ local Library do
                 Instances:Create("UICorner", {
                     Parent = Items["Notification"].Instance,
                     Name = "\0",
-                    CornerRadius = UDimNew(0, 2)
+                    CornerRadius = UDimNew(0, 0)
                 })
                 
                 Instances:Create("UIStroke", {
@@ -2494,7 +2492,7 @@ local Library do
                 Instances:Create("UICorner", {
                     Parent = Items["KeybindsList"].Instance,
                     Name = "\0",
-                    CornerRadius = UDimNew(0, 4)
+                    CornerRadius = UDimNew(0, 0)
                 })
                 
                 Instances:Create("UIStroke", {
@@ -2697,7 +2695,7 @@ local Library do
                 Instances:Create("UICorner", {
                     Parent = Items["Panel"].Instance,
                     Name = "\0",
-                    CornerRadius = UDimNew(0, 4)
+                    CornerRadius = UDimNew(0, 0)
                 })
 
                 Instances:Create("UIStroke", {
@@ -2849,7 +2847,7 @@ local Library do
                 Instances:Create("UICorner", {
                     Parent = Items["Avatar"].Instance,
                     Name = "\0",
-                    CornerRadius = UDimNew(0, 3)
+                    CornerRadius = UDimNew(0, 0)
                 })
 
                 Instances:Create("UIStroke", {
@@ -3055,7 +3053,7 @@ local Library do
                     Instances:Create("UICorner", {
                         Parent = Slot.Instance,
                         Name = "\0",
-                        CornerRadius = UDimNew(0, 3)
+                        CornerRadius = UDimNew(0, 0)
                     })
 
                     Instances:Create("UIStroke", {
@@ -3141,7 +3139,7 @@ local Library do
                 Instances:Create("UICorner", {
                     Parent = Items["Icon"].Instance,
                     Name = "\0",
-                    CornerRadius = UDimNew(0, 3)
+                    CornerRadius = UDimNew(0, 0)
                 })
 
                 Instances:Create("UIStroke", {
@@ -3532,7 +3530,7 @@ local Library do
                 Instances:Create("UICorner", {
                     Parent = Items["Watermark"].Instance,
                     Name = "\0",
-                    CornerRadius = UDimNew(0, 4)
+                    CornerRadius = UDimNew(0, 0)
                 })
                 
                 Instances:Create("UIStroke", {
@@ -3732,7 +3730,7 @@ local Library do
                 Instances:Create("UICorner", {
                     Parent = Items["MainFrame"].Instance,
                     Name = "\0",
-                    CornerRadius = UDimNew(0, 4)
+                    CornerRadius = UDimNew(0, 0)
                 })
                 
                 Items["Bottom"] = Instances:Create("Frame", {
@@ -3749,7 +3747,7 @@ local Library do
                 Instances:Create("UICorner", {
                     Parent = Items["Bottom"].Instance,
                     Name = "\0",
-                    CornerRadius = UDimNew(0, 4)
+                    CornerRadius = UDimNew(0, 0)
                 })
                 
                 Instances:Create("Frame", {
@@ -3825,7 +3823,7 @@ local Library do
                 Instances:Create("UICorner", {
                     Parent = Items["Top"].Instance,
                     Name = "\0",
-                    CornerRadius = UDimNew(0, 4)
+                    CornerRadius = UDimNew(0, 0)
                 })
                 
                 Instances:Create("Frame", {
@@ -4425,7 +4423,7 @@ local Library do
                 Instances:Create("UICorner", {
                     Parent = Items["Top"].Instance,
                     Name = "\0",
-                    CornerRadius = UDimNew(0, 4)
+                    CornerRadius = UDimNew(0, 0)
                 })
                 
                 Items["Shadow"] = Instances:Create("Frame", {
@@ -4475,7 +4473,7 @@ local Library do
                 Instances:Create("UICorner", {
                     Parent = Items["Background"].Instance,
                     Name = "\0",
-                    CornerRadius = UDimNew(0, 4)
+                    CornerRadius = UDimNew(0, 0)
                 })
                 
                 Items["ShadowBottom"] = Instances:Create("Frame", {
@@ -4611,7 +4609,7 @@ local Library do
                 Instances:Create("UICorner", {
                     Parent = Items["Outline"].Instance,
                     Name = "\0",
-                    CornerRadius = UDimNew(0, 4)
+                    CornerRadius = UDimNew(0, 0)
                 })
 
                 Section.Items = Items
@@ -4681,7 +4679,7 @@ local Library do
                 Instances:Create("UICorner", {
                     Parent = Items["Indicator"].Instance,
                     Name = "\0",
-                    CornerRadius = UDimNew(0, 2)
+                    CornerRadius = UDimNew(0, 0)
                 })
 
                 Items["Text"] = Instances:Create("TextLabel", {
@@ -4907,19 +4905,19 @@ local Library do
                 Instances:Create("UICorner", {
                     Parent = Items["Indicator"].Instance,
                     Name = "\0",
-                    CornerRadius = UDimNew(0, 3)
+                    CornerRadius = UDimNew(0, 0)
                 })
                 
                 Instances:Create("UICorner", {
                     Parent = Items["Inline"].Instance,
                     Name = "\0",
-                    CornerRadius = UDimNew(0, 3)
+                    CornerRadius = UDimNew(0, 0)
                 })
                 
                 Instances:Create("UICorner", {
                     Parent = Items["Outline"].Instance,
                     Name = "\0",
-                    CornerRadius = UDimNew(0, 3)
+                    CornerRadius = UDimNew(0, 0)
                 })                
 
                 Items["ButtonHolder"]:OnHover(function()
@@ -6474,6 +6472,38 @@ end
 -- Ammo se crea solo al cargar la libreria (asi aparece el panel y el toggle en Menu)
 if not Library.AmmoObj then
     Library:AmmoIndicator()
+end
+
+-- UI completa (se construye al cargar). Para usar solo la libreria: getgenv().PandoraNoExample = true
+if not getgenv().PandoraNoExample then
+    local function Try(Name, Fn, ...)
+        local Ok, Result = pcall(Fn, ...)
+        if not Ok then
+            warn(`[Pandora] {Name} fallo: {Result}`)
+            return nil
+        end
+        return Result
+    end
+
+    local KeybindList = Try("KeybindList", Library.KeybindList, Library)
+    local Watermark = Try("Watermark", Library.Watermark, Library, "Pandora")
+
+    Try("PlayerIndicator", Library.PlayerIndicator, Library)
+    Try("Hotbar", Library.Hotbar, Library)
+
+    local Window = Try("Window", Library.Window, Library, {Build = "live"})
+
+    if Window then
+        Try("MainPage", function()
+            local Page = Window:Page({Name = "Main"})
+            local SubPage = Page:SubPage({Name = "General"})
+            local Section = SubPage:Section({Name = "Example"})
+            Section:Toggle({Name = "Example toggle", Flag = "ExampleToggle", Default = false, Callback = function(Value) end})
+            Section:Button({Name = "Example button", Callback = function() Library:Alert("targetted", "Pandora cargado") end})
+        end)
+
+        Try("SettingsPage", Library.CreateSettingsPage, Library, Window, KeybindList, Watermark)
+    end
 end
 
 getgenv().Library = Library
