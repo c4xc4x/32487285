@@ -451,6 +451,10 @@ local Library do
                 if Input.UserInputType == Enum.UserInputType.MouseButton1 or Input.UserInputType == Enum.UserInputType.Touch then
                     Dragging = true
                     DragStart = Input.Position
+
+                    local Absolute = Gui.AbsolutePosition
+                    Gui.AnchorPoint = Vector2New(0, 0)
+                    Gui.Position = UDim2New(0, Absolute.X, 0, Absolute.Y)
                     StartPosition = Gui.Position
         
                     if InputChanged then 
@@ -2432,6 +2436,8 @@ local Library do
                 })                
             end
 
+            Items["KeybindsList"]:MakeDraggable()
+
             function KeybindList:SetVisibility(Bool)
                 Items["KeybindsList"].Instance.Visible = Bool
             end
@@ -2489,6 +2495,436 @@ local Library do
             end
 
             return KeybindList
+        end
+
+        -- Panel base con el mismo estilo que el Keybind List (header + liner + contenido)
+        Library.CreatePanel = function(self, Title, Width, Position, AnchorPoint)
+            local Items = { } do
+                Items["Panel"] = Instances:Create("Frame", {
+                    Parent = Library.Holder.Instance,
+                    Name = "\0",
+                    Size = UDim2New(0, Width, 0, 0),
+                    Position = Position,
+                    AnchorPoint = AnchorPoint or Vector2New(0, 0),
+                    BorderColor3 = FromRGB(0, 0, 0),
+                    BorderSizePixel = 0,
+                    AutomaticSize = Enum.AutomaticSize.Y,
+                    BackgroundColor3 = FromRGB(26, 26, 26)
+                })
+
+                Instances:Create("UICorner", {
+                    Parent = Items["Panel"].Instance,
+                    Name = "\0",
+                    CornerRadius = UDimNew(0, 4)
+                })
+
+                Instances:Create("UIStroke", {
+                    Parent = Items["Panel"].Instance,
+                    Name = "\0",
+                    Color = FromRGB(35, 35, 35),
+                    ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+                })
+
+                Items["Top"] = Instances:Create("Frame", {
+                    Parent = Items["Panel"].Instance,
+                    Name = "\0",
+                    BorderColor3 = FromRGB(0, 0, 0),
+                    Size = UDim2New(1, 0, 0, 25),
+                    BorderSizePixel = 0,
+                    BackgroundColor3 = FromRGB(26, 26, 26)
+                })
+
+                Items["Liner"] = Instances:Create("Frame", {
+                    Parent = Items["Top"].Instance,
+                    Name = "\0",
+                    AnchorPoint = Vector2New(0, 1),
+                    Position = UDim2New(0, 0, 1, -1),
+                    BorderColor3 = FromRGB(0, 0, 0),
+                    Size = UDim2New(1, 0, 0, 1),
+                    BorderSizePixel = 0,
+                    BackgroundColor3 = FromRGB(166, 147, 243)
+                })  Items["Liner"]:AddToTheme({BackgroundColor3 = "Accent"})
+
+                Instances:Create("UIGradient", {
+                    Parent = Items["Liner"].Instance,
+                    Name = "\0",
+                    Transparency = NumSequence{NumSequenceKeypoint(0, 0.8812500238418579), NumSequenceKeypoint(0.027, 0.8812500238418579), NumSequenceKeypoint(0.057, 0.887499988079071), NumSequenceKeypoint(1, 0)}
+                })
+
+                Items["Liner2"] = Instances:Create("Frame", {
+                    Parent = Items["Top"].Instance,
+                    Name = "\0",
+                    AnchorPoint = Vector2New(0, 1),
+                    Position = UDim2New(0, 0, 1, 0),
+                    BorderColor3 = FromRGB(0, 0, 0),
+                    Size = UDim2New(1, 0, 0, 1),
+                    BorderSizePixel = 0,
+                    BackgroundColor3 = FromRGB(110, 97, 161)
+                })  Items["Liner2"]:AddToTheme({BackgroundColor3 = "Dark Accent"})
+
+                Instances:Create("UIGradient", {
+                    Parent = Items["Liner2"].Instance,
+                    Name = "\0",
+                    Transparency = NumSequence{NumSequenceKeypoint(0, 0.8812500238418579), NumSequenceKeypoint(0.027, 0.8812500238418579), NumSequenceKeypoint(0.057, 0.887499988079071), NumSequenceKeypoint(1, 0)}
+                })
+
+                Items["Shadow"] = Instances:Create("Frame", {
+                    Parent = Items["Top"].Instance,
+                    Name = "\0",
+                    Position = UDim2New(0, 0, 1, -1),
+                    BorderColor3 = FromRGB(0, 0, 0),
+                    Size = UDim2New(1, 0, 0, 15),
+                    BorderSizePixel = 0,
+                    BackgroundColor3 = FromRGB(0, 0, 0)
+                })
+
+                Instances:Create("UIGradient", {
+                    Parent = Items["Shadow"].Instance,
+                    Name = "\0",
+                    Rotation = 90,
+                    Transparency = NumSequence{NumSequenceKeypoint(0, 1), NumSequenceKeypoint(0.025, 0.800000011920929), NumSequenceKeypoint(0.106, 0.7250000238418579), NumSequenceKeypoint(0.22, 0.8500000238418579), NumSequenceKeypoint(1, 1)}
+                })
+
+                Instances:Create("UIGradient", {
+                    Parent = Items["Top"].Instance,
+                    Name = "\0",
+                    Rotation = 90,
+                    Color = RGBSequence{RGBSequenceKeypoint(0, FromRGB(255, 255, 255)), RGBSequenceKeypoint(1, FromRGB(180, 180, 180))}
+                })
+
+                Items["Text"] = Instances:Create("TextLabel", {
+                    Parent = Items["Top"].Instance,
+                    Name = "\0",
+                    FontFace = Library.SubFont,
+                    TextColor3 = FromRGB(221, 221, 221),
+                    BorderColor3 = FromRGB(0, 0, 0),
+                    Text = Title,
+                    AnchorPoint = Vector2New(0, 0.5),
+                    BackgroundTransparency = 1,
+                    Position = UDim2New(0, 0, 0.5, -2),
+                    Size = UDim2New(1, 0, 1, 0),
+                    BorderSizePixel = 0,
+                    TextSize = 14,
+                    BackgroundColor3 = FromRGB(255, 255, 255)
+                })
+
+                Items["Content"] = Instances:Create("Frame", {
+                    Parent = Items["Panel"].Instance,
+                    Name = "\0",
+                    BorderColor3 = FromRGB(0, 0, 0),
+                    BackgroundTransparency = 1,
+                    Position = UDim2New(0, 0, 0, 25),
+                    Size = UDim2New(1, 0, 0, 0),
+                    BorderSizePixel = 0,
+                    AutomaticSize = Enum.AutomaticSize.Y,
+                    BackgroundColor3 = FromRGB(255, 255, 255)
+                })
+
+                Instances:Create("UIPadding", {
+                    Parent = Items["Content"].Instance,
+                    Name = "\0",
+                    PaddingBottom = UDimNew(0, 8),
+                    PaddingTop = UDimNew(0, 6),
+                    PaddingLeft = UDimNew(0, 8),
+                    PaddingRight = UDimNew(0, 8)
+                })
+            end
+
+            Items["Panel"]:MakeDraggable()
+
+            return Items
+        end
+
+        -- Player indicator: avatar (headshot), nombre y barra de vida del jugador
+        Library.PlayerIndicator = function(self)
+            local Indicator = {
+                Player = nil,
+                Health = -1
+            }
+
+            local Items = Library:CreatePanel("Player indicator", 170, UDim2New(0.014, 0, 0.55, 0)) do
+                Items["Row"] = Instances:Create("Frame", {
+                    Parent = Items["Content"].Instance,
+                    Name = "\0",
+                    BackgroundTransparency = 1,
+                    BorderColor3 = FromRGB(0, 0, 0),
+                    Size = UDim2New(1, 0, 0, 34),
+                    BorderSizePixel = 0,
+                    BackgroundColor3 = FromRGB(255, 255, 255)
+                })
+
+                Items["Avatar"] = Instances:Create("ImageLabel", {
+                    Parent = Items["Row"].Instance,
+                    Name = "\0",
+                    Size = UDim2New(0, 34, 0, 34),
+                    BorderColor3 = FromRGB(0, 0, 0),
+                    BorderSizePixel = 0,
+                    Image = "",
+                    BackgroundColor3 = FromRGB(20, 20, 20)
+                })
+
+                Instances:Create("UICorner", {
+                    Parent = Items["Avatar"].Instance,
+                    Name = "\0",
+                    CornerRadius = UDimNew(0, 3)
+                })
+
+                Instances:Create("UIStroke", {
+                    Parent = Items["Avatar"].Instance,
+                    Name = "\0",
+                    Color = FromRGB(35, 35, 35),
+                    ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+                })
+
+                Items["Name"] = Instances:Create("TextLabel", {
+                    Parent = Items["Row"].Instance,
+                    Name = "\0",
+                    FontFace = Library.SubFont,
+                    TextColor3 = FromRGB(221, 221, 221),
+                    BorderColor3 = FromRGB(0, 0, 0),
+                    Text = "no target",
+                    Position = UDim2New(0, 42, 0, 2),
+                    Size = UDim2New(1, -76, 0, 14),
+                    BackgroundTransparency = 1,
+                    TextXAlignment = Enum.TextXAlignment.Left,
+                    TextTruncate = Enum.TextTruncate.AtEnd,
+                    BorderSizePixel = 0,
+                    TextSize = 14,
+                    BackgroundColor3 = FromRGB(255, 255, 255)
+                })
+
+                Items["HealthText"] = Instances:Create("TextLabel", {
+                    Parent = Items["Row"].Instance,
+                    Name = "\0",
+                    FontFace = Library.SubFont,
+                    TextColor3 = FromRGB(119, 119, 119),
+                    BorderColor3 = FromRGB(0, 0, 0),
+                    Text = "0",
+                    AnchorPoint = Vector2New(1, 0),
+                    Position = UDim2New(1, 0, 0, 2),
+                    Size = UDim2New(0, 30, 0, 14),
+                    BackgroundTransparency = 1,
+                    TextXAlignment = Enum.TextXAlignment.Right,
+                    BorderSizePixel = 0,
+                    TextSize = 14,
+                    BackgroundColor3 = FromRGB(255, 255, 255)
+                })
+
+                Items["Bar"] = Instances:Create("Frame", {
+                    Parent = Items["Row"].Instance,
+                    Name = "\0",
+                    Position = UDim2New(0, 42, 0, 21),
+                    BorderColor3 = FromRGB(0, 0, 0),
+                    Size = UDim2New(1, -42, 0, 10),
+                    BorderSizePixel = 0,
+                    ClipsDescendants = true,
+                    BackgroundColor3 = FromRGB(20, 20, 20)
+                })
+
+                Instances:Create("UIStroke", {
+                    Parent = Items["Bar"].Instance,
+                    Name = "\0",
+                    Color = FromRGB(35, 35, 35),
+                    ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+                })
+
+                Items["Fill"] = Instances:Create("Frame", {
+                    Parent = Items["Bar"].Instance,
+                    Name = "\0",
+                    BorderColor3 = FromRGB(0, 0, 0),
+                    Size = UDim2New(0, 0, 1, 0),
+                    BorderSizePixel = 0,
+                    BackgroundColor3 = FromRGB(120, 230, 120)
+                })
+
+                Instances:Create("UIGradient", {
+                    Parent = Items["Fill"].Instance,
+                    Name = "\0",
+                    Rotation = 90,
+                    Color = RGBSequence{RGBSequenceKeypoint(0, FromRGB(255, 255, 255)), RGBSequenceKeypoint(1, FromRGB(195, 195, 195))}
+                })
+            end
+
+            function Indicator:SetPlayer(Player)
+                Indicator.Player = Player
+                Indicator.Health = -1
+
+                if Player then
+                    Items["Name"].Instance.Text = Player.Name
+                    Items["Avatar"].Instance.Image = StringFormat("rbxthumb://type=AvatarHeadShot&id=%d&w=100&h=100", Player.UserId)
+                else
+                    Items["Name"].Instance.Text = "no target"
+                    Items["Avatar"].Instance.Image = ""
+                end
+            end
+
+            function Indicator:SetVisibility(Bool)
+                Items["Panel"].Instance.Visible = Bool
+            end
+
+            Library:Connect(RunService.RenderStepped, function()
+                local Player = Indicator.Player
+                local Character = Player and Player.Character
+                local Humanoid = Character and Character:FindFirstChildOfClass("Humanoid")
+
+                local Health = Humanoid and MathFloor(Humanoid.Health) or 0
+                local MaxHealth = Humanoid and Humanoid.MaxHealth or 100
+
+                if Health == Indicator.Health then
+                    return
+                end
+
+                Indicator.Health = Health
+
+                local Ratio = MathClamp(Health / math.max(MaxHealth, 1), 0, 1)
+
+                Items["HealthText"].Instance.Text = tostring(Health)
+                Items["Fill"]:Tween(TweenInfo.new(0.2, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), {
+                    Size = UDim2New(Ratio, 0, 1, 0),
+                    BackgroundColor3 = FromHSV(Ratio * 0.33, 0.75, 0.95)
+                })
+            end)
+
+            Library.IndicatorObj = Indicator
+            return Indicator
+        end
+
+        -- Hotbar: fila con el icono de cada item
+        Library.Hotbar = function(self)
+            local Hotbar = {
+                Slots = { },
+                Signature = nil
+            }
+
+            local Items = Library:CreatePanel("Hotbar", 150, UDim2New(0.5, 0, 1, -16), Vector2New(0.5, 1)) do
+                Instances:Create("UIListLayout", {
+                    Parent = Items["Content"].Instance,
+                    Name = "\0",
+                    FillDirection = Enum.FillDirection.Horizontal,
+                    Wraps = true,
+                    Padding = UDimNew(0, 4),
+                    SortOrder = Enum.SortOrder.LayoutOrder
+                })
+            end
+
+            -- List = { {Name = "glock", Icon = "rbxassetid://..."}, ... }
+            function Hotbar:SetItems(List)
+                List = List or { }
+
+                local Signature = { }
+                for Index, Value in List do
+                    Signature[Index] = Value.Name .. "|" .. tostring(Value.Icon or "")
+                end
+                Signature = TableConcat(Signature, ";")
+
+                if Signature == Hotbar.Signature then
+                    return
+                end
+
+                Hotbar.Signature = Signature
+
+                for Index, Slot in Hotbar.Slots do
+                    Slot:Clean()
+                end
+                Hotbar.Slots = { }
+
+                local Columns = MathClamp(#List, 1, 10)
+                Items["Panel"].Instance.Size = UDim2New(0, math.max(150, Columns * 34 + 12), 0, 0)
+
+                if #List == 0 then
+                    local Empty = Instances:Create("TextLabel", {
+                        Parent = Items["Content"].Instance,
+                        Name = "\0",
+                        FontFace = Library.SubFont,
+                        TextColor3 = FromRGB(74, 74, 74),
+                        Text = "no items",
+                        Size = UDim2New(1, 0, 0, 30),
+                        BackgroundTransparency = 1,
+                        BorderSizePixel = 0,
+                        TextSize = 14,
+                        BackgroundColor3 = FromRGB(255, 255, 255)
+                    })
+
+                    TableInsert(Hotbar.Slots, Empty)
+                    return
+                end
+
+                for Index, Value in List do
+                    local Slot = Instances:Create("Frame", {
+                        Parent = Items["Content"].Instance,
+                        Name = "\0",
+                        Size = UDim2New(0, 30, 0, 30),
+                        BorderSizePixel = 0,
+                        LayoutOrder = Index,
+                        BackgroundColor3 = FromRGB(20, 20, 20)
+                    })
+
+                    Instances:Create("UICorner", {
+                        Parent = Slot.Instance,
+                        Name = "\0",
+                        CornerRadius = UDimNew(0, 3)
+                    })
+
+                    Instances:Create("UIStroke", {
+                        Parent = Slot.Instance,
+                        Name = "\0",
+                        Color = FromRGB(35, 35, 35),
+                        ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+                    })
+
+                    if Value.Icon and Value.Icon ~= "" then
+                        Instances:Create("ImageLabel", {
+                            Parent = Slot.Instance,
+                            Name = "\0",
+                            Position = UDim2New(0, 3, 0, 3),
+                            Size = UDim2New(1, -6, 1, -6),
+                            BackgroundTransparency = 1,
+                            BorderSizePixel = 0,
+                            ScaleType = Enum.ScaleType.Fit,
+                            Image = Value.Icon,
+                            BackgroundColor3 = FromRGB(255, 255, 255)
+                        })
+                    else
+                        Instances:Create("TextLabel", {
+                            Parent = Slot.Instance,
+                            Name = "\0",
+                            FontFace = Library.SubFont,
+                            TextColor3 = FromRGB(119, 119, 119),
+                            Text = string.upper(string.sub(Value.Name, 1, 3)),
+                            Size = UDim2New(1, 0, 1, 0),
+                            BackgroundTransparency = 1,
+                            BorderSizePixel = 0,
+                            TextSize = 14,
+                            BackgroundColor3 = FromRGB(255, 255, 255)
+                        })
+                    end
+
+                    TableInsert(Hotbar.Slots, Slot)
+                end
+            end
+
+            function Hotbar:SetVisibility(Bool)
+                Items["Panel"].Instance.Visible = Bool
+            end
+
+            Hotbar:SetItems({ })
+
+            Library.HotbarObj = Hotbar
+            return Hotbar
+        end
+
+        -- Unicas notificaciones: targetted / untargetted / killed / error
+        Library.Alert = function(self, Kind, Text, Duration)
+            local Colors = {
+                targetted = Library.Theme.Accent,
+                untargetted = FromRGB(150, 150, 150),
+                killed = FromRGB(120, 255, 120),
+                error = FromRGB(255, 70, 70)
+            }
+
+            task.spawn(function()
+                Library:Notification(StringFormat("%s (%s)", Kind, tostring(Text)), Duration or 4, Colors[Kind] or Library.Theme.Accent)
+            end)
         end
 
         Library.TitleLabels = { }
@@ -2619,6 +3055,8 @@ local Library do
                     Color = RGBSequence{RGBSequenceKeypoint(0, FromRGB(255, 255, 255)), RGBSequenceKeypoint(1, FromRGB(158, 158, 158))}
                 })                
             end
+
+            Items["Watermark"]:MakeDraggable()
 
             Library:AddTitle(Items["Text"])
 
@@ -5319,6 +5757,18 @@ local Library do
                     Watermark:SetVisibility(Value)
                 end})
 
+                if Library.IndicatorObj then
+                    MenuSection:Toggle({Name = "Player Indicator", Flag = "Player Indicator", Default = true, Callback = function(Value)
+                        Library.IndicatorObj:SetVisibility(Value)
+                    end})
+                end
+
+                if Library.HotbarObj then
+                    MenuSection:Toggle({Name = "Hotbar", Flag = "Hotbar", Default = true, Callback = function(Value)
+                        Library.HotbarObj:SetVisibility(Value)
+                    end})
+                end
+
                 MenuSection:Label("Menu Keybind"):Keybind({
                     Name = "UI",
                     Flag = "MenuKeybind",
@@ -5412,7 +5862,6 @@ local Library do
                             if not isfile(Library.Folders.Configs .. "/" .. ConfigName .. ".json") then
                                 writefile(Library.Folders.Configs .. "/" .. ConfigName .. ".json", Library:GetConfig())
                                 Library:RefreshConfigsList(ConfigsSearchbox)
-                                Library:Notification("Created config " .. ConfigName .. ".json", 5, FromRGB(0, 255, 0))
                             end
                         end
                     end
@@ -5424,7 +5873,6 @@ local Library do
                         if ConfigSelected ~= nil then
                             delfile(Library.Folders.Configs .. "/" .. ConfigSelected .. ".json")
                             Library:RefreshConfigsList(ConfigsSearchbox)
-                            Library:Notification("Deleted config " .. ConfigSelected .. ".json", 5, FromRGB(255, 0, 0))
                         end
                     end
                 })
@@ -5435,9 +5883,8 @@ local Library do
                         if ConfigSelected ~= nil then
                             local Success, Result = Library:LoadConfig(readfile(Library.Folders.Configs .. "/" .. ConfigSelected .. ".json"))
                             if Success then
-                                Library:Notification("Loaded config " .. ConfigSelected .. ".json", 5, FromRGB(0, 255, 0))
                             else
-                                Library:Notification("Failed to load config " .. ConfigSelected .. ".json", 5, FromRGB(255, 0, 0))
+                                Library:Alert("error", "failed to load " .. ConfigSelected .. ".json")
                             end
                         end
                     end
@@ -5448,7 +5895,6 @@ local Library do
                     Callback = function()
                         if ConfigSelected ~= nil then
                             writefile(Library.Folders.Configs .. "/" .. ConfigSelected .. ".json", Library:GetConfig())
-                            Library:Notification("Saved config " .. ConfigSelected .. ".json", 5, FromRGB(0, 255, 0))
                         end
                     end
                 })
