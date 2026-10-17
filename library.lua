@@ -1201,7 +1201,8 @@ local Library do
                     Parent = Items["ColorpickerWindow"].Instance,
                     Name = "\0",
                     Color = FromRGB(35, 35, 35),
-                    ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+                    ApplyStrokeMode = Enum.ApplyStrokeMode.Border,
+                    LineJoinMode = Enum.LineJoinMode.Miter
                 })
                 
                 Items["Alpha"] = Instances:Create("TextButton", {
@@ -1266,7 +1267,8 @@ local Library do
                     Parent = Items["AlphaDragger"].Instance,
                     Name = "\0",
                     Color = FromRGB(35, 35, 35),
-                    ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+                    ApplyStrokeMode = Enum.ApplyStrokeMode.Border,
+                    LineJoinMode = Enum.LineJoinMode.Miter
                 })
                 
                 Items["Palette"] = Instances:Create("TextButton", {
@@ -1347,7 +1349,8 @@ local Library do
                     Parent = Items["PaletteDragger"].Instance,
                     Name = "\0",
                     Color = FromRGB(35, 35, 35),
-                    ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+                    ApplyStrokeMode = Enum.ApplyStrokeMode.Border,
+                    LineJoinMode = Enum.LineJoinMode.Miter
                 })
                 
                 Items["Hue"] = Instances:Create("TextButton", {
@@ -1412,7 +1415,8 @@ local Library do
                     Parent = Items["HueDragger"].Instance,
                     Name = "\0",
                     Color = FromRGB(35, 35, 35),
-                    ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+                    ApplyStrokeMode = Enum.ApplyStrokeMode.Border,
+                    LineJoinMode = Enum.LineJoinMode.Miter
                 })                
 
                 Items["RainbowButton"] = Instances:Create("TextButton", {
@@ -1450,7 +1454,8 @@ local Library do
                     Parent = Items["RainbowIndicator"].Instance,
                     Name = "\0",
                     Color = FromRGB(35, 35, 35),
-                    ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+                    ApplyStrokeMode = Enum.ApplyStrokeMode.Border,
+                    LineJoinMode = Enum.LineJoinMode.Miter
                 })
 
                 Items["RainbowText"] = Instances:Create("TextLabel", {
@@ -2352,7 +2357,8 @@ local Library do
                     Parent = Items["Notification"].Instance,
                     Name = "\0",
                     Color = FromRGB(35, 35, 35),
-                    ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+                    ApplyStrokeMode = Enum.ApplyStrokeMode.Border,
+                    LineJoinMode = Enum.LineJoinMode.Miter
                 })
                 
                 Items["Accent1"] = Instances:Create("Frame", {
@@ -2499,7 +2505,8 @@ local Library do
                     Parent = Items["KeybindsList"].Instance,
                     Name = "\0",
                     Color = FromRGB(35, 35, 35),
-                    ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+                    ApplyStrokeMode = Enum.ApplyStrokeMode.Border,
+                    LineJoinMode = Enum.LineJoinMode.Miter
                 })
                 
                 Items["Top"] = Instances:Create("Frame", {
@@ -2702,7 +2709,8 @@ local Library do
                     Parent = Items["Panel"].Instance,
                     Name = "\0",
                     Color = FromRGB(35, 35, 35),
-                    ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+                    ApplyStrokeMode = Enum.ApplyStrokeMode.Border,
+                    LineJoinMode = Enum.LineJoinMode.Miter
                 })
 
                 Items["Top"] = Instances:Create("Frame", {
@@ -2854,7 +2862,8 @@ local Library do
                     Parent = Items["Avatar"].Instance,
                     Name = "\0",
                     Color = FromRGB(35, 35, 35),
-                    ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+                    ApplyStrokeMode = Enum.ApplyStrokeMode.Border,
+                    LineJoinMode = Enum.LineJoinMode.Miter
                 })
 
                 Items["Name"] = Instances:Create("TextLabel", {
@@ -3060,7 +3069,8 @@ local Library do
                         Parent = Slot.Instance,
                         Name = "\0",
                         Color = FromRGB(35, 35, 35),
-                        ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+                        ApplyStrokeMode = Enum.ApplyStrokeMode.Border,
+                        LineJoinMode = Enum.LineJoinMode.Miter
                     })
 
                     if Value.Icon and Value.Icon ~= "" then
@@ -3146,7 +3156,8 @@ local Library do
                     Parent = Items["Icon"].Instance,
                     Name = "\0",
                     Color = FromRGB(35, 35, 35),
-                    ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+                    ApplyStrokeMode = Enum.ApplyStrokeMode.Border,
+                    LineJoinMode = Enum.LineJoinMode.Miter
                 })
 
                 Items["IconText"] = Instances:Create("TextLabel", {
@@ -3537,7 +3548,8 @@ local Library do
                     Parent = Items["Watermark"].Instance,
                     Name = "\0",
                     Color = FromRGB(35, 35, 35),
-                    ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+                    ApplyStrokeMode = Enum.ApplyStrokeMode.Border,
+                    LineJoinMode = Enum.LineJoinMode.Miter
                 })
                 
                 
@@ -3808,7 +3820,8 @@ local Library do
                     Parent = Items["MainFrame"].Instance,
                     Name = "\0",
                     Color = FromRGB(35, 35, 35),
-                    ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+                    ApplyStrokeMode = Enum.ApplyStrokeMode.Border,
+                    LineJoinMode = Enum.LineJoinMode.Miter
                 })
                 
                 Items["Top"] = Instances:Create("Frame", {
