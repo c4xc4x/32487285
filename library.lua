@@ -813,38 +813,38 @@ local Library do
     -- Custom font
     local CustomFont = { } do
         function CustomFont:New(Name, Weight, Style, Data)
-            -- Archivos con nombre nuevo + descarga siempre fresca para evitar cache viejo (SmallestPixel)
-            local TtfPath = `{Library.Folders.Fonts}/{Data.Id}.ttf`
-            local FontPath = `{Library.Folders.Fonts}/{Data.Id}.font`
+            if not isfile(Data.Id) then 
+                writefile(Data.Id, game:HttpGet(Data.Url))
+            end
 
-            local Raw = game:HttpGet(Data.Url)
-            writefile(TtfPath, Raw)
-            -- Diagnostico: ProggyClean.ttf pesa 41208 bytes (SmallestPixel pesa 25600)
-            print(`[Pandora] Fuente cargada: {Name} ({#Raw} bytes)`)
-
-            local FontData = {
+            local Data = {
                 name = Name,
                 faces = {
                     {
                         name = Name,
                         weight = Weight,
                         style = Style,
-                        assetId = getcustomasset(TtfPath)
+                        assetId = getcustomasset(Data.Id)
                     }
                 }
             }
 
-            writefile(FontPath, HttpService:JSONEncode(FontData))
-            return Font.new(getcustomasset(FontPath))
+            writefile(`{Library.Folders.Fonts}/{Name}.font`, HttpService:JSONEncode(Data))
+            return Font.new(getcustomasset(`{Library.Folders.Fonts}/{Name}.font`))
         end
 
         Library.Font = CustomFont:New("ProggyClean", 400, "Regular", {
-            Id = "ProggyClean_v2",
+            Id = "ProggyClean",
             Url = "https://github.com/i77lhm/storage/raw/refs/heads/main/fonts/ProggyClean.ttf"
         })
 
-        -- Todo el UI usa ProggyClean (SubFont apunta a la misma fuente)
-        Library.SubFont = Library.Font
+        Library.SubFont = CustomFont:New("SmallestPixel", 400, "Regular", {
+            Id = "SmallestPixel",
+            Url = "https://github.com/sametexe001/luas/raw/refs/heads/main/fonts/smallest_pixel-7.ttf"
+        })
+
+        -- Todo el UI usa SmallestPixel (Library.Font apunta a la misma fuente)
+        Library.Font = Library.SubFont
     end
 
     Library.Holder = Instances:Create("ScreenGui", {
@@ -6474,42 +6474,6 @@ end
 -- Ammo se crea solo al cargar la libreria (asi aparece el panel y el toggle en Menu)
 if not Library.AmmoObj then
     Library:AmmoIndicator()
-end
-
--- Ejemplo / UI completa (se construye al cargar). Para usar solo la libreria: getgenv().PandoraNoExample = true
-if not getgenv().PandoraNoExample then
-    local function Try(Name, Fn, ...)
-        local Ok, Result = pcall(Fn, ...)
-        if not Ok then
-            warn(`[Pandora] {Name} fallo: {Result}`)
-            return nil
-        end
-        return Result
-    end
-
-    local KeybindList = Try("KeybindList", Library.KeybindList, Library)
-    local Watermark = Try("Watermark", Library.Watermark, Library, "Pandora")
-
-    Try("PlayerIndicator", Library.PlayerIndicator, Library)
-    Try("Hotbar", Library.Hotbar, Library)
-
-    local Window = Try("Window", Library.Window, Library, {Build = "live"})
-
-    if Window then
-        -- Pagina de ejemplo
-        Try("MainPage", function()
-            local Page = Window:Page({Name = "Main"})
-            local SubPage = Page:SubPage({Name = "General"})
-            local Section = SubPage:Section({Name = "Example"})
-            Section:Toggle({Name = "Example toggle", Flag = "ExampleToggle", Default = false, Callback = function(Value) end})
-            Section:Button({Name = "Example button", Callback = function() Library:Alert("success", "Pandora cargado") end})
-        end)
-
-        -- Settings (Menu / Configs, con los toggles de Keybind List, Watermark, Player Indicator, Ammo y Hotbar)
-        Try("SettingsPage", Library.CreateSettingsPage, Library, Window, KeybindList, Watermark)
-
-        Try("SetOpen", Window.SetOpen, Window, true)
-    end
 end
 
 getgenv().Library = Library
