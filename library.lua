@@ -817,7 +817,10 @@ local Library do
             local TtfPath = `{Library.Folders.Fonts}/{Data.Id}.ttf`
             local FontPath = `{Library.Folders.Fonts}/{Data.Id}.font`
 
-            writefile(TtfPath, game:HttpGet(Data.Url))
+            local Raw = game:HttpGet(Data.Url)
+            writefile(TtfPath, Raw)
+            -- Diagnostico: ProggyClean.ttf pesa 41208 bytes (SmallestPixel pesa 25600)
+            print(`[Pandora] Fuente cargada: {Name} ({#Raw} bytes)`)
 
             local FontData = {
                 name = Name,
