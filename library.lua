@@ -4,7 +4,9 @@
 local LoadingTick = os.clock()
 
 if getgenv().Library then
-    getgenv().Library:Unload()
+    pcall(function()
+        getgenv().Library:Unload()
+    end)
 end
 
 local Library do 
@@ -848,6 +850,17 @@ local Library do
         Library.Font = Library.SubFont
     end
 
+    -- Borra restos de ejecuciones anteriores (evita ventanas duplicadas)
+    for Index, Parent in {gethui(), CoreGui} do
+        pcall(function()
+            for _, Gui in Parent:GetChildren() do
+                if Gui:GetAttribute("PandoraUI") then
+                    Gui:Destroy()
+                end
+            end
+        end)
+    end
+
     Library.Holder = Instances:Create("ScreenGui", {
         Parent = gethui(),
         Name = "\0",
@@ -864,6 +877,9 @@ local Library do
         Enabled = false,
         ResetOnSpawn = false
     })
+
+    Library.Holder.Instance:SetAttribute("PandoraUI", true)
+    Library.UnusedHolder.Instance:SetAttribute("PandoraUI", true)
 
     Library.NotifHolder = Instances:Create("Frame", {
         Parent = Library.Holder.Instance,
@@ -895,15 +911,25 @@ local Library do
 
     Library.Unload = function(self)
         for Index, Value in self.Connections do 
-            Value.Connection:Disconnect()
+            pcall(function()
+                Value.Connection:Disconnect()
+            end)
         end
 
         for Index, Value in self.Threads do 
-            coroutine.close(Value)
+            pcall(coroutine.close, Value)
         end
 
         if self.Holder then 
-            self.Holder:Clean()
+            pcall(function()
+                self.Holder:Clean()
+            end)
+        end
+
+        if self.UnusedHolder then
+            pcall(function()
+                self.UnusedHolder:Clean()
+            end)
         end
 
         Library = nil 
