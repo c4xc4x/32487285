@@ -838,13 +838,8 @@ local Library do
             Url = "https://github.com/i77lhm/storage/raw/refs/heads/main/fonts/ProggyClean.ttf"
         })
 
-        Library.SubFont = CustomFont:New("SmallestPixel", 400, "Regular", {
-            Id = "SmallestPixel",
-            Url = "https://github.com/sametexe001/luas/raw/refs/heads/main/fonts/smallest_pixel-7.ttf"
-        })
-
-        -- Todo el UI usa SmallestPixel (Library.Font apunta a la misma fuente)
-        Library.Font = Library.SubFont
+        -- Todo el UI usa ProggyClean (SubFont apunta a la misma fuente)
+        Library.SubFont = Library.Font
     end
 
     Library.Holder = Instances:Create("ScreenGui", {
