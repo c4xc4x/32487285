@@ -77,6 +77,8 @@ local Library do
 
         FadeSpeed = 0.4,
 
+        GlowTransparency = 0.8,
+
         RainbowSpeed = 0.2,
 
         Folders = {
@@ -208,6 +210,7 @@ local Library do
             ["Inline"] = FromRGB(23, 23, 23),
             ["Accent"] = FromRGB(176, 176, 209),
             ["Dark Accent"] = FromRGB(123, 123, 146),
+            ["Glow"] = FromRGB(176, 176, 209),
             ["Text"] = FromRGB(255, 255, 255),
             ["Inactive Text"] = FromRGB(155, 155, 155),
             ["Element"] = FromRGB(46, 46, 46),
@@ -2588,9 +2591,9 @@ local Library do
                 Instances:Create("ImageLabel", {
                     Parent = Items["Liner"].Instance,
                     Name = "\0",
-                    ImageColor3 = Library.Theme["Accent"],
+                    ImageColor3 = Library.Theme["Glow"],
                     ScaleType = Enum.ScaleType.Slice,
-                    ImageTransparency = 0.800000011920929,
+                    ImageTransparency = Library.GlowTransparency,
                     Size = UDim2New(1, 8, 1, 8),
                     AnchorPoint = Vector2New(0.5, 0.5),
                     Image = "http://www.roblox.com/asset/?id=18245826428",
@@ -2598,7 +2601,7 @@ local Library do
                     Position = UDim2New(0.5, 0, 0.5, 0),
                     BorderSizePixel = 0,
                     SliceCenter = Rect.new(Vector2.new(21, 21), Vector2.new(79, 79)),
-                    Theme = {ImageColor3 = "Accent"}
+                    Theme = {ImageColor3 = "Glow"}
                 })
                 
 
@@ -2784,9 +2787,9 @@ local Library do
                 Instances:Create("ImageLabel", {
                     Parent = Items["Liner"].Instance,
                     Name = "\0",
-                    ImageColor3 = Library.Theme["Accent"],
+                    ImageColor3 = Library.Theme["Glow"],
                     ScaleType = Enum.ScaleType.Slice,
-                    ImageTransparency = 0.800000011920929,
+                    ImageTransparency = Library.GlowTransparency,
                     Size = UDim2New(1, 8, 1, 8),
                     AnchorPoint = Vector2New(0.5, 0.5),
                     Image = "http://www.roblox.com/asset/?id=18245826428",
@@ -2794,7 +2797,7 @@ local Library do
                     Position = UDim2New(0.5, 0, 0.5, 0),
                     BorderSizePixel = 0,
                     SliceCenter = Rect.new(Vector2.new(21, 21), Vector2.new(79, 79)),
-                    Theme = {ImageColor3 = "Accent"}
+                    Theme = {ImageColor3 = "Glow"}
                 })
 
 
@@ -3087,30 +3090,13 @@ local Library do
 
                 for Index, Value in List do
                     local Slot = Instances:Create("Frame", {
-                    Theme = {BackgroundColor3 = "Element 2"},
-                        Parent = Items["Content"].Instance,
+                                            Parent = Items["Content"].Instance,
                         Name = "\0",
                         Size = UDim2New(0, 40, 0, 40),
                         BorderSizePixel = 0,
+                        BackgroundTransparency = 1,
                         LayoutOrder = Index,
                         BackgroundColor3 = Library.Theme["Element 2"]
-                    })
-
-
-                    Instances:Create("UIStroke", {
-                        Theme = {Color = "Outline"},
-                        Parent = Slot.Instance,
-                        Name = "\0",
-                        Color = Library.Theme["Outline"],
-                        ApplyStrokeMode = Enum.ApplyStrokeMode.Border
-                    })
-                    Instances:Create("UIStroke", {
-                        Theme = {Color = "Border"},
-                        Parent = Slot.Instance,
-                        Name = "\0",
-                        Color = Library.Theme["Border"],
-                        ApplyStrokeMode = Enum.ApplyStrokeMode.Border,
-                        BorderOffset = UDimNew(0, 1)
                     })
 
                     if Value.Icon and Value.Icon ~= "" then
@@ -3778,14 +3764,14 @@ local Library do
                     AnchorPoint = Vector2New(0.5, 0.5),
                     Position = UDim2New(0.5, 0, 0.5, 0),
                     BorderColor3 = FromRGB(0, 0, 0),
-                    Size = UDim2New(0, 470, 0, 600),
+                    Size = UDim2New(0, 620, 0, 480),
                     BorderSizePixel = 0,
                     BackgroundColor3 = Library.Theme["Background"],
                     Theme = {BackgroundColor3 = "Background"}
                 })
 
                 Items["MainFrame"]:MakeDraggable()
-                Items["MainFrame"]:MakeResizeable(Vector2New(420, 480), Vector2New(9999, 9999))
+                Items["MainFrame"]:MakeResizeable(Vector2New(540, 400), Vector2New(9999, 9999))
 
                 Instances:Create("UIStroke", {
                     Parent = Items["MainFrame"].Instance,
@@ -3893,9 +3879,9 @@ local Library do
                 Items["Glow"] = Instances:Create("ImageLabel", {
                     Parent = Items["Liner"].Instance,
                     Name = "\0",
-                    ImageColor3 = Library.Theme["Accent"],
+                    ImageColor3 = Library.Theme["Glow"],
                     ScaleType = Enum.ScaleType.Slice,
-                    ImageTransparency = 0.800000011920929,
+                    ImageTransparency = Library.GlowTransparency,
                     Size = UDim2New(1, 8, 1, 8),
                     AnchorPoint = Vector2New(0.5, 0.5),
                     Image = "http://www.roblox.com/asset/?id=18245826428",
@@ -3903,7 +3889,7 @@ local Library do
                     Position = UDim2New(0.5, 0, 0.5, 0),
                     BorderSizePixel = 0,
                     SliceCenter = Rect.new(Vector2.new(21, 21), Vector2.new(79, 79)),
-                    Theme = {ImageColor3 = "Accent"}
+                    Theme = {ImageColor3 = "Glow"}
                 })
 
                 Items["SubPages"] = Instances:Create("Frame", {
@@ -4466,6 +4452,24 @@ local Library do
             return setmetatable(Section, Library.Sections)
         end
 
+        -- Ajusta el texto de un elemento al espacio libre; si no cabe se corta con "..."
+        local FitText = function(TextItem, Parent, Left, Reserve)
+            local Text = TextItem.Instance
+
+            Text.AutomaticSize = Enum.AutomaticSize.None
+            Text.TextTruncate = Enum.TextTruncate.AtEnd
+
+            local Update = function()
+                local Free = Parent.AbsoluteSize.X - Left - Reserve()
+                Text.Size = UDim2New(0, math.max(Free, 0), 0, 13)
+            end
+
+            Library:Connect(Parent:GetPropertyChangedSignal("AbsoluteSize"), Update)
+            Update()
+
+            return Update
+        end
+
         Library.Sections.Toggle = function(self, Data)
             Data = Data or { }
 
@@ -4571,6 +4575,15 @@ local Library do
                     if Toggle.Value then return end 
                     Items["Indicator"]:Tween(nil, {BackgroundColor3 = Library.Theme["Element 2"]})
                 end)
+            end
+
+            do
+                local Accessories = Items["EXAMPLAR_"].Instance:FindFirstChildOfClass("UIListLayout")
+                local Update = FitText(Items["Text"], Items["Toggle"].Instance, 17, function()
+                    return Accessories.AbsoluteContentSize.X + 14
+                end)
+
+                Library:Connect(Accessories:GetPropertyChangedSignal("AbsoluteContentSize"), Update)
             end
 
             function Toggle:Get()
@@ -4904,6 +4917,15 @@ local Library do
                 end)
             end
 
+            do
+                local ValueLabel = Items["Value"].Instance
+                local Update = FitText(Items["Text"], Items["Slider"].Instance, 17, function()
+                    return ValueLabel.AbsoluteSize.X + 34
+                end)
+
+                Library:Connect(ValueLabel:GetPropertyChangedSignal("AbsoluteSize"), Update)
+            end
+
             function Slider:Get()
                 return Slider.Value
             end
@@ -5152,6 +5174,25 @@ local Library do
             
             local Debounce = false
             local RenderStepped  
+
+            do
+                FitText(Items["Text"], Items["Dropdown"].Instance, 17, function()
+                    return 8
+                end)
+
+                local ValueLabel = Items["Value"].Instance
+                local Box = Items["Indicator"].Instance
+
+                ValueLabel.AutomaticSize = Enum.AutomaticSize.None
+                ValueLabel.TextTruncate = Enum.TextTruncate.AtEnd
+
+                local UpdateValue = function()
+                    ValueLabel.Size = UDim2New(0, math.max(Box.AbsoluteSize.X - 28, 0), 0.8333, 0)
+                end
+
+                Library:Connect(Box:GetPropertyChangedSignal("AbsoluteSize"), UpdateValue)
+                UpdateValue()
+            end
 
             function Dropdown:SetOpen(Bool)
                 if Debounce then 
@@ -5586,6 +5627,15 @@ local Library do
                     Padding = UDimNew(0, 5),
                     SortOrder = Enum.SortOrder.LayoutOrder
                 })                
+            end
+
+            do
+                local Accessories = Items["EXAMPLAR_"].Instance:FindFirstChildOfClass("UIListLayout")
+                local Update = FitText(Items["Text"], Items["Label"].Instance, 17, function()
+                    return Accessories.AbsoluteContentSize.X + 14
+                end)
+
+                Library:Connect(Accessories:GetPropertyChangedSignal("AbsoluteContentSize"), Update)
             end
 
             function Label:SetText(Text)
@@ -6244,7 +6294,15 @@ local Library do
                     end
                 })
 
-                local AccentLabel = MenuSection:Label("Accent Color")
+                MenuSection:Button({Name = "Unload", Callback = function()
+                    Library:Unload()
+                end})
+            end
+        end
+
+        do -- Theming (juanitahaxx)
+            local ThemingSection = ThemeSubPage:Section({Name = "Theming"}) do
+                local AccentLabel = ThemingSection:Label("Accent Color")
                 AccentLabel:Colorpicker({
                     Flag = "AccentColor",
                     Default = Library.Theme.Accent,
@@ -6260,19 +6318,41 @@ local Library do
                     Default = Library.Theme["Dark Accent"],
                     Alpha = 0,
                     Callback = function(Value)
-                        Library.Theme["Dark Accent"]= Value
+                        Library.Theme["Dark Accent"] = Value
                         Library:ChangeTheme("Dark Accent", Value)
                     end
                 })
 
-                MenuSection:Button({Name = "Unload", Callback = function()
-                    Library:Unload()
-                end})
-            end
-        end
+                ThemingSection:Label("Glow Color"):Colorpicker({
+                    Flag = "GlowColor",
+                    Default = Library.Theme["Glow"],
+                    Alpha = 0,
+                    Callback = function(Value)
+                        Library.Theme["Glow"] = Value
+                        Library:ChangeTheme("Glow", Value)
+                    end
+                })
 
-        do -- Theming (juanitahaxx)
-            local ThemingSection = ThemeSubPage:Section({Name = "Theming"}) do
+                ThemingSection:Slider({
+                    Name = "Glow transparency",
+                    Flag = "GlowTransparency",
+                    Default = Library.GlowTransparency,
+                    Min = 0,
+                    Max = 1,
+                    Decimals = 0.01,
+                    Callback = function(Value)
+                        Library.GlowTransparency = Value
+
+                        for Index, Holder in {Library.Holder.Instance, Library.UnusedHolder.Instance} do
+                            for _, Object in Holder:GetDescendants() do
+                                if Object:IsA("ImageLabel") and StringFind(Object.Image, "18245826428", 1, true) then
+                                    Object.ImageTransparency = Value
+                                end
+                            end
+                        end
+                    end
+                })
+
                 for Index, Name in {"Border", "Outline", "Background", "Inline", "Text", "Inactive Text", "Element", "Element 2", "Hovered Element"} do
                     ThemingSection:Label(Name):Colorpicker({
                         Flag = Name .. "Theming",
