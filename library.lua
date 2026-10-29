@@ -859,7 +859,7 @@ local Library do
             return Font.new(getcustomasset(FontPath))
         end
 
-        -- Fuentes: Tahoma (todo el menu y paneles) y ProggyClean (titulo + watermark)
+        -- Fuentes: Tahoma (titulo + watermark) y ProggyClean (todo lo demas)
         local Tahoma = CustomFont:New("Tahoma", 200, "normal", {
             Id = "Tahoma",
             Url = "https://github.com/i77lhm/storage/raw/refs/heads/main/fonts/tahoma_bold.ttf"
@@ -876,10 +876,10 @@ local Library do
             ProggyClean = ProggyClean
         }
 
-        Library.SubFont = Tahoma
-        Library.Font = Tahoma
-        Library.MenuFont = Tahoma
-        Library.TitleFont = ProggyClean
+        Library.SubFont = ProggyClean
+        Library.Font = ProggyClean
+        Library.MenuFont = ProggyClean
+        Library.TitleFont = Tahoma
     end
 
     Library.Holder = Instances:Create("ScreenGui", {
@@ -3898,7 +3898,7 @@ local Library do
                     TextColor3 = Library.Theme["Accent"],
                     BorderColor3 = FromRGB(0, 0, 0),
                     Text = "",
-                    TextSize = 14,
+                    TextSize = 13,
                     TextXAlignment = Enum.TextXAlignment.Left,
                     AnchorPoint = Vector2New(0, 0.5),
                     Size = UDim2New(0, 0, 0, 16),
