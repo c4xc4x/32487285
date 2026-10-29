@@ -2872,37 +2872,20 @@ local Library do
                     Name = "\0",
                     BackgroundTransparency = 1,
                     BorderColor3 = FromRGB(0, 0, 0),
-                    Size = UDim2New(1, 0, 0, 34),
+                    Size = UDim2New(1, 0, 0, 40),
                     BorderSizePixel = 0,
                     BackgroundColor3 = FromRGB(255, 255, 255)
                 })
 
                 Items["Avatar"] = Instances:Create("ImageLabel", {
-                    Theme = {BackgroundColor3 = "Element 2"},
                     Parent = Items["Row"].Instance,
                     Name = "\0",
-                    Size = UDim2New(0, 34, 0, 34),
+                    Size = UDim2New(0, 40, 0, 40),
                     BorderColor3 = FromRGB(0, 0, 0),
                     BorderSizePixel = 0,
                     Image = "",
+                    BackgroundTransparency = 1,
                     BackgroundColor3 = Library.Theme["Element 2"]
-                })
-
-
-                Instances:Create("UIStroke", {
-                    Theme = {Color = "Outline"},
-                    Parent = Items["Avatar"].Instance,
-                    Name = "\0",
-                    Color = Library.Theme["Outline"],
-                    ApplyStrokeMode = Enum.ApplyStrokeMode.Border
-                })
-                Instances:Create("UIStroke", {
-                    Theme = {Color = "Border"},
-                    Parent = Items["Avatar"].Instance,
-                    Name = "\0",
-                    Color = Library.Theme["Border"],
-                    ApplyStrokeMode = Enum.ApplyStrokeMode.Border,
-                    BorderOffset = UDimNew(0, 1)
                 })
 
                 Items["Name"] = Instances:Create("TextLabel", {
@@ -2913,8 +2896,8 @@ local Library do
                     TextColor3 = Library.Theme["Text"],
                     BorderColor3 = FromRGB(0, 0, 0),
                     Text = "no target",
-                    Position = UDim2New(0, 42, 0, 2),
-                    Size = UDim2New(1, -76, 0, 14),
+                    Position = UDim2New(0, 48, 0, 4),
+                    Size = UDim2New(1, -82, 0, 14),
                     BackgroundTransparency = 1,
                     TextXAlignment = Enum.TextXAlignment.Left,
                     TextTruncate = Enum.TextTruncate.AtEnd,
@@ -2932,7 +2915,7 @@ local Library do
                     BorderColor3 = FromRGB(0, 0, 0),
                     Text = "0",
                     AnchorPoint = Vector2New(1, 0),
-                    Position = UDim2New(1, 0, 0, 2),
+                    Position = UDim2New(1, 0, 0, 4),
                     Size = UDim2New(0, 30, 0, 14),
                     BackgroundTransparency = 1,
                     TextXAlignment = Enum.TextXAlignment.Right,
@@ -2945,9 +2928,9 @@ local Library do
                     Theme = {BackgroundColor3 = "Element 2"},
                     Parent = Items["Row"].Instance,
                     Name = "\0",
-                    Position = UDim2New(0, 42, 0, 21),
+                    Position = UDim2New(0, 48, 0, 24),
                     BorderColor3 = FromRGB(0, 0, 0),
-                    Size = UDim2New(1, -42, 0, 10),
+                    Size = UDim2New(1, -48, 0, 12),
                     BorderSizePixel = 0,
                     ClipsDescendants = true,
                     BackgroundColor3 = Library.Theme["Element 2"]
@@ -3091,7 +3074,7 @@ local Library do
                         FontFace = Library.MenuFont,
                         TextColor3 = Library.Theme["Inactive Text"],
                         Text = "no items",
-                        Size = UDim2New(1, 0, 0, 30),
+                        Size = UDim2New(1, 0, 0, 40),
                         BackgroundTransparency = 1,
                         BorderSizePixel = 0,
                         TextSize = 12,
@@ -3188,38 +3171,21 @@ local Library do
                     Name = "\0",
                     BackgroundTransparency = 1,
                     BorderColor3 = FromRGB(0, 0, 0),
-                    Size = UDim2New(1, 0, 0, 34),
+                    Size = UDim2New(1, 0, 0, 40),
                     BorderSizePixel = 0,
                     BackgroundColor3 = FromRGB(255, 255, 255)
                 })
 
                 Items["Icon"] = Instances:Create("ImageLabel", {
-                    Theme = {BackgroundColor3 = "Element 2"},
                     Parent = Items["Row"].Instance,
                     Name = "\0",
-                    Size = UDim2New(0, 34, 0, 34),
+                    Size = UDim2New(0, 40, 0, 40),
                     BorderColor3 = FromRGB(0, 0, 0),
                     BorderSizePixel = 0,
                     ScaleType = Enum.ScaleType.Fit,
                     Image = "",
+                    BackgroundTransparency = 1,
                     BackgroundColor3 = Library.Theme["Element 2"]
-                })
-
-
-                Instances:Create("UIStroke", {
-                    Theme = {Color = "Outline"},
-                    Parent = Items["Icon"].Instance,
-                    Name = "\0",
-                    Color = Library.Theme["Outline"],
-                    ApplyStrokeMode = Enum.ApplyStrokeMode.Border
-                })
-                Instances:Create("UIStroke", {
-                    Theme = {Color = "Border"},
-                    Parent = Items["Icon"].Instance,
-                    Name = "\0",
-                    Color = Library.Theme["Border"],
-                    ApplyStrokeMode = Enum.ApplyStrokeMode.Border,
-                    BorderOffset = UDimNew(0, 1)
                 })
 
                 Items["IconText"] = Instances:Create("TextLabel", {
@@ -3244,8 +3210,8 @@ local Library do
                     TextColor3 = Library.Theme["Text"],
                     BorderColor3 = FromRGB(0, 0, 0),
                     Text = "Ammo",
-                    Position = UDim2New(0, 42, 0, 2),
-                    Size = UDim2New(1, -92, 0, 14),
+                    Position = UDim2New(0, 48, 0, 4),
+                    Size = UDim2New(1, -98, 0, 14),
                     BackgroundTransparency = 1,
                     TextXAlignment = Enum.TextXAlignment.Left,
                     TextTruncate = Enum.TextTruncate.AtEnd,
@@ -3263,7 +3229,7 @@ local Library do
                     BorderColor3 = FromRGB(0, 0, 0),
                     Text = "-",
                     AnchorPoint = Vector2New(1, 0),
-                    Position = UDim2New(1, 0, 0, 2),
+                    Position = UDim2New(1, 0, 0, 4),
                     Size = UDim2New(0, 48, 0, 14),
                     BackgroundTransparency = 1,
                     TextXAlignment = Enum.TextXAlignment.Right,
@@ -3277,9 +3243,9 @@ local Library do
                     Theme = {BackgroundColor3 = "Element 2"},
                     Parent = Items["Row"].Instance,
                     Name = "\0",
-                    Position = UDim2New(0, 42, 0, 21),
+                    Position = UDim2New(0, 48, 0, 24),
                     BorderColor3 = FromRGB(0, 0, 0),
-                    Size = UDim2New(1, -42, 0, 10),
+                    Size = UDim2New(1, -48, 0, 12),
                     BorderSizePixel = 0,
                     ClipsDescendants = true,
                     BackgroundColor3 = Library.Theme["Element 2"]
