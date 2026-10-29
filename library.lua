@@ -3764,7 +3764,7 @@ local Library do
                     AnchorPoint = Vector2New(0.5, 0.5),
                     Position = UDim2New(0.5, 0, 0.5, 0),
                     BorderColor3 = FromRGB(0, 0, 0),
-                    Size = UDim2New(0, 620, 0, 480),
+                    Size = UDim2New(0, 590, 0, 480),
                     BorderSizePixel = 0,
                     BackgroundColor3 = Library.Theme["Background"],
                     Theme = {BackgroundColor3 = "Background"}
@@ -3861,7 +3861,7 @@ local Library do
                     BackgroundColor3 = FromRGB(255, 255, 255)
                 })  Items["Logo"]:AddToTheme({TextColor3 = "Accent"})
 
-                Library:AddTitle(Items["Logo"])
+                Items["Logo"].Instance.Text = "pchaxx13"
 
                 Items["Liner"] = Instances:Create("Frame", {
                     Parent = Items["Top"].Instance,
@@ -4710,7 +4710,7 @@ local Library do
                     Name = "\0",
                     Position = UDim2New(0, 17, 0, 0),
                     BorderColor3 = FromRGB(0, 0, 0),
-                    Size = UDim2New(1, -50, 0, 21),
+                    Size = UDim2New(1, -25, 0, 21),
                     BorderSizePixel = 0,
                     BackgroundColor3 = Library.Theme["Border"]
                 })
@@ -4834,7 +4834,7 @@ local Library do
                     Name = "\0",
                     Position = UDim2New(0, 17, 0, 17),
                     BorderColor3 = FromRGB(0, 0, 0),
-                    Size = UDim2New(1, -50, 0, 9),
+                    Size = UDim2New(1, -25, 0, 9),
                     BorderSizePixel = 2,
                     BackgroundColor3 = Library.Theme["Element 2"]
                 })
@@ -4899,7 +4899,7 @@ local Library do
                     Text = "",
                     AnchorPoint = Vector2New(1, 0),
                     Size = UDim2New(0, 0, 0, 13),
-                    Position = UDim2New(1, -28, 0, -2),
+                    Position = UDim2New(1, -8, 0, -2),
                     BackgroundTransparency = 1,
                     TextXAlignment = Enum.TextXAlignment.Left,
                     BorderSizePixel = 0,
@@ -4920,7 +4920,7 @@ local Library do
             do
                 local ValueLabel = Items["Value"].Instance
                 local Update = FitText(Items["Text"], Items["Slider"].Instance, 17, function()
-                    return ValueLabel.AbsoluteSize.X + 34
+                    return ValueLabel.AbsoluteSize.X + 14
                 end)
 
                 Library:Connect(ValueLabel:GetPropertyChangedSignal("AbsoluteSize"), Update)
@@ -5024,7 +5024,7 @@ local Library do
                     Name = "\0",
                     Position = UDim2New(0, 17, 0, 17),
                     BorderColor3 = FromRGB(0, 0, 0),
-                    Size = UDim2New(1, -50, 0, 21),
+                    Size = UDim2New(1, -25, 0, 21),
                     BorderSizePixel = 2,
                     BackgroundColor3 = Library.Theme["Element"],
                     ClipsDescendants = true,
@@ -5745,7 +5745,7 @@ local Library do
                     BorderColor3 = FromRGB(0, 0, 0),
                     Text = "",
                     ClipsDescendants = true,
-                    Size = UDim2New(1, -50, 1, 0),
+                    Size = UDim2New(1, -25, 1, 0),
                     Position = UDim2New(0, 17, 0, 0),
                     PlaceholderColor3 = Library.Theme["Inactive Text"],
                     CursorPosition = -1,
@@ -5863,7 +5863,7 @@ local Library do
                     Name = "\0",
                     Position = UDim2New(0, 17, 0, 22),
                     BorderColor3 = FromRGB(0, 0, 0),
-                    Size = UDim2New(1, -50, 1, -22),
+                    Size = UDim2New(1, -25, 1, -22),
                     BorderSizePixel = 0,
                     BackgroundColor3 = FromRGB(0, 0, 0)
                 })
