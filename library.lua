@@ -1,6 +1,5 @@
--- pchaxx (Pandora) con el estilo de juanitahaxx
 -- made by samet september 14 2025
--- example at bottom
+-- pchaxx (Pandora) con el estilo de juanitahaxx - solo libreria, sin UI de ejemplo
 
 local LoadingTick = os.clock()
 
@@ -119,6 +118,8 @@ local Library do
         Font = nil,
         SubFont = nil,
         MenuFont = nil,
+        TitleFont = nil,
+        Fonts = nil,
     }
 
     Library.__index = Library
@@ -201,17 +202,17 @@ local Library do
 
     local Themes = {
         ["Preset"] = {
-            ["Border"] = FromRGB(3, 3, 3),
-            ["Outline"] = FromRGB(51, 51, 51),
-            ["Background"] = FromRGB(12, 12, 12),
-            ["Inline"] = FromRGB(19, 19, 19),
+            ["Border"] = FromRGB(10, 10, 10),
+            ["Outline"] = FromRGB(60, 60, 60),
+            ["Background"] = FromRGB(16, 16, 16),
+            ["Inline"] = FromRGB(23, 23, 23),
             ["Accent"] = FromRGB(176, 176, 209),
             ["Dark Accent"] = FromRGB(123, 123, 146),
-            ["Text"] = FromRGB(208, 207, 227),
-            ["Inactive Text"] = FromRGB(134, 134, 134),
-            ["Element"] = FromRGB(39, 39, 39),
-            ["Element 2"] = FromRGB(56, 56, 56),
-            ["Hovered Element"] = FromRGB(61, 61, 61)
+            ["Text"] = FromRGB(255, 255, 255),
+            ["Inactive Text"] = FromRGB(155, 155, 155),
+            ["Element"] = FromRGB(46, 46, 46),
+            ["Element 2"] = FromRGB(64, 64, 64),
+            ["Hovered Element"] = FromRGB(72, 72, 72)
         }
     }
 
@@ -858,18 +859,27 @@ local Library do
             return Font.new(getcustomasset(FontPath))
         end
 
-        Library.SubFont = CustomFont:New("SmallestPixel", 400, "Regular", {
-            Id = "SmallestPixel_v2",
-            Url = "https://github.com/sametexe001/luas/raw/refs/heads/main/fonts/smallest_pixel-7.ttf"
+        -- Fuentes: Tahoma (todo el menu y paneles) y ProggyClean (titulo + watermark)
+        local Tahoma = CustomFont:New("Tahoma", 200, "normal", {
+            Id = "Tahoma",
+            Url = "https://github.com/i77lhm/storage/raw/refs/heads/main/fonts/tahoma_bold.ttf"
         })
 
-        Library.Font = Library.SubFont
-
-        -- fuente de juanitahaxx para el menu (los paneles aparte conservan SmallestPixel)
-        Library.MenuFont = CustomFont:New("TahomaXP", 400, "Regular", {
-            Id = "TahomaXP",
-            Url = "https://github.com/sametexe001/luas/raw/refs/heads/main/fonts/windows-xp-tahoma.ttf"
+        local ProggyClean = CustomFont:New("ProggyClean", 200, "normal", {
+            Id = "ProggyClean",
+            Url = "https://github.com/i77lhm/storage/raw/refs/heads/main/fonts/ProggyClean.ttf"
         })
+
+        Library.Fonts = {
+            Tahoma = Tahoma,
+            ProggyTiny = Tahoma,
+            ProggyClean = ProggyClean
+        }
+
+        Library.SubFont = Tahoma
+        Library.Font = Tahoma
+        Library.MenuFont = Tahoma
+        Library.TitleFont = ProggyClean
     end
 
     Library.Holder = Instances:Create("ScreenGui", {
@@ -1442,10 +1452,10 @@ local Library do
 
 
                 Instances:Create("UIStroke", {
-                    Theme = {Color = "Border"},
+                    Theme = {Color = "Outline"},
                     Parent = Items["RainbowIndicator"].Instance,
                     Name = "\0",
-                    Color = Library.Theme["Border"],
+                    Color = Library.Theme["Outline"],
                     ApplyStrokeMode = Enum.ApplyStrokeMode.Border
                 })
 
@@ -1878,10 +1888,10 @@ local Library do
                 })
 
                 Instances:Create("UIStroke", {
-                    Theme = {Color = "Border"},
+                    Theme = {Color = "Outline"},
                     Parent = Items["KeyButton"].Instance,
                     Name = "\0",
-                    Color = Library.Theme["Border"],
+                    Color = Library.Theme["Outline"],
                     LineJoinMode = Enum.LineJoinMode.Miter,
                     ApplyStrokeMode = Enum.ApplyStrokeMode.Border
                 })
@@ -3628,7 +3638,7 @@ local Library do
                     Theme = {TextColor3 = "Inactive Text"},
                     Parent = Items["Watermark"].Instance,
                     Name = "\0",
-                    FontFace = Library.MenuFont,
+                    FontFace = Library.TitleFont,
                     RichText = true,
                     TextColor3 = Library.Theme["Inactive Text"],
                     BorderColor3 = FromRGB(0, 0, 0),
@@ -3802,14 +3812,14 @@ local Library do
                     AnchorPoint = Vector2New(0.5, 0.5),
                     Position = UDim2New(0.5, 0, 0.5, 0),
                     BorderColor3 = FromRGB(0, 0, 0),
-                    Size = UDim2New(0, 750, 0, 455),
+                    Size = UDim2New(0, 470, 0, 600),
                     BorderSizePixel = 0,
                     BackgroundColor3 = Library.Theme["Background"],
                     Theme = {BackgroundColor3 = "Background"}
                 })
 
                 Items["MainFrame"]:MakeDraggable()
-                Items["MainFrame"]:MakeResizeable(Vector2New(620, 380), Vector2New(9999, 9999))
+                Items["MainFrame"]:MakeResizeable(Vector2New(420, 480), Vector2New(9999, 9999))
 
                 Instances:Create("UIStroke", {
                     Parent = Items["MainFrame"].Instance,
@@ -3884,11 +3894,11 @@ local Library do
                 Items["Logo"] = Instances:Create("TextLabel", {
                     Parent = Items["Top"].Instance,
                     Name = "\0",
-                    FontFace = Library.MenuFont,
+                    FontFace = Library.TitleFont,
                     TextColor3 = Library.Theme["Accent"],
                     BorderColor3 = FromRGB(0, 0, 0),
                     Text = "",
-                    TextSize = 13,
+                    TextSize = 14,
                     TextXAlignment = Enum.TextXAlignment.Left,
                     AnchorPoint = Vector2New(0, 0.5),
                     Size = UDim2New(0, 0, 0, 16),
@@ -4534,10 +4544,10 @@ local Library do
                 end})
                 
                 Instances:Create("UIStroke", {
-                    Theme = {Color = "Border"},
+                    Theme = {Color = "Outline"},
                     Parent = Items["Indicator"].Instance,
                     Name = "\0",
-                    Color = Library.Theme["Border"],
+                    Color = Library.Theme["Outline"],
                     LineJoinMode = Enum.LineJoinMode.Miter,
                     ApplyStrokeMode = Enum.ApplyStrokeMode.Border
                 })
@@ -4851,10 +4861,10 @@ local Library do
                 })
                 
                 Instances:Create("UIStroke", {
-                    Theme = {Color = "Border"},
+                    Theme = {Color = "Outline"},
                     Parent = Items["Indicator"].Instance,
                     Name = "\0",
-                    Color = Library.Theme["Border"],
+                    Color = Library.Theme["Outline"],
                     LineJoinMode = Enum.LineJoinMode.Miter,
                     ApplyStrokeMode = Enum.ApplyStrokeMode.Border
                 })
@@ -6393,42 +6403,7 @@ local Library do
     end
 end
 
--- Ammo se crea solo al cargar la libreria (asi aparece el panel y el toggle en Menu)
-if not Library.AmmoObj then
-    Library:AmmoIndicator()
-end
-
--- UI completa (se construye al cargar). Para usar solo la libreria: getgenv().PandoraNoExample = true
-if not getgenv().PandoraNoExample then
-    local function Try(Name, Fn, ...)
-        local Ok, Result = pcall(Fn, ...)
-        if not Ok then
-            warn(`[Pandora] {Name} fallo: {Result}`)
-            return nil
-        end
-        return Result
-    end
-
-    local KeybindList = Try("KeybindList", Library.KeybindList, Library)
-    local Watermark = Try("Watermark", Library.Watermark, Library, "Pandora")
-
-    Try("PlayerIndicator", Library.PlayerIndicator, Library)
-    Try("Hotbar", Library.Hotbar, Library)
-
-    local Window = Try("Window", Library.Window, Library, {Build = "live"})
-
-    if Window then
-        Try("MainPage", function()
-            local Page = Window:Page({Name = "Main"})
-            local SubPage = Page:SubPage({Name = "General"})
-            local Section = SubPage:Section({Name = "Example"})
-            Section:Toggle({Name = "Example toggle", Flag = "ExampleToggle", Default = false, Callback = function(Value) end})
-            Section:Button({Name = "Example button", Callback = function() Library:Alert("targetted", "Pandora cargado") end})
-        end)
-
-        Try("SettingsPage", Library.CreateSettingsPage, Library, Window, KeybindList, Watermark)
-    end
-end
+-- La libreria no carga ninguna UI por si sola: crea las tuyas desde tu script.
 
 getgenv().Library = Library
 return Library
