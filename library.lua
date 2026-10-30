@@ -1852,6 +1852,228 @@ local Library do
             return Colorpicker, Items 
         end
 
+        -- Popup de clic derecho con un toggle (misma ventana y animacion que el menu de Keybind)
+        Library.CreateTogglePopup = function(self, Data)
+            local Popup = {
+                Flag = Data.Flag,
+                Value = false,
+                IsOpen = false
+            }
+
+            local Items = { } do
+                Items["Window"] = Instances:Create("Frame", {
+                    Theme = {BackgroundColor3 = "Background"},
+                    Parent = Library.UnusedHolder.Instance,
+                    Name = "\0",
+                    Position = UDim2New(0, 0, 0, 0),
+                    BorderColor3 = FromRGB(0, 0, 0),
+                    Visible = false,
+                    Size = UDim2New(0, math.max(110, #Data.Name * 7 + 38), 0, 25),
+                    BorderSizePixel = 2,
+                    BackgroundColor3 = Library.Theme["Background"]
+                })
+
+                Instances:Create("UIStroke", {
+                    Theme = {Color = "Outline"},
+                    Parent = Items["Window"].Instance,
+                    Name = "\0",
+                    Color = Library.Theme["Outline"],
+                    LineJoinMode = Enum.LineJoinMode.Miter,
+                    ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+                })
+
+                Instances:Create("UIStroke", {
+                    Theme = {Color = "Border"},
+                    Parent = Items["Window"].Instance,
+                    Name = "\0",
+                    Color = Library.Theme["Border"],
+                    LineJoinMode = Enum.LineJoinMode.Miter,
+                    ApplyStrokeMode = Enum.ApplyStrokeMode.Border,
+                    BorderOffset = UDimNew(0, 1)
+                })
+
+                Items["Row"] = Instances:Create("TextButton", {
+                    Parent = Items["Window"].Instance,
+                    Name = "\0",
+                    FontFace = Library.MenuFont,
+                    TextColor3 = FromRGB(0, 0, 0),
+                    BorderColor3 = FromRGB(0, 0, 0),
+                    Text = "",
+                    AutoButtonColor = false,
+                    BackgroundTransparency = 1,
+                    Size = UDim2New(1, 0, 1, 0),
+                    BorderSizePixel = 0,
+                    TextSize = 12,
+                    BackgroundColor3 = FromRGB(255, 255, 255)
+                })
+
+                Items["Indicator"] = Instances:Create("Frame", {
+                    Parent = Items["Row"].Instance,
+                    Name = "\0",
+                    BorderColor3 = FromRGB(0, 0, 0),
+                    AnchorPoint = Vector2New(0, 0.5),
+                    Position = UDim2New(0, 10, 0.5, 0),
+                    Size = UDim2New(0, 9, 0, 9),
+                    BorderSizePixel = 2,
+                    BackgroundColor3 = Library.Theme["Element 2"]
+                })  Items["Indicator"]:AddToTheme({BackgroundColor3 = function()
+                    return Library.Theme["Element 2"]
+                end})
+
+                Instances:Create("UIStroke", {
+                    Theme = {Color = "Outline"},
+                    Parent = Items["Indicator"].Instance,
+                    Name = "\0",
+                    Color = Library.Theme["Outline"],
+                    LineJoinMode = Enum.LineJoinMode.Miter,
+                    ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+                })
+
+                Instances:Create("UIGradient", {
+                    Parent = Items["Indicator"].Instance,
+                    Name = "\0",
+                    Rotation = 90,
+                    Color = RGBSequence{RGBSequenceKeypoint(0, FromRGB(255, 255, 255)), RGBSequenceKeypoint(1, FromRGB(163, 163, 163))}
+                })
+
+                Items["Text"] = Instances:Create("TextLabel", {
+                    Theme = {TextColor3 = "Text"},
+                    Parent = Items["Row"].Instance,
+                    Name = "\0",
+                    FontFace = Library.MenuFont,
+                    TextColor3 = Library.Theme["Text"],
+                    BorderColor3 = FromRGB(0, 0, 0),
+                    Text = Data.Name,
+                    AnchorPoint = Vector2New(0, 0.5),
+                    Size = UDim2New(0, 0, 0, 15),
+                    Position = UDim2New(0, 27, 0.5, -2),
+                    BackgroundTransparency = 1,
+                    TextXAlignment = Enum.TextXAlignment.Left,
+                    BorderSizePixel = 0,
+                    AutomaticSize = Enum.AutomaticSize.X,
+                    TextSize = 12,
+                    BackgroundColor3 = FromRGB(255, 255, 255)
+                })
+
+                Items["Row"]:OnHover(function()
+                    if Popup.Value then return end
+                    Items["Indicator"]:Tween(nil, {BackgroundColor3 = Library.Theme["Hovered Element"]})
+                end)
+
+                Items["Row"]:OnHoverLeave(function()
+                    if Popup.Value then return end
+                    Items["Indicator"]:Tween(nil, {BackgroundColor3 = Library.Theme["Element 2"]})
+                end)
+            end
+
+            function Popup:Get()
+                return Popup.Value
+            end
+
+            function Popup:Set(Value)
+                Popup.Value = Value
+                Library.Flags[Popup.Flag] = Value
+
+                if Popup.Value then
+                    Items["Indicator"]:ChangeItemTheme({BackgroundColor3 = "Accent"})
+                    Items["Indicator"]:Tween(nil, {BackgroundColor3 = Library.Theme.Accent})
+                else
+                    Items["Indicator"]:ChangeItemTheme({BackgroundColor3 = function()
+                        return Library.Theme["Element 2"]
+                    end})
+                    Items["Indicator"]:Tween(nil, {BackgroundColor3 = Library.Theme["Element 2"]})
+                end
+
+                if Data.Callback then
+                    Library:SafeCall(Data.Callback, Popup.Value)
+                end
+            end
+
+            local Debounce = false
+
+            function Popup:SetOpen(Bool)
+                if Debounce then
+                    return
+                end
+
+                Popup.IsOpen = Bool
+
+                Debounce = true
+
+                if Popup.IsOpen then
+                    local Mouse = UserInputService:GetMouseLocation()
+
+                    Items["Window"].Instance.Position = UDim2New(0, Mouse.X, 0, Mouse.Y)
+                    Items["Window"].Instance.Visible = true
+                    Items["Window"].Instance.Parent = Library.Holder.Instance
+
+                    for Index, Value in Library.OpenFrames do
+                        Value:SetOpen(false)
+                    end
+
+                    Library.OpenFrames[Popup] = Popup
+                else
+                    if Library.OpenFrames[Popup] then
+                        Library.OpenFrames[Popup] = nil
+                    end
+                end
+
+                local Descendants = Items["Window"].Instance:GetDescendants()
+                TableInsert(Descendants, Items["Window"].Instance)
+
+                local NewTween
+
+                for Index, Value in Descendants do
+                    local TransparencyProperty = Tween:GetProperty(Value)
+
+                    if not TransparencyProperty then
+                        continue
+                    end
+
+                    for _, Property in TransparencyProperty do
+                        NewTween = Tween:FadeItem(Value, Property, Bool, Library.FadeSpeed)
+                    end
+                end
+
+                NewTween.Tween.Completed:Connect(function()
+                    Debounce = false
+                    Items["Window"].Instance.Visible = Popup.IsOpen
+                    task.wait(0.2)
+                    Items["Window"].Instance.Parent = not Popup.IsOpen and Library.UnusedHolder.Instance or Library.Holder.Instance
+                end)
+            end
+
+            Items["Row"]:Connect("MouseButton1Down", function()
+                Popup:Set(not Popup.Value)
+            end)
+
+            if Data.Button then
+                Data.Button:Connect("MouseButton2Down", function()
+                    Popup:SetOpen(not Popup.IsOpen)
+                end)
+            end
+
+            Library:Connect(UserInputService.InputBegan, function(Input)
+                if Input.UserInputType ~= Enum.UserInputType.MouseButton1 or not Popup.IsOpen then
+                    return
+                end
+
+                if Library:IsMouseOverFrame(Items["Window"]) then
+                    return
+                end
+
+                Popup:SetOpen(false)
+            end)
+
+            Popup:Set(Data.Default or false)
+
+            Library.SetFlags[Popup.Flag] = function(Value)
+                Popup:Set(Value)
+            end
+
+            return Popup, Items
+        end
+
         Library.CreateKeybind = function(self, Data)
             local Keybind = {
                 Flag = Data.Flag,
@@ -2666,11 +2888,22 @@ local Library do
                 })                
             end
 
+            local Fader = Library:CreateFader(Items["KeybindsList"].Instance)
+            Fader.Empty = true
+
+            local Active = 0
+
             Items["KeybindsList"]:MakeDraggable()
             Items["KeybindsList"]:MakeResizeable(Vector2New(130, 0), Vector2New(9999, 9999), {Thickness = 4, AutoHeight = true, Sides = {"L", "R"}})
 
             function KeybindList:SetVisibility(Bool)
-                Items["KeybindsList"].Instance.Visible = Bool
+                Fader.Enabled = Bool
+                Fader:Update()
+            end
+
+            function KeybindList:SetHideWhenEmpty(Bool)
+                Fader.HideWhenEmpty = Bool
+                Fader:Update()
             end
 
             function KeybindList:Add(Name, Mode)
@@ -2719,14 +2952,106 @@ local Library do
                     NewKeyMode.Instance.Text = Mode
                 end
 
+                local KeyActive = false
+
                 function NewKey:Set(Bool)
                     NewKey.Instance.Visible = Bool
+
+                    if Bool ~= KeyActive then
+                        KeyActive = Bool
+                        Active = Active + (Bool and 1 or -1)
+
+                        Fader.Empty = Active <= 0
+                        Fader:Update()
+                    end
                 end
 
                 return NewKey
             end
 
             return KeybindList
+        end
+
+        -- Fader reutilizable: mismo fade que usa la UI principal / watermark
+        -- Visible final = Enabled (toggle del menu) y no (HideWhenEmpty y Empty)
+        Library.CreateFader = function(self, Frame)
+            local Fader = {
+                Visible = Frame.Visible,
+                Fading = false,
+                Pending = nil,
+
+                Enabled = true,
+                HideWhenEmpty = false,
+                Empty = false
+            }
+
+            local Apply
+
+            Apply = function(Bool)
+                Fader.Fading = true
+                Fader.Visible = Bool
+
+                if Bool then
+                    Frame.Visible = true
+                end
+
+                local Descendants = Frame:GetDescendants()
+                TableInsert(Descendants, Frame)
+
+                local NewTween
+
+                for Index, Value in Descendants do
+                    local TransparencyProperty = Tween:GetProperty(Value)
+
+                    if not TransparencyProperty then
+                        continue
+                    end
+
+                    for _, Property in TransparencyProperty do
+                        NewTween = Tween:FadeItem(Value, Property, Bool, Library.FadeSpeed)
+                    end
+                end
+
+                local Finish = function()
+                    Fader.Fading = false
+
+                    if not Fader.Visible then
+                        Frame.Visible = false
+                    end
+
+                    local Next = Fader.Pending
+                    Fader.Pending = nil
+
+                    if Next ~= nil and Next ~= Fader.Visible then
+                        Apply(Next)
+                    end
+                end
+
+                if NewTween then
+                    NewTween.Tween.Completed:Connect(Finish)
+                else
+                    Finish()
+                end
+            end
+
+            function Fader:Set(Bool)
+                if Fader.Fading then
+                    Fader.Pending = Bool
+                    return
+                end
+
+                if Bool == Fader.Visible then
+                    return
+                end
+
+                Apply(Bool)
+            end
+
+            function Fader:Update()
+                Fader:Set(Fader.Enabled and not (Fader.HideWhenEmpty and Fader.Empty))
+            end
+
+            return Fader
         end
 
         -- Panel base con el mismo estilo que el Keybind List (header + liner + contenido)
@@ -2981,9 +3306,15 @@ local Library do
                 })
             end
 
+            local Fader = Library:CreateFader(Items["Panel"].Instance)
+            Fader.Empty = true
+
             function Indicator:SetPlayer(Player)
                 Indicator.Player = Player
                 Indicator.Health = -1
+
+                Fader.Empty = Player == nil
+                Fader:Update()
 
                 if Player then
                     Items["Name"].Instance.Text = Player.Name
@@ -2995,7 +3326,13 @@ local Library do
             end
 
             function Indicator:SetVisibility(Bool)
-                Items["Panel"].Instance.Visible = Bool
+                Fader.Enabled = Bool
+                Fader:Update()
+            end
+
+            function Indicator:SetHideWhenEmpty(Bool)
+                Fader.HideWhenEmpty = Bool
+                Fader:Update()
             end
 
             Library:Connect(RunService.RenderStepped, function()
@@ -3131,9 +3468,25 @@ local Library do
                 end
             end
 
+            local Fader = Library:CreateFader(Items["Panel"].Instance)
+            Fader.Empty = true
+
             function Hotbar:SetVisibility(Bool)
-                Items["Panel"].Instance.Visible = Bool
+                Fader.Enabled = Bool
+                Fader:Update()
             end
+
+            function Hotbar:SetHideWhenEmpty(Bool)
+                Fader.HideWhenEmpty = Bool
+                Fader:Update()
+            end
+
+            Library:Connect(RunService.RenderStepped, function()
+                local Target = Library.IndicatorObj and Library.IndicatorObj.Player
+
+                Fader.Empty = Target == nil
+                Fader:Update()
+            end)
 
             Hotbar:SetItems({ })
 
@@ -3401,8 +3754,17 @@ local Library do
                 return nil
             end
 
+            local Fader = Library:CreateFader(Items["Panel"].Instance)
+            Fader.Empty = true
+
             function Ammo:SetVisibility(Bool)
-                Items["Panel"].Instance.Visible = Bool
+                Fader.Enabled = Bool
+                Fader:Update()
+            end
+
+            function Ammo:SetHideWhenEmpty(Bool)
+                Fader.HideWhenEmpty = Bool
+                Fader:Update()
             end
 
             Library:Connect(RunService.RenderStepped, function()
@@ -3434,6 +3796,9 @@ local Library do
                     Ammo.TrackedMax = math.max(Ammo.TrackedMax, Current)
                     Max = Ammo.TrackedMax
                 end
+
+                Fader.Empty = Current == nil
+                Fader:Update()
 
                 local Signature = StringFormat("%s|%s|%s|%s", Name, Texture, tostring(Current), tostring(Max))
 
@@ -4378,7 +4743,7 @@ local Library do
                 Items["Text"] = Instances:Create("TextLabel", {
                     Parent = Items["Outline"].Instance,
                     Name = "\0",
-                    FontFace = Library.MenuFont,
+                    FontFace = Library.TitleFont,
                     TextColor3 = Library.Theme["Text"],
                     BorderColor3 = FromRGB(0, 0, 0),
                     Text = Section.Name,
@@ -4666,6 +5031,19 @@ local Library do
                 })
 
                 return NewKeybind
+            end
+
+            -- clic derecho sobre el toggle -> ventana con un toggle extra
+            function Toggle:Popup(Data)
+                Data = Data or { }
+
+                return Library:CreateTogglePopup({
+                    Name = Data.Name or Data.name or "Option",
+                    Flag = Data.Flag or Data.flag or Library:NextFlag(),
+                    Default = Data.Default or Data.default or false,
+                    Callback = Data.Callback or Data.callback or function() end,
+                    Button = Items["Toggle"]
+                })
             end
 
             Items["Toggle"]:Connect("MouseButton1Down", function()
@@ -6236,6 +6614,8 @@ local Library do
             local MenuSection = MenuSubPage:Section({Name = "Menu"}) do
                 MenuSection:Toggle({Name = "Keybind List", Flag = "Keybind List", Default = true, Callback = function(Value)
                     KeybindList:SetVisibility(Value)
+                end}):Popup({Name = "Hide when no keybinds", Flag = "KeybindListHideEmpty", Callback = function(Value)
+                    KeybindList:SetHideWhenEmpty(Value)
                 end})
 
                 MenuSection:Toggle({Name = "Watermark", Flag = "Watermark", Default = true, Callback = function(Value)
@@ -6245,18 +6625,24 @@ local Library do
                 if Library.IndicatorObj then
                     MenuSection:Toggle({Name = "Player Indicator", Flag = "Player Indicator", Default = true, Callback = function(Value)
                         Library.IndicatorObj:SetVisibility(Value)
+                    end}):Popup({Name = "Hide when no target", Flag = "IndicatorHideEmpty", Callback = function(Value)
+                        Library.IndicatorObj:SetHideWhenEmpty(Value)
                     end})
                 end
 
                 if Library.AmmoObj then
                     MenuSection:Toggle({Name = "Ammo", Flag = "Ammo", Default = true, Callback = function(Value)
                         Library.AmmoObj:SetVisibility(Value)
+                    end}):Popup({Name = "Hide when no ammo", Flag = "AmmoHideEmpty", Callback = function(Value)
+                        Library.AmmoObj:SetHideWhenEmpty(Value)
                     end})
                 end
 
                 if Library.HotbarObj then
                     MenuSection:Toggle({Name = "Hotbar", Flag = "Hotbar", Default = true, Callback = function(Value)
                         Library.HotbarObj:SetVisibility(Value)
+                    end}):Popup({Name = "Hide when no target", Flag = "HotbarHideEmpty", Callback = function(Value)
+                        Library.HotbarObj:SetHideWhenEmpty(Value)
                     end})
                 end
 
