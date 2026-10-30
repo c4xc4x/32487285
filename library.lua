@@ -4373,7 +4373,7 @@ local Library do
                     Text = "",
                     AutoButtonColor = false,
                     BackgroundTransparency = 1,
-                    Size = UDim2New(1, 0, 0, 49),
+                    Size = UDim2New(1, 0, 0, 54),
                     BorderSizePixel = 0,
                     TextSize = 12,
                     BackgroundColor3 = FromRGB(255, 255, 255)
@@ -4413,7 +4413,7 @@ local Library do
                     BorderColor3 = FromRGB(0, 0, 0),
                     Image = Page.Icon,
                     AnchorPoint = Vector2New(0.5, 0.5),
-                    Size = UDim2New(0, 25, 0, 25),
+                    Size = UDim2New(0, 40, 0, 40),
                     BackgroundTransparency = 1,
                     Position = UDim2New(0.5, 0, 0.5, 0),
                     BorderSizePixel = 0,
