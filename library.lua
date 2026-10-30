@@ -247,6 +247,12 @@ local Library do
         ["Visuals"] = "\137\080\078\071\013\010\026\010\000\000\000\013\073\072\068\082\000\000\000\064\000\000\000\064\008\006\000\000\000\170\105\113\222\000\000\006\017\073\068\065\084\120\218\237\154\093\136\085\085\020\199\255\251\222\145\004\053\112\040\141\236\067\009\145\100\010\161\050\005\051\021\164\039\013\163\065\065\136\160\151\158\066\250\120\009\161\135\064\005\041\196\162\002\019\146\008\065\009\012\042\098\130\032\123\152\044\035\043\050\012\163\200\082\075\018\027\103\212\209\123\231\215\067\107\195\114\119\238\189\231\206\220\143\049\206\130\203\156\185\231\220\189\215\250\239\181\254\107\173\189\143\084\072\033\133\020\082\072\033\133\020\082\072\033\029\023\032\000\161\155\058\132\014\026\091\178\249\130\036\066\008\213\228\126\057\222\179\251\099\255\151\085\046\155\241\077\003\102\160\092\155\030\016\141\142\043\009\220\038\233\030\073\203\037\221\033\233\038\073\215\219\227\035\146\254\144\116\076\210\065\073\095\133\016\126\205\026\231\090\088\241\171\086\014\088\006\188\003\156\039\191\156\183\223\044\075\060\041\076\122\119\119\215\075\128\129\196\176\043\192\037\251\092\001\070\237\147\126\239\101\000\088\146\053\199\100\099\243\178\093\207\005\222\050\195\000\198\128\203\025\171\252\075\141\235\040\151\237\183\216\088\187\045\140\162\151\133\073\193\001\022\163\132\016\000\158\148\180\069\210\076\187\029\227\118\072\210\105\073\055\074\058\036\233\115\073\131\146\110\177\251\191\073\090\042\105\137\164\251\037\157\073\056\034\146\232\089\073\155\067\008\175\027\000\161\171\220\224\086\189\007\216\154\172\030\192\105\251\123\004\088\010\204\202\049\230\044\123\246\072\050\134\247\162\151\129\158\174\134\132\083\096\054\112\208\197\120\021\024\002\254\006\142\003\079\000\051\018\146\236\049\082\235\073\174\075\238\185\025\246\219\227\054\214\144\141\029\057\226\032\048\219\235\210\013\227\251\076\193\184\066\094\193\237\192\252\196\240\144\147\079\060\016\243\109\172\040\085\160\098\215\063\002\119\118\020\004\103\252\114\224\140\091\249\168\084\197\184\064\046\060\194\056\137\181\199\253\255\052\112\214\129\016\129\254\019\088\222\017\016\156\241\253\142\229\043\166\016\192\009\224\097\183\226\165\090\025\035\186\188\011\137\076\160\252\056\192\074\155\035\245\132\081\160\191\173\032\000\083\236\239\122\151\222\042\078\137\067\192\156\122\074\228\033\172\090\207\056\240\231\000\095\056\240\043\046\093\174\247\186\182\195\248\181\134\124\053\089\249\247\128\233\121\140\007\166\000\143\000\175\000\031\001\031\003\111\000\027\035\089\214\001\033\142\049\221\230\036\209\165\010\172\109\041\008\014\249\021\192\176\161\237\171\181\221\209\117\107\053\061\078\241\213\192\183\117\074\224\159\129\013\013\064\040\185\080\218\157\084\153\099\166\227\138\150\132\067\098\252\136\067\252\156\145\207\142\070\012\239\140\127\202\041\091\113\196\025\175\061\168\219\026\128\016\028\016\059\076\151\115\206\035\071\038\012\066\194\246\222\248\088\144\236\108\196\242\206\248\149\025\196\149\037\158\221\031\203\001\066\212\113\103\146\138\035\008\227\203\014\078\241\062\067\054\085\110\175\197\114\185\142\241\193\062\215\001\199\220\202\055\146\024\203\103\129\027\234\237\026\185\140\050\197\116\242\197\024\166\123\095\083\032\056\215\090\000\156\076\216\022\096\111\158\237\044\007\226\186\038\140\247\241\012\176\169\145\242\094\015\007\130\215\247\036\176\176\030\071\253\039\182\128\155\129\159\050\242\252\190\188\085\157\115\207\215\050\136\179\145\196\212\246\126\158\244\153\112\194\190\140\112\059\105\021\101\168\011\130\083\122\187\139\169\056\200\001\095\188\052\225\073\003\227\240\128\008\248\247\222\200\028\027\049\177\168\058\224\230\140\156\181\063\011\204\090\134\076\139\227\186\150\185\103\156\237\115\105\002\137\104\060\191\013\166\107\045\155\026\162\024\128\121\073\252\087\019\020\155\009\129\055\039\016\002\003\121\098\055\009\129\253\009\153\098\132\122\159\223\184\201\227\186\011\129\083\117\072\176\212\128\004\035\000\027\039\064\130\155\115\146\096\169\014\009\158\114\153\160\212\108\026\092\232\058\176\074\146\006\067\131\002\040\166\193\025\192\239\182\162\213\028\198\199\030\227\002\112\107\131\010\051\056\175\221\155\209\153\158\115\025\160\103\188\133\208\178\026\133\208\158\070\187\181\014\200\071\051\114\116\045\227\099\151\249\076\142\066\040\142\191\167\070\033\244\096\171\170\193\180\020\142\158\176\171\137\106\112\091\226\226\149\164\177\242\028\241\118\061\112\147\042\112\087\006\184\035\237\234\007\134\157\043\071\055\107\166\031\120\220\241\074\150\012\001\207\213\027\047\163\015\240\068\221\218\102\040\163\029\094\229\144\174\184\253\191\087\157\082\141\186\184\089\192\038\107\103\191\003\142\002\031\002\207\003\115\235\229\124\007\100\201\230\028\074\116\185\002\172\106\247\158\064\127\082\105\093\048\212\223\005\166\229\233\231\039\184\033\050\205\230\026\182\185\125\154\238\111\139\241\025\074\108\072\170\182\081\219\185\253\018\088\090\143\023\098\252\038\167\072\165\116\087\184\070\188\247\001\135\109\174\209\132\080\055\116\122\095\112\141\059\239\243\037\231\041\224\161\086\028\101\037\032\109\000\190\113\174\094\113\231\136\107\186\181\051\188\216\145\090\084\234\047\251\127\043\208\219\130\109\241\094\096\139\091\233\139\073\145\179\184\219\103\003\243\140\200\124\005\023\093\243\184\109\162\102\186\187\165\185\114\086\008\216\247\235\221\185\067\037\073\193\071\129\121\093\049\062\131\149\123\237\056\059\221\159\139\064\012\002\119\001\051\115\140\057\211\158\029\116\096\166\189\196\190\232\093\019\061\026\107\201\225\168\123\009\226\069\073\207\074\154\042\169\106\221\100\201\014\053\127\144\180\064\210\097\073\159\072\250\204\238\151\237\016\245\001\073\171\036\221\171\127\095\148\184\083\082\175\221\011\246\220\037\073\047\073\122\033\132\080\245\115\079\166\227\241\069\174\035\139\043\056\082\099\007\056\235\026\087\205\121\150\223\015\044\202\179\027\213\245\211\098\183\021\054\088\231\005\137\152\057\070\237\186\214\011\018\131\192\186\086\100\149\078\129\080\074\200\108\053\240\129\021\046\121\101\216\126\179\186\214\184\173\146\118\190\036\085\246\175\194\037\047\073\221\045\233\118\073\023\221\078\205\009\073\095\075\250\084\238\037\169\172\177\174\009\000\018\151\029\011\033\144\124\063\213\136\077\118\255\098\202\043\146\074\237\050\188\099\000\036\205\080\124\081\114\044\101\111\051\184\172\014\191\040\025\186\200\021\087\205\157\122\072\033\133\020\082\072\033\133\020\082\072\033\133\180\087\254\001\104\007\110\121\009\240\180\251\000\000\000\000\073\069\078\068\174\066\096\130",
     }
 
+    -- Iconos de los tabs de la izquierda (SubPage) segun su posicion, si no se pasa Icon
+    Library.SubIcons = {
+        [1] = "rbxassetid://15571376653",
+        [2] = "rbxassetid://7992557358"
+    }
+
     -- Icono automatico segun la posicion del tab (el 2 se queda como esta)
     Library.TabIcons = {
         [1] = "Aim",
@@ -1181,6 +1187,192 @@ local Library do
     end
 
     do 
+
+        -- Menu de clic derecho del colorpicker: Copy color / Paste color
+        Library.ColorClipboard = nil
+
+        Library.GetColorMenu = function(self)
+            if Library.ColorMenu then
+                return Library.ColorMenu
+            end
+
+            local Menu = { Target = nil, IsOpen = false }
+            local Items = { }
+            local Z = 200
+
+            Items["Window"] = Instances:Create("Frame", {
+                Theme = {BackgroundColor3 = "Background"},
+                Parent = Library.UnusedHolder.Instance,
+                Name = "\0",
+                Visible = false,
+                Size = UDim2New(0, 120, 0, 52),
+                BorderSizePixel = 0,
+                ZIndex = Z,
+                BackgroundColor3 = Library.Theme["Background"]
+            })
+
+            Instances:Create("UIStroke", {
+                Theme = {Color = "Outline"},
+                Parent = Items["Window"].Instance,
+                Name = "\0",
+                Color = Library.Theme["Outline"],
+                LineJoinMode = Enum.LineJoinMode.Miter,
+                ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+            })
+            Instances:Create("UIStroke", {
+                Theme = {Color = "Border"},
+                Parent = Items["Window"].Instance,
+                Name = "\0",
+                Color = Library.Theme["Border"],
+                LineJoinMode = Enum.LineJoinMode.Miter,
+                ApplyStrokeMode = Enum.ApplyStrokeMode.Border,
+                BorderOffset = UDimNew(0, 1)
+            })
+            Instances:Create("UIListLayout", {
+                Parent = Items["Window"].Instance,
+                Name = "\0",
+                Padding = UDimNew(0, 2),
+                SortOrder = Enum.SortOrder.LayoutOrder
+            })
+
+            local AddButton = function(Text, Callback, IsEnabled)
+                local Button = Instances:Create("TextButton", {
+                    Parent = Items["Window"].Instance,
+                    Name = "\0",
+                    FontFace = Library.MenuFont,
+                    TextColor3 = FromRGB(0, 0, 0),
+                    BorderColor3 = FromRGB(0, 0, 0),
+                    Text = "",
+                    AutoButtonColor = false,
+                    BackgroundTransparency = 1,
+                    Size = UDim2New(1, 0, 0, 25),
+                    BorderSizePixel = 0,
+                    TextSize = 12,
+                    ZIndex = Z + 1,
+                    BackgroundColor3 = FromRGB(255, 255, 255)
+                })
+
+                local Label = Instances:Create("TextLabel", {
+                    Parent = Button.Instance,
+                    Name = "\0",
+                    FontFace = Library.MenuFont,
+                    TextColor3 = Library.Theme["Text"],
+                    BorderColor3 = FromRGB(0, 0, 0),
+                    Text = Text,
+                    AnchorPoint = Vector2New(0, 0.5),
+                    Size = UDim2New(1, -20, 0, 15),
+                    BackgroundTransparency = 1,
+                    Position = UDim2New(0, 10, 0.5, -1),
+                    BorderSizePixel = 0,
+                    TextXAlignment = Enum.TextXAlignment.Left,
+                    TextSize = 12,
+                    ZIndex = Z + 3,
+                    BackgroundColor3 = FromRGB(255, 255, 255)
+                })  Label:AddToTheme({TextColor3 = function()
+                    return Library.Theme["Text"]
+                end})
+
+                local Background = Instances:Create("Frame", {
+                    Theme = {BackgroundColor3 = "Hovered Element"},
+                    Parent = Button.Instance,
+                    Name = "\0",
+                    BackgroundTransparency = 1,
+                    BorderColor3 = FromRGB(0, 0, 0),
+                    Size = UDim2New(1, 0, 1, 0),
+                    BorderSizePixel = 0,
+                    ZIndex = Z + 2,
+                    BackgroundColor3 = Library.Theme["Hovered Element"]
+                })
+
+                Button:OnHover(function()
+                    if IsEnabled and not IsEnabled() then return end
+                    Background:Tween(nil, {BackgroundTransparency = 0})
+                end)
+                Button:OnHoverLeave(function()
+                    Background:Tween(nil, {BackgroundTransparency = 1})
+                end)
+                Button:Connect("MouseButton1Click", function()
+                    if IsEnabled and not IsEnabled() then return end
+                    Library:SafeCall(Callback)
+                    Menu:Close()
+                end)
+
+                return Label
+            end
+
+            AddButton("Copy color", function()
+                local Target = Menu.Target
+                if not Target then return end
+
+                Library.ColorClipboard = { Color = Target.Color, Alpha = Target.Alpha }
+                pcall(function() Library:Notification("color copied", 2, Library.Theme.Accent) end)
+            end)
+
+            local PasteLabel = AddButton("Paste color", function()
+                local Target = Menu.Target
+                local Clip = Library.ColorClipboard
+                if not Target or not Clip then return end
+
+                if Target.Rainbow then
+                    Target:SetRainbow(false)
+                end
+                Target:Set(Clip.Color, Clip.Alpha)
+            end, function()
+                return Library.ColorClipboard ~= nil
+            end)
+
+            function Menu:Close()
+                Menu.IsOpen = false
+                Menu.Target = nil
+                Items["Window"].Instance.Visible = false
+                Items["Window"].Instance.Parent = Library.UnusedHolder.Instance
+            end
+
+            function Menu:Open(Target)
+                Menu.Target = Target
+                Menu.IsOpen = true
+                Menu.OpenedAt = os.clock()
+
+                -- Paste se ve apagado si todavia no se copio ningun color
+                PasteLabel.Instance.TextTransparency = Library.ColorClipboard and 0 or 0.5
+
+                local Window = Items["Window"].Instance
+                local MousePos = UserInputService:GetMouseLocation()
+                local Camera = Workspace.CurrentCamera
+                local Viewport = Camera and Camera.ViewportSize or Vector2New(1920, 1080)
+
+                Window.Parent = Library.Holder.Instance
+                Window.Position = UDim2New(
+                    0, MathClamp(MousePos.X + 4, 0, math.max(Viewport.X - Window.AbsoluteSize.X - 4, 0)),
+                    0, MathClamp(MousePos.Y + 4, 0, math.max(Viewport.Y - Window.AbsoluteSize.Y - 4, 0))
+                )
+                Window.Visible = true
+            end
+
+            -- cerrar al hacer clic fuera del menu
+            Library:Connect(UserInputService.InputBegan, function(Input)
+                if not Menu.IsOpen then return end
+                if Input.UserInputType ~= Enum.UserInputType.MouseButton1 and Input.UserInputType ~= Enum.UserInputType.MouseButton2 then
+                    return
+                end
+
+                -- el mismo clic que abre el menu no debe cerrarlo
+                if os.clock() - (Menu.OpenedAt or 0) < 0.15 then return end
+
+                local Window = Items["Window"].Instance
+                local Mouse = UserInputService:GetMouseLocation()
+                local Pos, Size = Window.AbsolutePosition, Window.AbsoluteSize
+                local Inside = Mouse.X >= Pos.X and Mouse.X <= Pos.X + Size.X and Mouse.Y >= Pos.Y and Mouse.Y <= Pos.Y + Size.Y
+
+                if not Inside then
+                    Menu:Close()
+                end
+            end)
+
+            Library.ColorMenu = Menu
+            return Menu
+        end
+
         Library.CreateColorpicker = function(self, Data)
             local Colorpicker = {
                 Flag = Data.Flag,
@@ -1837,6 +2029,13 @@ local Library do
                 Colorpicker:SetOpen(not Colorpicker.IsOpen)
             end)
 
+            Items["ColorpickerButton"]:Connect("MouseButton2Down", function()
+                if Colorpicker.IsOpen then
+                    Colorpicker:SetOpen(false)
+                end
+                Library:GetColorMenu():Open(Colorpicker)
+            end)
+
             Items["RainbowButton"]:Connect("MouseButton1Down", function()
                 Colorpicker:SetRainbow(not Colorpicker.Rainbow)
             end)
@@ -1850,228 +2049,6 @@ local Library do
             end
 
             return Colorpicker, Items 
-        end
-
-        -- Popup de clic derecho con un toggle (misma ventana y animacion que el menu de Keybind)
-        Library.CreateTogglePopup = function(self, Data)
-            local Popup = {
-                Flag = Data.Flag,
-                Value = false,
-                IsOpen = false
-            }
-
-            local Items = { } do
-                Items["Window"] = Instances:Create("Frame", {
-                    Theme = {BackgroundColor3 = "Background"},
-                    Parent = Library.UnusedHolder.Instance,
-                    Name = "\0",
-                    Position = UDim2New(0, 0, 0, 0),
-                    BorderColor3 = FromRGB(0, 0, 0),
-                    Visible = false,
-                    Size = UDim2New(0, math.max(110, #Data.Name * 7 + 38), 0, 25),
-                    BorderSizePixel = 2,
-                    BackgroundColor3 = Library.Theme["Background"]
-                })
-
-                Instances:Create("UIStroke", {
-                    Theme = {Color = "Outline"},
-                    Parent = Items["Window"].Instance,
-                    Name = "\0",
-                    Color = Library.Theme["Outline"],
-                    LineJoinMode = Enum.LineJoinMode.Miter,
-                    ApplyStrokeMode = Enum.ApplyStrokeMode.Border
-                })
-
-                Instances:Create("UIStroke", {
-                    Theme = {Color = "Border"},
-                    Parent = Items["Window"].Instance,
-                    Name = "\0",
-                    Color = Library.Theme["Border"],
-                    LineJoinMode = Enum.LineJoinMode.Miter,
-                    ApplyStrokeMode = Enum.ApplyStrokeMode.Border,
-                    BorderOffset = UDimNew(0, 1)
-                })
-
-                Items["Row"] = Instances:Create("TextButton", {
-                    Parent = Items["Window"].Instance,
-                    Name = "\0",
-                    FontFace = Library.MenuFont,
-                    TextColor3 = FromRGB(0, 0, 0),
-                    BorderColor3 = FromRGB(0, 0, 0),
-                    Text = "",
-                    AutoButtonColor = false,
-                    BackgroundTransparency = 1,
-                    Size = UDim2New(1, 0, 1, 0),
-                    BorderSizePixel = 0,
-                    TextSize = 12,
-                    BackgroundColor3 = FromRGB(255, 255, 255)
-                })
-
-                Items["Indicator"] = Instances:Create("Frame", {
-                    Parent = Items["Row"].Instance,
-                    Name = "\0",
-                    BorderColor3 = FromRGB(0, 0, 0),
-                    AnchorPoint = Vector2New(0, 0.5),
-                    Position = UDim2New(0, 10, 0.5, 0),
-                    Size = UDim2New(0, 9, 0, 9),
-                    BorderSizePixel = 2,
-                    BackgroundColor3 = Library.Theme["Element 2"]
-                })  Items["Indicator"]:AddToTheme({BackgroundColor3 = function()
-                    return Library.Theme["Element 2"]
-                end})
-
-                Instances:Create("UIStroke", {
-                    Theme = {Color = "Outline"},
-                    Parent = Items["Indicator"].Instance,
-                    Name = "\0",
-                    Color = Library.Theme["Outline"],
-                    LineJoinMode = Enum.LineJoinMode.Miter,
-                    ApplyStrokeMode = Enum.ApplyStrokeMode.Border
-                })
-
-                Instances:Create("UIGradient", {
-                    Parent = Items["Indicator"].Instance,
-                    Name = "\0",
-                    Rotation = 90,
-                    Color = RGBSequence{RGBSequenceKeypoint(0, FromRGB(255, 255, 255)), RGBSequenceKeypoint(1, FromRGB(163, 163, 163))}
-                })
-
-                Items["Text"] = Instances:Create("TextLabel", {
-                    Theme = {TextColor3 = "Text"},
-                    Parent = Items["Row"].Instance,
-                    Name = "\0",
-                    FontFace = Library.MenuFont,
-                    TextColor3 = Library.Theme["Text"],
-                    BorderColor3 = FromRGB(0, 0, 0),
-                    Text = Data.Name,
-                    AnchorPoint = Vector2New(0, 0.5),
-                    Size = UDim2New(0, 0, 0, 15),
-                    Position = UDim2New(0, 27, 0.5, -2),
-                    BackgroundTransparency = 1,
-                    TextXAlignment = Enum.TextXAlignment.Left,
-                    BorderSizePixel = 0,
-                    AutomaticSize = Enum.AutomaticSize.X,
-                    TextSize = 12,
-                    BackgroundColor3 = FromRGB(255, 255, 255)
-                })
-
-                Items["Row"]:OnHover(function()
-                    if Popup.Value then return end
-                    Items["Indicator"]:Tween(nil, {BackgroundColor3 = Library.Theme["Hovered Element"]})
-                end)
-
-                Items["Row"]:OnHoverLeave(function()
-                    if Popup.Value then return end
-                    Items["Indicator"]:Tween(nil, {BackgroundColor3 = Library.Theme["Element 2"]})
-                end)
-            end
-
-            function Popup:Get()
-                return Popup.Value
-            end
-
-            function Popup:Set(Value)
-                Popup.Value = Value
-                Library.Flags[Popup.Flag] = Value
-
-                if Popup.Value then
-                    Items["Indicator"]:ChangeItemTheme({BackgroundColor3 = "Accent"})
-                    Items["Indicator"]:Tween(nil, {BackgroundColor3 = Library.Theme.Accent})
-                else
-                    Items["Indicator"]:ChangeItemTheme({BackgroundColor3 = function()
-                        return Library.Theme["Element 2"]
-                    end})
-                    Items["Indicator"]:Tween(nil, {BackgroundColor3 = Library.Theme["Element 2"]})
-                end
-
-                if Data.Callback then
-                    Library:SafeCall(Data.Callback, Popup.Value)
-                end
-            end
-
-            local Debounce = false
-
-            function Popup:SetOpen(Bool)
-                if Debounce then
-                    return
-                end
-
-                Popup.IsOpen = Bool
-
-                Debounce = true
-
-                if Popup.IsOpen then
-                    local Mouse = UserInputService:GetMouseLocation()
-
-                    Items["Window"].Instance.Position = UDim2New(0, Mouse.X, 0, Mouse.Y)
-                    Items["Window"].Instance.Visible = true
-                    Items["Window"].Instance.Parent = Library.Holder.Instance
-
-                    for Index, Value in Library.OpenFrames do
-                        Value:SetOpen(false)
-                    end
-
-                    Library.OpenFrames[Popup] = Popup
-                else
-                    if Library.OpenFrames[Popup] then
-                        Library.OpenFrames[Popup] = nil
-                    end
-                end
-
-                local Descendants = Items["Window"].Instance:GetDescendants()
-                TableInsert(Descendants, Items["Window"].Instance)
-
-                local NewTween
-
-                for Index, Value in Descendants do
-                    local TransparencyProperty = Tween:GetProperty(Value)
-
-                    if not TransparencyProperty then
-                        continue
-                    end
-
-                    for _, Property in TransparencyProperty do
-                        NewTween = Tween:FadeItem(Value, Property, Bool, Library.FadeSpeed)
-                    end
-                end
-
-                NewTween.Tween.Completed:Connect(function()
-                    Debounce = false
-                    Items["Window"].Instance.Visible = Popup.IsOpen
-                    task.wait(0.2)
-                    Items["Window"].Instance.Parent = not Popup.IsOpen and Library.UnusedHolder.Instance or Library.Holder.Instance
-                end)
-            end
-
-            Items["Row"]:Connect("MouseButton1Down", function()
-                Popup:Set(not Popup.Value)
-            end)
-
-            if Data.Button then
-                Data.Button:Connect("MouseButton2Down", function()
-                    Popup:SetOpen(not Popup.IsOpen)
-                end)
-            end
-
-            Library:Connect(UserInputService.InputBegan, function(Input)
-                if Input.UserInputType ~= Enum.UserInputType.MouseButton1 or not Popup.IsOpen then
-                    return
-                end
-
-                if Library:IsMouseOverFrame(Items["Window"]) then
-                    return
-                end
-
-                Popup:SetOpen(false)
-            end)
-
-            Popup:Set(Data.Default or false)
-
-            Library.SetFlags[Popup.Flag] = function(Value)
-                Popup:Set(Value)
-            end
-
-            return Popup, Items
         end
 
         Library.CreateKeybind = function(self, Data)
@@ -2888,22 +2865,11 @@ local Library do
                 })                
             end
 
-            local Fader = Library:CreateFader(Items["KeybindsList"].Instance)
-            Fader.Empty = true
-
-            local Active = 0
-
             Items["KeybindsList"]:MakeDraggable()
             Items["KeybindsList"]:MakeResizeable(Vector2New(130, 0), Vector2New(9999, 9999), {Thickness = 4, AutoHeight = true, Sides = {"L", "R"}})
 
             function KeybindList:SetVisibility(Bool)
-                Fader.Enabled = Bool
-                Fader:Update()
-            end
-
-            function KeybindList:SetHideWhenEmpty(Bool)
-                Fader.HideWhenEmpty = Bool
-                Fader:Update()
+                Items["KeybindsList"].Instance.Visible = Bool
             end
 
             function KeybindList:Add(Name, Mode)
@@ -2952,106 +2918,14 @@ local Library do
                     NewKeyMode.Instance.Text = Mode
                 end
 
-                local KeyActive = false
-
                 function NewKey:Set(Bool)
                     NewKey.Instance.Visible = Bool
-
-                    if Bool ~= KeyActive then
-                        KeyActive = Bool
-                        Active = Active + (Bool and 1 or -1)
-
-                        Fader.Empty = Active <= 0
-                        Fader:Update()
-                    end
                 end
 
                 return NewKey
             end
 
             return KeybindList
-        end
-
-        -- Fader reutilizable: mismo fade que usa la UI principal / watermark
-        -- Visible final = Enabled (toggle del menu) y no (HideWhenEmpty y Empty)
-        Library.CreateFader = function(self, Frame)
-            local Fader = {
-                Visible = Frame.Visible,
-                Fading = false,
-                Pending = nil,
-
-                Enabled = true,
-                HideWhenEmpty = false,
-                Empty = false
-            }
-
-            local Apply
-
-            Apply = function(Bool)
-                Fader.Fading = true
-                Fader.Visible = Bool
-
-                if Bool then
-                    Frame.Visible = true
-                end
-
-                local Descendants = Frame:GetDescendants()
-                TableInsert(Descendants, Frame)
-
-                local NewTween
-
-                for Index, Value in Descendants do
-                    local TransparencyProperty = Tween:GetProperty(Value)
-
-                    if not TransparencyProperty then
-                        continue
-                    end
-
-                    for _, Property in TransparencyProperty do
-                        NewTween = Tween:FadeItem(Value, Property, Bool, Library.FadeSpeed)
-                    end
-                end
-
-                local Finish = function()
-                    Fader.Fading = false
-
-                    if not Fader.Visible then
-                        Frame.Visible = false
-                    end
-
-                    local Next = Fader.Pending
-                    Fader.Pending = nil
-
-                    if Next ~= nil and Next ~= Fader.Visible then
-                        Apply(Next)
-                    end
-                end
-
-                if NewTween then
-                    NewTween.Tween.Completed:Connect(Finish)
-                else
-                    Finish()
-                end
-            end
-
-            function Fader:Set(Bool)
-                if Fader.Fading then
-                    Fader.Pending = Bool
-                    return
-                end
-
-                if Bool == Fader.Visible then
-                    return
-                end
-
-                Apply(Bool)
-            end
-
-            function Fader:Update()
-                Fader:Set(Fader.Enabled and not (Fader.HideWhenEmpty and Fader.Empty))
-            end
-
-            return Fader
         end
 
         -- Panel base con el mismo estilo que el Keybind List (header + liner + contenido)
@@ -3306,15 +3180,9 @@ local Library do
                 })
             end
 
-            local Fader = Library:CreateFader(Items["Panel"].Instance)
-            Fader.Empty = true
-
             function Indicator:SetPlayer(Player)
                 Indicator.Player = Player
                 Indicator.Health = -1
-
-                Fader.Empty = Player == nil
-                Fader:Update()
 
                 if Player then
                     Items["Name"].Instance.Text = Player.Name
@@ -3326,13 +3194,7 @@ local Library do
             end
 
             function Indicator:SetVisibility(Bool)
-                Fader.Enabled = Bool
-                Fader:Update()
-            end
-
-            function Indicator:SetHideWhenEmpty(Bool)
-                Fader.HideWhenEmpty = Bool
-                Fader:Update()
+                Items["Panel"].Instance.Visible = Bool
             end
 
             Library:Connect(RunService.RenderStepped, function()
@@ -3468,25 +3330,9 @@ local Library do
                 end
             end
 
-            local Fader = Library:CreateFader(Items["Panel"].Instance)
-            Fader.Empty = true
-
             function Hotbar:SetVisibility(Bool)
-                Fader.Enabled = Bool
-                Fader:Update()
+                Items["Panel"].Instance.Visible = Bool
             end
-
-            function Hotbar:SetHideWhenEmpty(Bool)
-                Fader.HideWhenEmpty = Bool
-                Fader:Update()
-            end
-
-            Library:Connect(RunService.RenderStepped, function()
-                local Target = Library.IndicatorObj and Library.IndicatorObj.Player
-
-                Fader.Empty = Target == nil
-                Fader:Update()
-            end)
 
             Hotbar:SetItems({ })
 
@@ -3754,17 +3600,8 @@ local Library do
                 return nil
             end
 
-            local Fader = Library:CreateFader(Items["Panel"].Instance)
-            Fader.Empty = true
-
             function Ammo:SetVisibility(Bool)
-                Fader.Enabled = Bool
-                Fader:Update()
-            end
-
-            function Ammo:SetHideWhenEmpty(Bool)
-                Fader.HideWhenEmpty = Bool
-                Fader:Update()
+                Items["Panel"].Instance.Visible = Bool
             end
 
             Library:Connect(RunService.RenderStepped, function()
@@ -3796,9 +3633,6 @@ local Library do
                     Ammo.TrackedMax = math.max(Ammo.TrackedMax, Current)
                     Max = Ammo.TrackedMax
                 end
-
-                Fader.Empty = Current == nil
-                Fader:Update()
 
                 local Signature = StringFormat("%s|%s|%s|%s", Name, Texture, tostring(Current), tostring(Max))
 
@@ -4292,7 +4126,7 @@ local Library do
                     BackgroundTransparency = 1,
                     Position = UDim2New(0, 0, 0, 46),
                     BorderColor3 = FromRGB(0, 0, 0),
-                    Size = UDim2New(0, 68, 1, -71),
+                    Size = UDim2New(0, 74, 1, -71),
                     BorderSizePixel = 0,
                     BackgroundColor3 = FromRGB(255, 255, 255)
                 })
@@ -4445,9 +4279,9 @@ local Library do
                     Name = "\0",
                     Visible = false,
                     BackgroundTransparency = 1,
-                    Position = UDim2New(0, 69, 0, 45),
+                    Position = UDim2New(0, 75, 0, 45),
                     BorderColor3 = FromRGB(0, 0, 0),
-                    Size = UDim2New(1, -69, 1, -70),
+                    Size = UDim2New(1, -75, 1, -70),
                     BorderSizePixel = 0,
                     BackgroundColor3 = FromRGB(255, 255, 255)
                 })
@@ -4524,7 +4358,7 @@ local Library do
                 Page = self,
 
                 Name = Data.Name or Data.name or "SubPage",
-                Icon = Data.Icon or Data.icon or "rbxassetid://86962395649126",
+                Icon = Data.Icon or Data.icon or Library.SubIcons[#self.SubPages + 1] or "rbxassetid://86962395649126",
                 Items = { },
                 Active = false
             }
@@ -4539,7 +4373,7 @@ local Library do
                     Text = "",
                     AutoButtonColor = false,
                     BackgroundTransparency = 1,
-                    Size = UDim2New(1, 0, 0, 44),
+                    Size = UDim2New(1, 0, 0, 49),
                     BorderSizePixel = 0,
                     TextSize = 12,
                     BackgroundColor3 = FromRGB(255, 255, 255)
@@ -4579,7 +4413,7 @@ local Library do
                     BorderColor3 = FromRGB(0, 0, 0),
                     Image = Page.Icon,
                     AnchorPoint = Vector2New(0.5, 0.5),
-                    Size = UDim2New(0, 22, 0, 22),
+                    Size = UDim2New(0, 25, 0, 25),
                     BackgroundTransparency = 1,
                     Position = UDim2New(0.5, 0, 0.5, 0),
                     BorderSizePixel = 0,
@@ -4743,7 +4577,7 @@ local Library do
                 Items["Text"] = Instances:Create("TextLabel", {
                     Parent = Items["Outline"].Instance,
                     Name = "\0",
-                    FontFace = Library.TitleFont,
+                    FontFace = Library.MenuFont,
                     TextColor3 = Library.Theme["Text"],
                     BorderColor3 = FromRGB(0, 0, 0),
                     Text = Section.Name,
@@ -5031,19 +4865,6 @@ local Library do
                 })
 
                 return NewKeybind
-            end
-
-            -- clic derecho sobre el toggle -> ventana con un toggle extra
-            function Toggle:Popup(Data)
-                Data = Data or { }
-
-                return Library:CreateTogglePopup({
-                    Name = Data.Name or Data.name or "Option",
-                    Flag = Data.Flag or Data.flag or Library:NextFlag(),
-                    Default = Data.Default or Data.default or false,
-                    Callback = Data.Callback or Data.callback or function() end,
-                    Button = Items["Toggle"]
-                })
             end
 
             Items["Toggle"]:Connect("MouseButton1Down", function()
@@ -6614,8 +6435,6 @@ local Library do
             local MenuSection = MenuSubPage:Section({Name = "Menu"}) do
                 MenuSection:Toggle({Name = "Keybind List", Flag = "Keybind List", Default = true, Callback = function(Value)
                     KeybindList:SetVisibility(Value)
-                end}):Popup({Name = "Hide when no keybinds", Flag = "KeybindListHideEmpty", Callback = function(Value)
-                    KeybindList:SetHideWhenEmpty(Value)
                 end})
 
                 MenuSection:Toggle({Name = "Watermark", Flag = "Watermark", Default = true, Callback = function(Value)
@@ -6625,24 +6444,18 @@ local Library do
                 if Library.IndicatorObj then
                     MenuSection:Toggle({Name = "Player Indicator", Flag = "Player Indicator", Default = true, Callback = function(Value)
                         Library.IndicatorObj:SetVisibility(Value)
-                    end}):Popup({Name = "Hide when no target", Flag = "IndicatorHideEmpty", Callback = function(Value)
-                        Library.IndicatorObj:SetHideWhenEmpty(Value)
                     end})
                 end
 
                 if Library.AmmoObj then
                     MenuSection:Toggle({Name = "Ammo", Flag = "Ammo", Default = true, Callback = function(Value)
                         Library.AmmoObj:SetVisibility(Value)
-                    end}):Popup({Name = "Hide when no ammo", Flag = "AmmoHideEmpty", Callback = function(Value)
-                        Library.AmmoObj:SetHideWhenEmpty(Value)
                     end})
                 end
 
                 if Library.HotbarObj then
                     MenuSection:Toggle({Name = "Hotbar", Flag = "Hotbar", Default = true, Callback = function(Value)
                         Library.HotbarObj:SetVisibility(Value)
-                    end}):Popup({Name = "Hide when no target", Flag = "HotbarHideEmpty", Callback = function(Value)
-                        Library.HotbarObj:SetHideWhenEmpty(Value)
                     end})
                 end
 
