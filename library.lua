@@ -1235,6 +1235,8 @@ local Library do
                 SortOrder = Enum.SortOrder.LayoutOrder
             })
 
+            local Rows = { }
+
             local AddButton = function(Text, Callback, IsEnabled)
                 local Button = Instances:Create("TextButton", {
                     Parent = Items["Window"].Instance,
@@ -1291,11 +1293,7 @@ local Library do
                 Button:OnHoverLeave(function()
                     Background:Tween(nil, {BackgroundTransparency = 1})
                 end)
-                Button:Connect("MouseButton1Click", function()
-                    if IsEnabled and not IsEnabled() then return end
-                    Library:SafeCall(Callback)
-                    Menu:Close()
-                end)
+                TableInsert(Rows, { Button = Button, Callback = Callback, IsEnabled = IsEnabled })
 
                 return Label
             end
@@ -1356,17 +1354,32 @@ local Library do
                     return
                 end
 
-                -- el mismo clic que abre el menu no debe cerrarlo
-                if os.clock() - (Menu.OpenedAt or 0) < 0.15 then return end
-
                 local Window = Items["Window"].Instance
                 local Mouse = UserInputService:GetMouseLocation()
                 local Pos, Size = Window.AbsolutePosition, Window.AbsoluteSize
                 local Inside = Mouse.X >= Pos.X and Mouse.X <= Pos.X + Size.X and Mouse.Y >= Pos.Y and Mouse.Y <= Pos.Y + Size.Y
 
-                if not Inside then
-                    Menu:Close()
+                if Inside then
+                    -- clic dentro del menu: se detecta la fila aqui (Copy / Paste), sin depender de MouseButton1Click
+                    if Input.UserInputType == Enum.UserInputType.MouseButton1 then
+                        for _, Row in Rows do
+                            local BPos, BSize = Row.Button.Instance.AbsolutePosition, Row.Button.Instance.AbsoluteSize
+                            if Mouse.X >= BPos.X and Mouse.X <= BPos.X + BSize.X and Mouse.Y >= BPos.Y and Mouse.Y <= BPos.Y + BSize.Y then
+                                if not Row.IsEnabled or Row.IsEnabled() then
+                                    Library:SafeCall(Row.Callback)
+                                    Menu:Close()
+                                end
+                                break
+                            end
+                        end
+                    end
+                    return
                 end
+
+                -- el mismo clic que abre el menu no debe cerrarlo
+                if os.clock() - (Menu.OpenedAt or 0) < 0.15 then return end
+
+                Menu:Close()
             end)
 
             Library.ColorMenu = Menu
@@ -5807,6 +5820,8 @@ local Library do
                     BackgroundColor3 = FromRGB(255, 255, 255)
                 })
                 
+                Items["Label"].Instance:SetAttribute("IsLabel", true)
+                
                 Items["EXAMPLAR_"] = Instances:Create("Frame", {
                     Parent = Items["Label"].Instance,
                     Name = "\0",
@@ -5922,6 +5937,17 @@ local Library do
                 Value = ""
             }
 
+            -- si va justo debajo de un Label, el cuadro sube para tener el mismo espacio que Slider / Dropdown
+            local AfterLabel = false do
+                local Last
+                for _, Child in Textbox.Section.Items["ElementsHolder"].Instance:GetChildren() do
+                    if Child:IsA("GuiObject") then
+                        Last = Child
+                    end
+                end
+                AfterLabel = Last ~= nil and Last:GetAttribute("IsLabel") == true
+            end
+
             local Items = { } do
                 Items["Textbox"] = Instances:Create("Frame", {
                     Theme = {BackgroundColor3 = "Element"},
@@ -5930,7 +5956,7 @@ local Library do
                     BackgroundTransparency = 1,
                     Position = UDim2New(0, 1, 0, 1),
                     BorderColor3 = FromRGB(0, 0, 0),
-                    Size = UDim2New(1, -2, 0, 20),
+                    Size = UDim2New(1, 0, 0, AfterLabel and 12 or 20),
                     BorderSizePixel = 0,
                     BackgroundColor3 = Library.Theme["Element"]
                 })
@@ -5944,8 +5970,9 @@ local Library do
                     BorderColor3 = FromRGB(0, 0, 0),
                     Text = "",
                     ClipsDescendants = true,
-                    Size = UDim2New(1, -25, 1, 0),
-                    Position = UDim2New(0, 17, 0, 0),
+                    Size = UDim2New(1, -25, 0, 20),
+                    Position = UDim2New(0, 17, 0, AfterLabel and -8 or 0),
+                    BorderSizePixel = 2,
                     PlaceholderColor3 = Library.Theme["Inactive Text"],
                     CursorPosition = -1,
                     PlaceholderText = Textbox.Placeholder,
@@ -5954,6 +5981,24 @@ local Library do
                     BackgroundColor3 = Library.Theme["Element"]
                 })
                 
+                Instances:Create("UIStroke", {
+                    Theme = {Color = "Outline"},
+                    Parent = Items["Input"].Instance,
+                    Name = "\0",
+                    Color = Library.Theme["Outline"],
+                    LineJoinMode = Enum.LineJoinMode.Miter,
+                    ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+                })
+                Instances:Create("UIStroke", {
+                    Theme = {Color = "Border"},
+                    Parent = Items["Input"].Instance,
+                    Name = "\0",
+                    Color = Library.Theme["Border"],
+                    LineJoinMode = Enum.LineJoinMode.Miter,
+                    ApplyStrokeMode = Enum.ApplyStrokeMode.Border,
+                    BorderOffset = UDimNew(0, 1)
+                })
+
                 Instances:Create("UIPadding", {
                     Parent = Items["Input"].Instance,
                     Name = "\0",
