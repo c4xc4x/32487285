@@ -1237,6 +1237,16 @@ local Library do
 
             local Rows = { }
 
+            -- ejecuta una fila una sola vez por clic (InputBegan y MouseButton1Click pueden llegar los dos)
+            local RunRow = function(Row)
+                if Menu.RunAt and os.clock() - Menu.RunAt < 0.3 then return end
+                if Row.IsEnabled and not Row.IsEnabled() then return end
+
+                Menu.RunAt = os.clock()
+                Library:SafeCall(Row.Callback)
+                Menu:Close()
+            end
+
             local AddButton = function(Text, Callback, IsEnabled)
                 local Button = Instances:Create("TextButton", {
                     Parent = Items["Window"].Instance,
@@ -1302,9 +1312,7 @@ local Library do
                 -- respaldo: si el clic llega como MouseButton1Click (el menu ya se cerro si lo proceso InputBegan)
                 Button:Connect("MouseButton1Click", function()
                     if not Menu.IsOpen then return end
-                    if IsEnabled and not IsEnabled() then return end
-                    Library:SafeCall(Callback)
-                    Menu:Close()
+                    RunRow(Row)
                 end)
 
                 return Label
@@ -1380,10 +1388,7 @@ local Library do
 
                 if Hovered then
                     if Input.UserInputType == Enum.UserInputType.MouseButton1 then
-                        if not Hovered.IsEnabled or Hovered.IsEnabled() then
-                            Library:SafeCall(Hovered.Callback)
-                            Menu:Close()
-                        end
+                        RunRow(Hovered)
                     end
                     return
                 end
@@ -2607,8 +2612,11 @@ local Library do
             return Keybind, Items
         end
 
+        Library.NotifTime = Library.NotifTime or 4
+
         Library.Notification = function(self, Name, Duration, Color)
             Color = Color or Library.Theme.Accent
+            Duration = Library.NotifTime or Duration or 4
             local Items = { } do
                 Items["Notification"] = Instances:Create("Frame", {
                     Theme = {BackgroundColor3 = "Inline"},
@@ -2676,6 +2684,19 @@ local Library do
                     Transparency = NumSequence{NumSequenceKeypoint(0, 0.90625), NumSequenceKeypoint(0.075, 0.9437500238418579), NumSequenceKeypoint(0.427, 0.981249988079071), NumSequenceKeypoint(0.739, 1), NumSequenceKeypoint(1, 1)}
                 })
                 
+                -- linea de 1px abajo (color accent): se vacia de derecha a izquierda mientras dura la notificacion
+                Items["Timer"] = Instances:Create("Frame", {
+                    Theme = {BackgroundColor3 = "Accent"},
+                    Parent = Items["Notification"].Instance,
+                    Name = "\0",
+                    Position = UDim2New(0, -8, 1, -13),
+                    Size = UDim2New(1, 16, 0, 1),
+                    BorderColor3 = FromRGB(0, 0, 0),
+                    BorderSizePixel = 0,
+                    ZIndex = 3,
+                    BackgroundColor3 = Library.Theme["Accent"]
+                })
+
                 Items["Text"] = Instances:Create("TextLabel", {
                     Theme = {TextColor3 = "Text"},
                     Parent = Items["Notification"].Instance,
@@ -2735,6 +2756,8 @@ local Library do
                         Tween:Create(Value, TweenInfoq, {BackgroundTransparency = 0}, true)
                     end
                 end
+
+                Items["Timer"]:Tween(TweenInfo.new(Duration, Enum.EasingStyle.Linear, Enum.EasingDirection.Out), {Size = UDim2New(0, 0, 0, 1)})
 
                 task.delay(Duration, function()
                     for Index, Value in Items["Notification"].Instance:GetDescendants() do
@@ -3189,12 +3212,13 @@ local Library do
                 })
 
                 Items["Fill"] = Instances:Create("Frame", {
+                    Theme = {BackgroundColor3 = "Accent"},
                     Parent = Items["Bar"].Instance,
                     Name = "\0",
                     BorderColor3 = FromRGB(0, 0, 0),
                     Size = UDim2New(0, 0, 1, 0),
                     BorderSizePixel = 0,
-                    BackgroundColor3 = FromRGB(120, 230, 120)
+                    BackgroundColor3 = Library.Theme["Accent"]
                 })
 
                 Instances:Create("UIGradient", {
@@ -3240,8 +3264,7 @@ local Library do
 
                 Items["HealthText"].Instance.Text = tostring(Health)
                 Items["Fill"]:Tween(TweenInfo.new(0.2, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), {
-                    Size = UDim2New(Ratio, 0, 1, 0),
-                    BackgroundColor3 = FromHSV(Ratio * 0.33, 0.75, 0.95)
+                    Size = UDim2New(Ratio, 0, 1, 0)
                 })
             end)
 
@@ -6547,6 +6570,19 @@ local Library do
                     Decimals = 0.01,
                     Callback = function(Value)
                         Library.RainbowSpeed = Value
+                    end
+                })
+
+                MenuSection:Slider({
+                    Name = "Notification time",
+                    Flag = "Notification time",
+                    Default = Library.NotifTime,
+                    Min = 1,
+                    Max = 15,
+                    Decimals = 0.5,
+                    Suffix = " s",
+                    Callback = function(Value)
+                        Library.NotifTime = Value
                     end
                 })
 
