@@ -1286,14 +1286,26 @@ local Library do
                     BackgroundColor3 = Library.Theme["Hovered Element"]
                 })
 
+                local Row = { Button = Button, Callback = Callback, IsEnabled = IsEnabled, Hover = false }
+                TableInsert(Rows, Row)
+
                 Button:OnHover(function()
+                    Row.Hover = true
                     if IsEnabled and not IsEnabled() then return end
                     Background:Tween(nil, {BackgroundTransparency = 0})
                 end)
                 Button:OnHoverLeave(function()
+                    Row.Hover = false
                     Background:Tween(nil, {BackgroundTransparency = 1})
                 end)
-                TableInsert(Rows, { Button = Button, Callback = Callback, IsEnabled = IsEnabled })
+
+                -- respaldo: si el clic llega como MouseButton1Click (el menu ya se cerro si lo proceso InputBegan)
+                Button:Connect("MouseButton1Click", function()
+                    if not Menu.IsOpen then return end
+                    if IsEnabled and not IsEnabled() then return end
+                    Library:SafeCall(Callback)
+                    Menu:Close()
+                end)
 
                 return Label
             end
@@ -1315,6 +1327,7 @@ local Library do
                     Target:SetRainbow(false)
                 end
                 Target:Set(Clip.Color, Clip.Alpha)
+                pcall(function() Library:Notification("color pasted", 2, Library.Theme.Accent) end)
             end, function()
                 return Library.ColorClipboard ~= nil
             end)
@@ -1322,6 +1335,7 @@ local Library do
             function Menu:Close()
                 Menu.IsOpen = false
                 Menu.Target = nil
+                for _, Row in Rows do Row.Hover = false end
                 Items["Window"].Instance.Visible = false
                 Items["Window"].Instance.Parent = Library.UnusedHolder.Instance
             end
@@ -1330,6 +1344,7 @@ local Library do
                 Menu.Target = Target
                 Menu.IsOpen = true
                 Menu.OpenedAt = os.clock()
+                for _, Row in Rows do Row.Hover = false end
 
                 -- Paste se ve apagado si todavia no se copio ningun color
                 PasteLabel.Instance.TextTransparency = Library.ColorClipboard and 0 or 0.5
@@ -1354,23 +1369,20 @@ local Library do
                     return
                 end
 
-                local Window = Items["Window"].Instance
-                local Mouse = UserInputService:GetMouseLocation()
-                local Pos, Size = Window.AbsolutePosition, Window.AbsoluteSize
-                local Inside = Mouse.X >= Pos.X and Mouse.X <= Pos.X + Size.X and Mouse.Y >= Pos.Y and Mouse.Y <= Pos.Y + Size.Y
+                -- fila bajo el mouse (hover real de la GUI, sin comparar coordenadas)
+                local Hovered
+                for _, Row in Rows do
+                    if Row.Hover then
+                        Hovered = Row
+                        break
+                    end
+                end
 
-                if Inside then
-                    -- clic dentro del menu: se detecta la fila aqui (Copy / Paste), sin depender de MouseButton1Click
+                if Hovered then
                     if Input.UserInputType == Enum.UserInputType.MouseButton1 then
-                        for _, Row in Rows do
-                            local BPos, BSize = Row.Button.Instance.AbsolutePosition, Row.Button.Instance.AbsoluteSize
-                            if Mouse.X >= BPos.X and Mouse.X <= BPos.X + BSize.X and Mouse.Y >= BPos.Y and Mouse.Y <= BPos.Y + BSize.Y then
-                                if not Row.IsEnabled or Row.IsEnabled() then
-                                    Library:SafeCall(Row.Callback)
-                                    Menu:Close()
-                                end
-                                break
-                            end
+                        if not Hovered.IsEnabled or Hovered.IsEnabled() then
+                            Library:SafeCall(Hovered.Callback)
+                            Menu:Close()
                         end
                     end
                     return
