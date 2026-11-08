@@ -2978,7 +2978,7 @@ local Library do
         end
 
         -- Panel base con el mismo estilo que el Keybind List (header + liner + contenido)
-        Library.CreatePanel = function(self, Title, Width, Position, AnchorPoint, MinSize)
+        Library.CreatePanel = function(self, Title, Width, Position, AnchorPoint, MinSize, NoResize)
             local Items = { } do
                 Items["Panel"] = Instances:Create("Frame", {
                     Theme = {BackgroundColor3 = "Background"},
@@ -3105,9 +3105,413 @@ local Library do
             end
 
             Items["Panel"]:MakeDraggable()
-            Items["Panel"]:MakeResizeable(MinSize or Vector2New(110, 45), Vector2New(9999, 9999), {Thickness = 4})
+            if not NoResize then
+                Items["Panel"]:MakeResizeable(MinSize or Vector2New(110, 45), Vector2New(9999, 9999), {Thickness = 4})
+            end
 
             return Items
+        end
+
+        -- ESP Preview: panel con el mismo estilo/drag que el resto de la UI y un "Stage" fijo donde el script dibuja el preview.
+        -- Se activa desde Settings (engranaje) > Menu > ESP Preview. El script usa Preview.Stage y Preview.OnVisibility.
+        Library.EspPreview = function(self, StageWidth, StageHeight)
+            local Preview = { OnVisibility = nil }
+
+            local Items = Library:CreatePanel("ESP Preview", StageWidth + 16, UDim2New(0.014, 0, 0.18, 0), nil, nil, true) do
+                Items["Panel"].Instance.Visible = false
+
+                Items["Stage"] = Instances:Create("Frame", {
+                    Parent = Items["Content"].Instance,
+                    Name = "\0",
+                    BorderColor3 = FromRGB(0, 0, 0),
+                    Size = UDim2New(1, 0, 0, StageHeight),
+                    BorderSizePixel = 0,
+                    ClipsDescendants = true,
+                    BackgroundColor3 = FromRGB(12, 12, 12)
+                })
+
+                Instances:Create("UIStroke", {
+                    Theme = {Color = "Outline"},
+                    Parent = Items["Stage"].Instance,
+                    Name = "\0",
+                    Color = Library.Theme["Outline"],
+                    LineJoinMode = Enum.LineJoinMode.Miter,
+                    ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+                })
+
+                Instances:Create("UIStroke", {
+                    Theme = {Color = "Border"},
+                    Parent = Items["Stage"].Instance,
+                    Name = "\0",
+                    Color = Library.Theme["Border"],
+                    LineJoinMode = Enum.LineJoinMode.Miter,
+                    ApplyStrokeMode = Enum.ApplyStrokeMode.Border,
+                    BorderOffset = UDimNew(0, 1)
+                })
+            end
+
+            Preview.Items = Items
+            Preview.Stage = Items["Stage"].Instance
+
+            function Preview:SetVisibility(Bool)
+                Items["Panel"].Instance.Visible = Bool
+                if Preview.OnVisibility then
+                    Library:SafeCall(Preview.OnVisibility, Bool)
+                end
+            end
+
+            Library.PreviewObj = Preview
+            return Preview
+        end
+
+        -- Player list: ventana con el estilo de la UI (panel + section + textbox/label/dropdown reales de la libreria)
+        -- Click en un jugador -> Name / Display Name / User Id. Priority: Enemy / Friendly / Neutral (LocalPlayer = tu).
+        -- Las prioridades se guardan en getgenv().PlayerPriority[UserId]
+        Library.PlayerList = function(self)
+            getgenv().PlayerPriority = getgenv().PlayerPriority or { }
+            local Priority = getgenv().PlayerPriority
+
+            local PlayerList = { Selected = nil, Filter = "" }
+
+            local PrioColors = {
+                Neutral = nil, -- usa el color de texto del tema
+                Friendly = FromRGB(110, 200, 255), -- azul celeste
+                Enemy = FromRGB(255, 60, 60),      -- rojo
+                LocalPlayer = FromRGB(80, 110, 255)
+            }
+            local Options = { "Enemy", "Friendly", "Neutral" }
+
+            local PrioOf = function(Plr)
+                if Plr == LocalPlayer then
+                    return "LocalPlayer"
+                end
+                return Priority[Plr.UserId] or "Neutral"
+            end
+
+            local Items = Library:CreatePanel("Playerlist", 340, UDim2New(0.3, 0, 0.12, 0), nil, Vector2New(300, 100)) do
+                Items["Panel"].Instance.Visible = false
+
+                -- "pagina" falsa: asi se usan Section / Textbox / Label / Dropdown reales de la libreria
+                Items["Holder"] = Instances:Create("Frame", {
+                    Parent = Items["Content"].Instance,
+                    Name = "\0",
+                    BackgroundTransparency = 1,
+                    BorderColor3 = FromRGB(0, 0, 0),
+                    Size = UDim2New(1, 0, 0, 380),
+                    BorderSizePixel = 0,
+                    BackgroundColor3 = FromRGB(255, 255, 255)
+                })
+            end
+
+            local FakePage = setmetatable({
+                Window = nil,
+                Items = { PageContent = Items["Holder"] },
+                SubPages = { }
+            }, Library.Pages)
+
+            local Section = Library.Pages.Section(FakePage, {Name = "Playerlist"})
+            Section.Items["Outline"].Instance.Size = UDim2New(1, 0, 0, 330)
+
+            local ElementsHolder = Section.Items["ElementsHolder"].Instance
+            local FitSection = function()
+                local Height = ElementsHolder.AbsoluteSize.Y + 34
+                Section.Items["Outline"].Instance.Size = UDim2New(1, 0, 0, Height)
+                -- espacio extra debajo para que la lista del dropdown no se considere "fuera" de la ventana
+                Items["Holder"].Instance.Size = UDim2New(1, 0, 0, Height + 70)
+            end
+            Library:Connect(ElementsHolder:GetPropertyChangedSignal("AbsoluteSize"), FitSection)
+
+            -- lista (scroll) con el estilo de los elementos de la UI
+            local ListItems = { } do
+                ListItems["List"] = Instances:Create("Frame", {
+                    Theme = {BackgroundColor3 = "Background"},
+                    Parent = ElementsHolder,
+                    Name = "\0",
+                    BorderColor3 = FromRGB(0, 0, 0),
+                    Size = UDim2New(1, 0, 0, 170),
+                    BorderSizePixel = 0,
+                    ClipsDescendants = true,
+                    BackgroundColor3 = Library.Theme["Background"]
+                })
+
+                Instances:Create("UIStroke", {
+                    Theme = {Color = "Outline"},
+                    Parent = ListItems["List"].Instance,
+                    Name = "\0",
+                    Color = Library.Theme["Outline"],
+                    LineJoinMode = Enum.LineJoinMode.Miter,
+                    ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+                })
+
+                Instances:Create("UIStroke", {
+                    Theme = {Color = "Border"},
+                    Parent = ListItems["List"].Instance,
+                    Name = "\0",
+                    Color = Library.Theme["Border"],
+                    LineJoinMode = Enum.LineJoinMode.Miter,
+                    ApplyStrokeMode = Enum.ApplyStrokeMode.Border,
+                    BorderOffset = UDimNew(0, 1)
+                })
+
+                ListItems["Scroll"] = Instances:Create("ScrollingFrame", {
+                    Parent = ListItems["List"].Instance,
+                    Name = "\0",
+                    Active = true,
+                    AutomaticCanvasSize = Enum.AutomaticSize.Y,
+                    BorderSizePixel = 0,
+                    CanvasSize = UDim2New(0, 0, 0, 0),
+                    ScrollBarImageColor3 = Library.Theme["Accent"],
+                    MidImage = "rbxassetid://81680855285439",
+                    TopImage = "rbxassetid://81680855285439",
+                    BottomImage = "rbxassetid://81680855285439",
+                    BorderColor3 = FromRGB(0, 0, 0),
+                    ScrollBarThickness = 2,
+                    Size = UDim2New(1, 0, 1, 0),
+                    BackgroundTransparency = 1,
+                    BackgroundColor3 = FromRGB(255, 255, 255),
+                    Theme = {ScrollBarImageColor3 = "Accent"}
+                })
+
+                Instances:Create("UIListLayout", {
+                    Parent = ListItems["Scroll"].Instance,
+                    Name = "\0",
+                    Padding = UDimNew(0, 0),
+                    SortOrder = Enum.SortOrder.LayoutOrder
+                })
+            end
+
+            local Search = Section:Textbox({
+                Placeholder = "Type here...",
+                Finished = false,
+                Callback = function(Value)
+                    PlayerList.Filter = tostring(Value or "")
+                    PlayerList:Refresh()
+                end
+            })
+
+            local NameLabel = Section:Label("Name: ??")
+            local DisplayLabel = Section:Label("Display Name: ??")
+            local IdLabel = Section:Label("User Id: ??")
+
+            local Updating = false
+            local PriorityDropdown
+            PriorityDropdown = Section:Dropdown({
+                Name = "Priority",
+                Items = Options,
+                Default = "Neutral",
+                Multi = false,
+                Callback = function(Value)
+                    if Updating then
+                        return
+                    end
+
+                    local Plr = PlayerList.Selected
+                    if type(Value) == "table" then
+                        Value = Value[1]
+                    end
+
+                    if not Plr or Plr == LocalPlayer or not Value then
+                        return
+                    end
+
+                    Priority[Plr.UserId] = (Value ~= "Neutral") and Value or nil
+                    PlayerList:UpdateRow(Plr)
+                end
+            })
+
+            local Rows = { }
+
+            local SetDropdown = function(Plr)
+                Updating = true
+                pcall(function()
+                    if Plr == LocalPlayer then
+                        PriorityDropdown:Refresh({"LocalPlayer"})
+                        PriorityDropdown:Set("LocalPlayer")
+                    else
+                        PriorityDropdown:Refresh(Options)
+                        PriorityDropdown:Set(Plr and PrioOf(Plr) or "Neutral")
+                    end
+                end)
+                Updating = false
+            end
+
+            function PlayerList:UpdateRow(Plr)
+                local Row = Rows[Plr]
+                if not Row then
+                    return
+                end
+
+                local Prio = PrioOf(Plr)
+                Row.Prio.Instance.Text = Prio
+
+                local Color = PrioColors[Prio]
+                if Color then
+                    Row.Prio:ChangeItemTheme({TextColor3 = function() return Color end})
+                    Row.Prio.Instance.TextColor3 = Color
+                else
+                    Row.Prio:ChangeItemTheme({TextColor3 = "Text"})
+                    Row.Prio.Instance.TextColor3 = Library.Theme["Text"]
+                end
+
+                Row.Button.Instance.BackgroundTransparency = (PlayerList.Selected == Plr) and 0 or 1
+            end
+
+            function PlayerList:Select(Plr)
+                local Previous = PlayerList.Selected
+                PlayerList.Selected = Plr
+
+                if Previous then
+                    PlayerList:UpdateRow(Previous)
+                end
+
+                if Plr then
+                    PlayerList:UpdateRow(Plr)
+                end
+
+                NameLabel:SetText("Name: " .. (Plr and Plr.Name or "??"))
+                DisplayLabel:SetText("Display Name: " .. (Plr and Plr.DisplayName or "??"))
+                IdLabel:SetText("User Id: " .. (Plr and tostring(Plr.UserId) or "??"))
+
+                SetDropdown(Plr)
+            end
+
+            local AddRow = function(Plr, Order)
+                local Row = { }
+
+                Row.Button = Instances:Create("TextButton", {
+                    Theme = {BackgroundColor3 = "Element"},
+                    Parent = ListItems["Scroll"].Instance,
+                    Name = "\0",
+                    AutoButtonColor = false,
+                    Text = "",
+                    Active = false,
+                    Selectable = false,
+                    BorderColor3 = FromRGB(0, 0, 0),
+                    BackgroundTransparency = 1,
+                    Size = UDim2New(1, -4, 0, 21),
+                    LayoutOrder = Order,
+                    BorderSizePixel = 0,
+                    BackgroundColor3 = Library.Theme["Element"]
+                })
+
+                Instances:Create("Frame", {
+                    Theme = {BackgroundColor3 = "Border"},
+                    Parent = Row.Button.Instance,
+                    Name = "\0",
+                    AnchorPoint = Vector2New(0, 1),
+                    Position = UDim2New(0, 0, 1, 0),
+                    Size = UDim2New(1, 0, 0, 1),
+                    BorderSizePixel = 0,
+                    BackgroundColor3 = Library.Theme["Border"]
+                })
+
+                Instances:Create("Frame", {
+                    Theme = {BackgroundColor3 = "Border"},
+                    Parent = Row.Button.Instance,
+                    Name = "\0",
+                    AnchorPoint = Vector2New(1, 0),
+                    Position = UDim2New(1, -88, 0, 0),
+                    Size = UDim2New(0, 1, 1, 0),
+                    BorderSizePixel = 0,
+                    BackgroundColor3 = Library.Theme["Border"]
+                })
+
+                Row.Name = Instances:Create("TextLabel", {
+                    Theme = {TextColor3 = "Text"},
+                    Parent = Row.Button.Instance,
+                    Name = "\0",
+                    FontFace = Library.MenuFont,
+                    TextColor3 = Library.Theme["Text"],
+                    BorderColor3 = FromRGB(0, 0, 0),
+                    Text = Plr.Name,
+                    BackgroundTransparency = 1,
+                    Position = UDim2New(0, 8, 0, 0),
+                    Size = UDim2New(1, -100, 1, 0),
+                    BorderSizePixel = 0,
+                    TextXAlignment = Enum.TextXAlignment.Left,
+                    TextTruncate = Enum.TextTruncate.AtEnd,
+                    TextSize = 12,
+                    BackgroundColor3 = FromRGB(255, 255, 255)
+                })
+
+                Row.Prio = Instances:Create("TextLabel", {
+                    Theme = {TextColor3 = "Text"},
+                    Parent = Row.Button.Instance,
+                    Name = "\0",
+                    FontFace = Library.MenuFont,
+                    TextColor3 = Library.Theme["Text"],
+                    BorderColor3 = FromRGB(0, 0, 0),
+                    Text = "Neutral",
+                    BackgroundTransparency = 1,
+                    Position = UDim2New(1, -80, 0, 0),
+                    Size = UDim2New(0, 76, 1, 0),
+                    BorderSizePixel = 0,
+                    TextXAlignment = Enum.TextXAlignment.Left,
+                    TextSize = 12,
+                    BackgroundColor3 = FromRGB(255, 255, 255)
+                })
+
+                Row.Button:Connect("MouseButton1Down", function()
+                    PlayerList:Select(Plr)
+                end)
+
+                Rows[Plr] = Row
+                PlayerList:UpdateRow(Plr)
+            end
+
+            function PlayerList:Refresh()
+                for Plr, Row in Rows do
+                    Row.Button:Clean()
+                end
+                Rows = { }
+
+                local List = Players:GetPlayers()
+                table.sort(List, function(A, B)
+                    if A == LocalPlayer then return true end
+                    if B == LocalPlayer then return false end
+                    return A.Name:lower() < B.Name:lower()
+                end)
+
+                local Filter = PlayerList.Filter:lower()
+                local Order = 0
+
+                for _, Plr in List do
+                    if Filter == "" or Plr.Name:lower():find(Filter, 1, true) or Plr.DisplayName:lower():find(Filter, 1, true) then
+                        Order += 1
+                        AddRow(Plr, Order)
+                    end
+                end
+            end
+
+            function PlayerList:GetPriority(Plr)
+                return PrioOf(Plr)
+            end
+
+            function PlayerList:SetVisibility(Bool)
+                Items["Panel"].Instance.Visible = Bool
+                if Bool then
+                    PlayerList:Refresh()
+                end
+            end
+
+            Library:Connect(Players.PlayerAdded, function()
+                PlayerList:Refresh()
+            end)
+
+            Library:Connect(Players.PlayerRemoving, function(Plr)
+                if PlayerList.Selected == Plr then
+                    PlayerList:Select(nil)
+                end
+                task.defer(function()
+                    PlayerList:Refresh()
+                end)
+            end)
+
+            PlayerList:Refresh()
+            FitSection()
+
+            Library.PlayerListObj = PlayerList
+            return PlayerList
         end
 
         -- Player indicator: avatar (headshot), nombre y barra de vida del jugador
@@ -6537,6 +6941,18 @@ local Library do
                 if Library.HotbarObj then
                     MenuSection:Toggle({Name = "Hotbar", Flag = "Hotbar", Default = true, Callback = function(Value)
                         Library.HotbarObj:SetVisibility(Value)
+                    end})
+                end
+
+                if Library.PlayerListObj then
+                    MenuSection:Toggle({Name = "Player List", Flag = "Player List", Default = false, Callback = function(Value)
+                        Library.PlayerListObj:SetVisibility(Value)
+                    end})
+                end
+
+                if Library.PreviewObj then
+                    MenuSection:Toggle({Name = "ESP Preview", Flag = "ESP Preview", Default = false, Callback = function(Value)
+                        Library.PreviewObj:SetVisibility(Value)
                     end})
                 end
 
