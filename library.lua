@@ -3197,7 +3197,7 @@ local Library do
                     Name = "\0",
                     BackgroundTransparency = 1,
                     BorderColor3 = FromRGB(0, 0, 0),
-                    Size = UDim2New(1, 0, 0, 300),
+                    Size = UDim2New(1, 0, 0, 440),
                     BorderSizePixel = 0,
                     BackgroundColor3 = FromRGB(255, 255, 255)
                 })
@@ -3210,7 +3210,7 @@ local Library do
             }, Library.Pages)
 
             local Section = Library.Pages.Section(FakePage, {Name = "Playerlist"})
-            Section.Items["Outline"].Instance.Size = UDim2New(1, 0, 0, 260)
+            Section.Items["Outline"].Instance.Size = UDim2New(1, 0, 0, 400)
 
             local ElementsHolder = Section.Items["ElementsHolder"].Instance
             local FitSection = function()
@@ -3228,7 +3228,7 @@ local Library do
                     Parent = ElementsHolder,
                     Name = "\0",
                     BorderColor3 = FromRGB(0, 0, 0),
-                    Size = UDim2New(1, 0, 0, 110),
+                    Size = UDim2New(1, 0, 0, 270),
                     BorderSizePixel = 0,
                     ClipsDescendants = true,
                     BackgroundColor3 = Library.Theme["Background"]
@@ -3277,6 +3277,13 @@ local Library do
                     Name = "\0",
                     Padding = UDimNew(0, 0),
                     SortOrder = Enum.SortOrder.LayoutOrder
+                })
+
+                Instances:Create("UIPadding", {
+                    Parent = ListItems["Scroll"].Instance,
+                    Name = "\0",
+                    PaddingTop = UDimNew(0, 4),
+                    PaddingBottom = UDimNew(0, 4)
                 })
             end
 
@@ -3388,7 +3395,7 @@ local Library do
                     Selectable = false,
                     BorderColor3 = FromRGB(0, 0, 0),
                     BackgroundTransparency = 1,
-                    Size = UDim2New(1, -4, 0, 24),
+                    Size = UDim2New(1, -4, 0, 30),
                     LayoutOrder = Order,
                     BorderSizePixel = 0,
                     BackgroundColor3 = Library.Theme["Element"]
@@ -3425,8 +3432,8 @@ local Library do
                     BorderColor3 = FromRGB(0, 0, 0),
                     Text = Plr.Name,
                     BackgroundTransparency = 1,
-                    Position = UDim2New(0, 12, 0, 0),
-                    Size = UDim2New(1, -182, 1, 0),
+                    Position = UDim2New(0, 18, 0, 0),
+                    Size = UDim2New(1, -200, 1, 0),
                     BorderSizePixel = 0,
                     TextXAlignment = Enum.TextXAlignment.Left,
                     TextTruncate = Enum.TextTruncate.AtEnd,
@@ -3443,8 +3450,8 @@ local Library do
                     BorderColor3 = FromRGB(0, 0, 0),
                     Text = "Neutral",
                     BackgroundTransparency = 1,
-                    Position = UDim2New(1, -138, 0, 0),
-                    Size = UDim2New(0, 130, 1, 0),
+                    Position = UDim2New(1, -132, 0, 0),
+                    Size = UDim2New(0, 124, 1, 0),
                     BorderSizePixel = 0,
                     TextXAlignment = Enum.TextXAlignment.Left,
                     TextSize = 12,
@@ -3522,39 +3529,41 @@ local Library do
             }
 
             local Items = Library:CreatePanel("Indicator", 288, UDim2New(0.014, 0, 0.55, 0), nil, Vector2New(240, 120)) do
-                -- subtitulo "Info" + linea (igual que la UI original)
-                Items["InfoTitle"] = Instances:Create("TextLabel", {
-                    Theme = {TextColor3 = "Inactive Text"},
+                -- "pagina" falsa: asi se usa una Section real de la libreria (titulo "Info" dentro del borde, como en Playerlist)
+                Items["Holder"] = Instances:Create("Frame", {
                     Parent = Items["Content"].Instance,
                     Name = "\0",
-                    FontFace = Library.TitleFont or Library.MenuFont,
-                    TextColor3 = Library.Theme["Inactive Text"],
-                    BorderColor3 = FromRGB(0, 0, 0),
-                    Text = "Info",
-                    Size = UDim2New(1, 0, 0, 16),
                     BackgroundTransparency = 1,
-                    TextXAlignment = Enum.TextXAlignment.Left,
+                    BorderColor3 = FromRGB(0, 0, 0),
+                    Size = UDim2New(1, 0, 0, 130),
                     BorderSizePixel = 0,
-                    TextSize = 12,
                     BackgroundColor3 = FromRGB(255, 255, 255)
                 })
 
-                Items["InfoLine"] = Instances:Create("Frame", {
-                    Theme = {BackgroundColor3 = "Border"},
-                    Parent = Items["Content"].Instance,
-                    Name = "\0",
-                    Position = UDim2New(0, 0, 0, 17),
-                    Size = UDim2New(1, 0, 0, 1),
-                    BorderSizePixel = 0,
-                    BackgroundColor3 = Library.Theme["Border"]
-                })
+                local FakePage = setmetatable({
+                    Window = nil,
+                    Items = { PageContent = Items["Holder"] },
+                    SubPages = { }
+                }, Library.Pages)
+
+                local Section = Library.Pages.Section(FakePage, {Name = "Info"})
+                Section.Items["Outline"].Instance.Size = UDim2New(1, 0, 0, 130)
+                Items["Section"] = Section
+
+                local ElementsHolder = Section.Items["ElementsHolder"].Instance
+                local FitSection = function()
+                    local Height = ElementsHolder.AbsoluteSize.Y + 34
+                    Section.Items["Outline"].Instance.Size = UDim2New(1, 0, 0, Height)
+                    Items["Holder"].Instance.Size = UDim2New(1, 0, 0, Height + 2)
+                end
+                Library:Connect(ElementsHolder:GetPropertyChangedSignal("AbsoluteSize"), FitSection)
 
                 Items["Row"] = Instances:Create("Frame", {
-                    Parent = Items["Content"].Instance,
+                    Parent = ElementsHolder,
                     Name = "\0",
                     BackgroundTransparency = 1,
                     BorderColor3 = FromRGB(0, 0, 0),
-                    Position = UDim2New(0, 0, 0, 26),
+                    LayoutOrder = 1,
                     Size = UDim2New(1, 0, 0, 56),
                     BorderSizePixel = 0,
                     BackgroundColor3 = FromRGB(255, 255, 255)
@@ -3643,9 +3652,9 @@ local Library do
                 -- barra de vida (ancho completo) con "vida/max" centrado
                 Items["Bar"] = Instances:Create("Frame", {
                     Theme = {BackgroundColor3 = "Element 2"},
-                    Parent = Items["Content"].Instance,
+                    Parent = ElementsHolder,
                     Name = "\0",
-                    Position = UDim2New(0, 0, 0, 92),
+                    LayoutOrder = 2,
                     BorderColor3 = FromRGB(0, 0, 0),
                     Size = UDim2New(1, 0, 0, 16),
                     BorderSizePixel = 0,
@@ -3686,7 +3695,7 @@ local Library do
                     Size = UDim2New(0, 0, 1, 0),
                     BorderSizePixel = 0,
                     BackgroundColor3 = Library.Theme["Accent"]
-                })
+                })  Items["Fill"]:AddToTheme({BackgroundColor3 = "Accent"}) -- mismo color accent que los sliders
 
                 Instances:Create("UIGradient", {
                     Parent = Items["Fill"].Instance,
@@ -3711,9 +3720,7 @@ local Library do
                     BackgroundColor3 = FromRGB(255, 255, 255)
                 })
 
-                -- altura fija del contenido (la barra va debajo de la fila de datos)
-                Items["Content"].Instance.Size = UDim2New(1, 0, 0, 124)
-                Items["Content"].Instance.AutomaticSize = Enum.AutomaticSize.None
+                FitSection()
             end
 
             function Indicator:SetPlayer(Player)
