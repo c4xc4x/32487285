@@ -3189,7 +3189,7 @@ local Library do
                     Position = UDim2New(0, 0, 0.5, -2),
                     Size = UDim2New(1, 0, 1, 0),
                     BorderSizePixel = 0,
-                    TextSize = 12,
+                    TextSize = 11,
                     BackgroundColor3 = FromRGB(255, 255, 255)
                 })
 
@@ -3264,11 +3264,24 @@ local Library do
             Preview.Items = Items
             Preview.Stage = Items["Stage"].Instance
 
-            function Preview:SetVisibility(Bool)
-                Items["Panel"].Instance.Visible = Bool
-                if Preview.OnVisibility then
-                    Library:SafeCall(Preview.OnVisibility, Bool)
+            Preview.Wanted = false
+            Preview.Shown = false
+
+            -- visible solo si el toggle esta activo Y la UI esta abierta
+            function Preview:Apply()
+                local Show = Preview.Wanted and Library.MenuOpen ~= false
+                Items["Panel"].Instance.Visible = Show
+                if Show ~= Preview.Shown then
+                    Preview.Shown = Show
+                    if Preview.OnVisibility then
+                        Library:SafeCall(Preview.OnVisibility, Show)
+                    end
                 end
+            end
+
+            function Preview:SetVisibility(Bool)
+                Preview.Wanted = Bool
+                Preview:Apply()
             end
 
             Library.PreviewObj = Preview
@@ -3327,8 +3340,12 @@ local Library do
             local FitSection = function()
                 local Height = ElementsHolder.AbsoluteSize.Y + 34
                 Section.Items["Outline"].Instance.Size = UDim2New(1, 0, 0, Height)
-                -- espacio extra debajo para que la lista del dropdown no se considere "fuera" de la ventana
+                -- el Holder conserva espacio extra (para que la lista del dropdown no se considere "fuera"),
+                -- pero el panel se ajusta al contenido real: header 25 + padding 6 + contenido + padding 8
                 Items["Holder"].Instance.Size = UDim2New(1, 0, 0, Height + 70)
+                local Panel = Items["Panel"].Instance
+                Panel.AutomaticSize = Enum.AutomaticSize.None
+                Panel.Size = UDim2New(Panel.Size.X.Scale, Panel.Size.X.Offset, 0, Height + 41)
             end
             Library:Connect(ElementsHolder:GetPropertyChangedSignal("AbsoluteSize"), FitSection)
 
@@ -3605,11 +3622,19 @@ local Library do
                 return PrioOf(Plr)
             end
 
-            function PlayerList:SetVisibility(Bool)
-                Items["Panel"].Instance.Visible = Bool
-                if Bool then
+            PlayerList.Wanted = false
+
+            function PlayerList:Apply()
+                local Show = PlayerList.Wanted and Library.MenuOpen ~= false
+                Items["Panel"].Instance.Visible = Show
+                if Show then
                     PlayerList:Refresh()
                 end
+            end
+
+            function PlayerList:SetVisibility(Bool)
+                PlayerList.Wanted = Bool
+                PlayerList:Apply()
             end
 
             Library:Connect(Players.PlayerAdded, function()
@@ -3636,7 +3661,11 @@ local Library do
         Library.PlayerIndicator = function(self)
             local Indicator = {
                 Player = nil,
-                Health = -1
+                Health = -1,
+                Enabled = true,
+                HideNoTarget = true,
+                Follow = false,
+                OffScreen = false
             }
 
             local Items = Library:CreatePanel("Indicator", 288, UDim2New(0.014, 0, 0.55, 0), nil, Vector2New(240, 120)) do
@@ -3700,7 +3729,7 @@ local Library do
                     TextColor3 = Library.Theme["Text"],
                     BorderColor3 = FromRGB(0, 0, 0),
                     Text = "no target",
-                    Position = UDim2New(0, 66, 0, 0),
+                    Position = UDim2New(0, 66, 0.5, -7),
                     Size = UDim2New(1, -66, 0, 14),
                     BackgroundTransparency = 1,
                     TextXAlignment = Enum.TextXAlignment.Left,
@@ -3710,46 +3739,7 @@ local Library do
                     BackgroundColor3 = FromRGB(255, 255, 255)
                 })
 
-                -- lineas 2-4: etiqueta a la izquierda, valor a la derecha
                 Items["Stats"] = { }
-                for Index, Label in { "Distance", "Weapon", "Account age" } do
-                    local Y = 4 + Index * 14
-                    Instances:Create("TextLabel", {
-                        Theme = {TextColor3 = "Inactive Text"},
-                        Parent = Items["Row"].Instance,
-                        Name = "\0",
-                        FontFace = Library.MenuFont,
-                        TextColor3 = Library.Theme["Inactive Text"],
-                        BorderColor3 = FromRGB(0, 0, 0),
-                        Text = Label,
-                        Position = UDim2New(0, 66, 0, Y),
-                        Size = UDim2New(0.5, -33, 0, 14),
-                        BackgroundTransparency = 1,
-                        TextXAlignment = Enum.TextXAlignment.Left,
-                        BorderSizePixel = 0,
-                        TextSize = 12,
-                        BackgroundColor3 = FromRGB(255, 255, 255)
-                    })
-
-                    Items["Stats"][Index] = Instances:Create("TextLabel", {
-                        Theme = {TextColor3 = "Text"},
-                        Parent = Items["Row"].Instance,
-                        Name = "\0",
-                        FontFace = Library.MenuFont,
-                        TextColor3 = Library.Theme["Text"],
-                        BorderColor3 = FromRGB(0, 0, 0),
-                        Text = "-",
-                        AnchorPoint = Vector2New(1, 0),
-                        Position = UDim2New(1, 0, 0, Y),
-                        Size = UDim2New(0.5, -33, 0, 14),
-                        BackgroundTransparency = 1,
-                        TextXAlignment = Enum.TextXAlignment.Right,
-                        TextTruncate = Enum.TextTruncate.AtEnd,
-                        BorderSizePixel = 0,
-                        TextSize = 12,
-                        BackgroundColor3 = FromRGB(255, 255, 255)
-                    })
-                end
 
                 -- barra de vida (ancho completo) con "vida/max" centrado
                 Items["Bar"] = Instances:Create("Frame", {
@@ -3826,9 +3816,37 @@ local Library do
                 FitSection()
             end
 
+            function Indicator:Apply()
+                local Show = Indicator.Enabled
+                    and (not Indicator.HideNoTarget or Indicator.Player ~= nil)
+                    and not Indicator.OffScreen
+                Items["Panel"].Instance.Visible = Show
+            end
+
+            function Indicator:SetHideNoTarget(Bool)
+                Indicator.HideNoTarget = Bool
+                Indicator:Apply()
+            end
+
+            -- Follow: el panel sigue al personaje del target (esquina de abajo, suavizado)
+            function Indicator:SetFollow(Bool)
+                Indicator.Follow = Bool
+                Indicator.FollowPos = nil
+                if Bool then
+                    Indicator.HomePosition = Items["Panel"].Instance.Position
+                else
+                    Indicator.OffScreen = false
+                    if Indicator.HomePosition then
+                        Items["Panel"].Instance.Position = Indicator.HomePosition
+                    end
+                end
+                Indicator:Apply()
+            end
+
             function Indicator:SetPlayer(Player)
                 Indicator.Player = Player
                 Indicator.Health = -1
+                Indicator.FollowPos = nil
 
                 if Player then
                     Items["Name"].Instance.Text = (Player.DisplayName ~= Player.Name) and (Player.DisplayName .. " (@" .. Player.Name .. ")") or Player.Name
@@ -3836,33 +3854,73 @@ local Library do
                 else
                     Items["Name"].Instance.Text = "no target"
                     Items["Avatar"].Instance.Image = ""
-                    for _, Stat in Items["Stats"] do
-                        Stat.Instance.Text = "-"
-                    end
                 end
+                Indicator:Apply()
             end
 
             function Indicator:SetVisibility(Bool)
-                Items["Panel"].Instance.Visible = Bool
+                Indicator.Enabled = Bool
+                Indicator:Apply()
             end
+
+            Library:Connect(RunService.RenderStepped, function(Delta)
+                if not Indicator.Follow then
+                    return
+                end
+
+                local Camera = Workspace.CurrentCamera
+                local Character = Indicator.Player and Indicator.Player.Character
+                local Root = Character and Character:FindFirstChild("HumanoidRootPart")
+                if not Camera or not Root then
+                    if not Indicator.OffScreen then
+                        Indicator.OffScreen = true
+                        Indicator:Apply()
+                    end
+                    return
+                end
+
+                -- esquina de abajo-derecha del personaje (sin llegar del todo al borde)
+                local Size = Character:GetExtentsSize()
+                local World = Root.Position
+                    + Camera.CFrame.RightVector * (Size.X * 0.5 * 0.7)
+                    - Vector3.new(0, Size.Y * 0.5 * 0.75, 0)
+
+                local Point, OnScreen = Camera:WorldToViewportPoint(World)
+                if not OnScreen or Point.Z <= 0 then
+                    if not Indicator.OffScreen then
+                        Indicator.OffScreen = true
+                        Indicator:Apply()
+                    end
+                    return
+                end
+
+                if Indicator.OffScreen then
+                    Indicator.OffScreen = false
+                    Indicator.FollowPos = nil
+                    Indicator:Apply()
+                end
+
+                local Panel = Items["Panel"].Instance
+                local Viewport = Camera.ViewportSize
+                local PanelSize = Panel.AbsoluteSize
+                local Target = Vector2New(
+                    MathClamp(Point.X - 10, 0, math.max(Viewport.X - PanelSize.X, 0)),
+                    MathClamp(Point.Y - 10, 0, math.max(Viewport.Y - PanelSize.Y, 0))
+                )
+
+                -- movimiento suave
+                local Alpha = 1 - math.exp(-(Delta or 0.016) * 14)
+                Indicator.FollowPos = Indicator.FollowPos and Indicator.FollowPos:Lerp(Target, Alpha) or Target
+
+                Panel.AnchorPoint = Vector2New(0, 0)
+                Panel.Position = UDim2FromOffset(MathFloor(Indicator.FollowPos.X + 0.5), MathFloor(Indicator.FollowPos.Y + 0.5))
+            end)
 
             local LastInfo = 0
             Library:Connect(RunService.RenderStepped, function()
                 local Player = Indicator.Player
                 local Character = Player and Player.Character
                 local Humanoid = Character and Character:FindFirstChildOfClass("Humanoid")
-
-                -- distancia / arma / edad de la cuenta (5 veces por segundo)
-                local Now = os.clock()
-                if Player and Now - LastInfo > 0.2 then
-                    LastInfo = Now
-                    local Mine = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
-                    local Theirs = Character and Character:FindFirstChild("HumanoidRootPart")
-                    Items["Stats"][1].Instance.Text = (Mine and Theirs) and (MathFloor((Mine.Position - Theirs.Position).Magnitude) .. " studs") or "-"
-                    local Tool = Character and Character:FindFirstChildOfClass("Tool")
-                    Items["Stats"][2].Instance.Text = Tool and Tool.Name or "none"
-                    Items["Stats"][3].Instance.Text = tostring(Player.AccountAge) .. " days"
-                end
 
                 local Health = Humanoid and MathFloor(Humanoid.Health) or 0
                 local MaxHealth = Humanoid and Humanoid.MaxHealth or 100
@@ -3889,7 +3947,10 @@ local Library do
         Library.Hotbar = function(self)
             local Hotbar = {
                 Slots = { },
-                Signature = nil
+                Signature = nil,
+                Enabled = true,
+                HideNoTarget = true,
+                HasTarget = false
             }
 
             local Items = Library:CreatePanel("Hotbar", 88, UDim2New(0.014, 0, 0.04, 0), nil, Vector2New(88, 120)) do
@@ -3933,11 +3994,11 @@ local Library do
 
                 if #List == 0 then
                     local Empty = Instances:Create("TextLabel", {
-                    Theme = {TextColor3 = "Inactive Text"},
+                    Theme = {TextColor3 = "Text"},
                         Parent = Items["Content"].Instance,
                         Name = "\0",
                         FontFace = Library.MenuFont,
-                        TextColor3 = Library.Theme["Inactive Text"],
+                        TextColor3 = Library.Theme["Text"],
                         Text = "no items",
                         Size = UDim2New(1, 0, 0, 48),
                         BackgroundTransparency = 1,
@@ -3975,11 +4036,11 @@ local Library do
                         })
                     else
                         Instances:Create("TextLabel", {
-                            Theme = {TextColor3 = "Inactive Text"},
+                            Theme = {TextColor3 = "Text"},
                             Parent = Slot.Instance,
                             Name = "\0",
                             FontFace = Library.MenuFont,
-                            TextColor3 = Library.Theme["Inactive Text"],
+                            TextColor3 = Library.Theme["Text"],
                             Text = string.upper(string.sub(Value.Name, 1, 3)),
                             Size = UDim2New(1, 0, 1, 0),
                             BackgroundTransparency = 1,
@@ -3993,8 +4054,24 @@ local Library do
                 end
             end
 
+            function Hotbar:Apply()
+                Items["Panel"].Instance.Visible = Hotbar.Enabled and (not Hotbar.HideNoTarget or Hotbar.HasTarget)
+            end
+
             function Hotbar:SetVisibility(Bool)
-                Items["Panel"].Instance.Visible = Bool
+                Hotbar.Enabled = Bool
+                Hotbar:Apply()
+            end
+
+            function Hotbar:SetHideNoTarget(Bool)
+                Hotbar.HideNoTarget = Bool
+                Hotbar:Apply()
+            end
+
+            -- el script avisa si hay target o no
+            function Hotbar:SetTarget(Bool)
+                Hotbar.HasTarget = Bool and true or false
+                Hotbar:Apply()
             end
 
             Hotbar:SetItems({ })
@@ -4067,11 +4144,11 @@ local Library do
                 })
 
                 Items["IconText"] = Instances:Create("TextLabel", {
-                    Theme = {TextColor3 = "Inactive Text"},
+                    Theme = {TextColor3 = "Text"},
                     Parent = Items["Icon"].Instance,
                     Name = "\0",
                     FontFace = Library.MenuFont,
-                    TextColor3 = Library.Theme["Inactive Text"],
+                    TextColor3 = Library.Theme["Text"],
                     Text = "",
                     Size = UDim2New(1, 0, 1, 0),
                     BackgroundTransparency = 1,
@@ -4089,7 +4166,7 @@ local Library do
                     TextColor3 = Library.Theme["Text"],
                     BorderColor3 = FromRGB(0, 0, 0),
                     Text = "no weapon",
-                    Position = UDim2New(0, 66, 0, 0),
+                    Position = UDim2New(0, 66, 0.5, -7),
                     Size = UDim2New(1, -66, 0, 14),
                     BackgroundTransparency = 1,
                     TextXAlignment = Enum.TextXAlignment.Left,
@@ -4099,46 +4176,7 @@ local Library do
                     BackgroundColor3 = FromRGB(255, 255, 255)
                 })
 
-                -- lineas 2-4: etiqueta a la izquierda, valor a la derecha
                 Items["Stats"] = { }
-                for Index, Label in { "Current", "Max", "Status" } do
-                    local Y = 4 + Index * 14
-                    Instances:Create("TextLabel", {
-                        Theme = {TextColor3 = "Inactive Text"},
-                        Parent = Items["Row"].Instance,
-                        Name = "\0",
-                        FontFace = Library.MenuFont,
-                        TextColor3 = Library.Theme["Inactive Text"],
-                        BorderColor3 = FromRGB(0, 0, 0),
-                        Text = Label,
-                        Position = UDim2New(0, 66, 0, Y),
-                        Size = UDim2New(0.5, -33, 0, 14),
-                        BackgroundTransparency = 1,
-                        TextXAlignment = Enum.TextXAlignment.Left,
-                        BorderSizePixel = 0,
-                        TextSize = 12,
-                        BackgroundColor3 = FromRGB(255, 255, 255)
-                    })
-
-                    Items["Stats"][Index] = Instances:Create("TextLabel", {
-                        Theme = {TextColor3 = "Text"},
-                        Parent = Items["Row"].Instance,
-                        Name = "\0",
-                        FontFace = Library.MenuFont,
-                        TextColor3 = Library.Theme["Text"],
-                        BorderColor3 = FromRGB(0, 0, 0),
-                        Text = "-",
-                        AnchorPoint = Vector2New(1, 0),
-                        Position = UDim2New(1, 0, 0, Y),
-                        Size = UDim2New(0.5, -33, 0, 14),
-                        BackgroundTransparency = 1,
-                        TextXAlignment = Enum.TextXAlignment.Right,
-                        TextTruncate = Enum.TextTruncate.AtEnd,
-                        BorderSizePixel = 0,
-                        TextSize = 12,
-                        BackgroundColor3 = FromRGB(255, 255, 255)
-                    })
-                end
 
                 -- barra de municion (ancho completo) con "actual/max" centrado
                 Items["Bar"] = Instances:Create("Frame", {
@@ -4336,14 +4374,33 @@ local Library do
                 return nil
             end
 
+            Ammo.Enabled = true
+            Ammo.HideNoGun = true
+            Ammo.HasGun = false
+
+            function Ammo:Apply()
+                Items["Panel"].Instance.Visible = Ammo.Enabled and (not Ammo.HideNoGun or Ammo.HasGun)
+            end
+
             function Ammo:SetVisibility(Bool)
-                Items["Panel"].Instance.Visible = Bool
+                Ammo.Enabled = Bool
+                Ammo:Apply()
+            end
+
+            function Ammo:SetHideNoGun(Bool)
+                Ammo.HideNoGun = Bool
+                Ammo:Apply()
             end
 
             Library:Connect(RunService.RenderStepped, function()
                 local Character = LocalPlayer.Character
                 local Tool = Character and Character:FindFirstChildOfClass("Tool")
                 local Now = os.clock()
+
+                if (Tool ~= nil) ~= Ammo.HasGun then
+                    Ammo.HasGun = Tool ~= nil
+                    Ammo:Apply()
+                end
 
                 if Tool ~= Ammo.Tool then
                     Ammo.Tool = Tool
@@ -4387,10 +4444,7 @@ local Library do
                     local Ratio = Max and Max > 0 and MathClamp(Current / Max, 0, 1) or 0
 
                     Items["Count"].Instance.Text = StringFormat("%d/%d", MathFloor(Current), MathFloor(Max or 0))
-                    Items["Count"].Instance.TextColor3 = Current <= 0 and FromRGB(255, 70, 70) or Library.Theme["Text"]
-                    Items["Stats"][1].Instance.Text = tostring(MathFloor(Current))
-                    Items["Stats"][2].Instance.Text = Max and tostring(MathFloor(Max)) or "-"
-                    Items["Stats"][3].Instance.Text = Current <= 0 and "empty" or "ready"
+                    Items["Count"].Instance.TextColor3 = Library.Theme["Text"]
                     Items["Fill"]:Tween(TweenInfo.new(0.2, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), {Size = UDim2New(Ratio, 0, 1, 0)})
                 else
                     Items["Count"].Instance.Text = Tool and "n/a" or "-"
@@ -4920,6 +4974,11 @@ local Library do
 
                 Window.IsOpen = Bool
 
+                -- Playerlist y ESP Preview se esconden cuando se cierra la UI (y vuelven al abrirla si estan activados)
+                Library.MenuOpen = Bool
+                if Library.PlayerListObj then Library.PlayerListObj:Apply() end
+                if Library.PreviewObj then Library.PreviewObj:Apply() end
+
                 Debounce = true 
 
                 if Window.IsOpen then 
@@ -5329,7 +5388,7 @@ local Library do
                     Size = UDim2New(0, 0, 0, 1),
                     BorderSizePixel = 0,
                     AutomaticSize = Enum.AutomaticSize.X,
-                    TextSize = 12,
+                    TextSize = 11,
                     BackgroundColor3 = Library.Theme["Background"],
                     Theme = {TextColor3 = "Text", BackgroundColor3 = "Background"}
                 })
@@ -7220,17 +7279,29 @@ local Library do
                     MenuSection:Toggle({Name = "Player Indicator", Flag = "Player Indicator", Default = true, Callback = function(Value)
                         Library.IndicatorObj:SetVisibility(Value)
                     end})
+                    MenuSection:Toggle({Name = "Indicator follow", Flag = "Indicator Follow", Default = false, Callback = function(Value)
+                        Library.IndicatorObj:SetFollow(Value)
+                    end})
+                    MenuSection:Toggle({Name = "Indicator hide no target", Flag = "Indicator Hide", Default = true, Callback = function(Value)
+                        Library.IndicatorObj:SetHideNoTarget(Value)
+                    end})
                 end
 
                 if Library.AmmoObj then
                     MenuSection:Toggle({Name = "Ammo", Flag = "Ammo", Default = true, Callback = function(Value)
                         Library.AmmoObj:SetVisibility(Value)
                     end})
+                    MenuSection:Toggle({Name = "Ammo hide no gun", Flag = "Ammo Hide", Default = true, Callback = function(Value)
+                        Library.AmmoObj:SetHideNoGun(Value)
+                    end})
                 end
 
                 if Library.HotbarObj then
                     MenuSection:Toggle({Name = "Hotbar", Flag = "Hotbar", Default = true, Callback = function(Value)
                         Library.HotbarObj:SetVisibility(Value)
+                    end})
+                    MenuSection:Toggle({Name = "Hotbar hide no target", Flag = "Hotbar Hide", Default = true, Callback = function(Value)
+                        Library.HotbarObj:SetHideNoTarget(Value)
                     end})
                 end
 
