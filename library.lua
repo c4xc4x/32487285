@@ -3228,17 +3228,42 @@ local Library do
         Library.EspPreview = function(self, StageWidth, StageHeight)
             local Preview = { OnVisibility = nil }
 
-            local Items = Library:CreatePanel("ESP Preview", StageWidth + 16, UDim2New(0.014, 0, 0.18, 0), nil, nil, true) do
+            -- el dummy crece DummyScale; el panel solo PanelScale (menos), asi el dummy llena mas el panel
+            local DummyScale = Library.PreviewDummyScale or 1.25
+            local PanelScale = Library.PreviewPanelScale or 1.12
+            local PanelW = MathFloor(StageWidth * PanelScale)
+            local PanelH = MathFloor(StageHeight * PanelScale)
+
+            local Items = Library:CreatePanel("ESP Preview", PanelW + 16, UDim2New(0.014, 0, 0.18, 0), nil, nil, true) do
                 Items["Panel"].Instance.Visible = false
 
                 Items["Stage"] = Instances:Create("Frame", {
                     Parent = Items["Content"].Instance,
                     Name = "\0",
                     BorderColor3 = FromRGB(0, 0, 0),
-                    Size = UDim2New(1, 0, 0, StageHeight),
+                    Size = UDim2New(1, 0, 0, PanelH),
                     BorderSizePixel = 0,
                     ClipsDescendants = true,
                     BackgroundColor3 = FromRGB(12, 12, 12)
+                })
+
+                -- lienzo donde el script dibuja (mismo tamaño original, escalado) centrado dentro del panel
+                Items["Canvas"] = Instances:Create("Frame", {
+                    Parent = Items["Stage"].Instance,
+                    Name = "\0",
+                    AnchorPoint = Vector2New(0.5, 0.5),
+                    Position = UDim2New(0.5, 0, 0.5, 0),
+                    Size = UDim2New(0, StageWidth, 0, StageHeight),
+                    BackgroundTransparency = 1,
+                    BorderSizePixel = 0,
+                    ClipsDescendants = false,
+                    BackgroundColor3 = FromRGB(12, 12, 12)
+                })
+
+                Instances:Create("UIScale", {
+                    Parent = Items["Canvas"].Instance,
+                    Name = "\0",
+                    Scale = DummyScale
                 })
 
                 Instances:Create("UIStroke", {
@@ -3262,7 +3287,7 @@ local Library do
             end
 
             Preview.Items = Items
-            Preview.Stage = Items["Stage"].Instance
+            Preview.Stage = Items["Canvas"].Instance
 
             Preview.Wanted = false
             Preview.Shown = false
@@ -3823,8 +3848,8 @@ local Library do
                 Items["Panel"].Instance.Visible = Show
             end
 
-            function Indicator:SetHideNoTarget(Bool)
-                Indicator.HideNoTarget = Bool
+            function Indicator:SetHideNoTarget()
+                Indicator.HideNoTarget = true -- siempre activo
                 Indicator:Apply()
             end
 
@@ -4063,8 +4088,8 @@ local Library do
                 Hotbar:Apply()
             end
 
-            function Hotbar:SetHideNoTarget(Bool)
-                Hotbar.HideNoTarget = Bool
+            function Hotbar:SetHideNoTarget()
+                Hotbar.HideNoTarget = true -- siempre activo
                 Hotbar:Apply()
             end
 
@@ -4387,8 +4412,8 @@ local Library do
                 Ammo:Apply()
             end
 
-            function Ammo:SetHideNoGun(Bool)
-                Ammo.HideNoGun = Bool
+            function Ammo:SetHideNoGun()
+                Ammo.HideNoGun = true -- siempre activo
                 Ammo:Apply()
             end
 
@@ -7282,26 +7307,17 @@ local Library do
                     MenuSection:Toggle({Name = "Indicator follow", Flag = "Indicator Follow", Default = false, Callback = function(Value)
                         Library.IndicatorObj:SetFollow(Value)
                     end})
-                    MenuSection:Toggle({Name = "Indicator hide no target", Flag = "Indicator Hide", Default = true, Callback = function(Value)
-                        Library.IndicatorObj:SetHideNoTarget(Value)
-                    end})
                 end
 
                 if Library.AmmoObj then
                     MenuSection:Toggle({Name = "Ammo", Flag = "Ammo", Default = true, Callback = function(Value)
                         Library.AmmoObj:SetVisibility(Value)
                     end})
-                    MenuSection:Toggle({Name = "Ammo hide no gun", Flag = "Ammo Hide", Default = true, Callback = function(Value)
-                        Library.AmmoObj:SetHideNoGun(Value)
-                    end})
                 end
 
                 if Library.HotbarObj then
                     MenuSection:Toggle({Name = "Hotbar", Flag = "Hotbar", Default = true, Callback = function(Value)
                         Library.HotbarObj:SetVisibility(Value)
-                    end})
-                    MenuSection:Toggle({Name = "Hotbar hide no target", Flag = "Hotbar Hide", Default = true, Callback = function(Value)
-                        Library.HotbarObj:SetHideNoTarget(Value)
                     end})
                 end
 
