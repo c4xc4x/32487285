@@ -1293,6 +1293,368 @@ local Library do
 
     do 
 
+        -- Mini ventana generica (mismo estilo y misma animacion de fade que la del colorpicker / keybind picker).
+        -- Popup = Library:CreatePopup({Title = "Dummy", Width = 176})
+        -- Popup:AddLabel(texto) -> TextLabel | Popup:AddTextbox(placeholder, OnEnter) -> {Instance, Get, Set}
+        -- Popup:AddButtons({ {"Texto", callback}, ... }) | Popup:AddSeparator() | Popup:Open() | Popup:SetOpen(bool)
+        Library.CreatePopup = function(self, Data)
+            Data = Data or { }
+
+            local Popup = { IsOpen = false, Width = Data.Width or 170, Height = 0, Count = 0, Order = 0, Boxes = { } }
+            local Items = { }
+            local Z = 220
+            local PAD, GAP = 6, 4
+
+            Items["Window"] = Instances:Create("Frame", {
+                Theme = {BackgroundColor3 = "Background"},
+                Parent = Library.UnusedHolder.Instance,
+                Name = "\0",
+                Visible = false,
+                Size = UDim2New(0, Popup.Width, 0, 20),
+                BorderSizePixel = 0,
+                ZIndex = Z,
+                BackgroundColor3 = Library.Theme["Background"]
+            })
+
+            Instances:Create("UIStroke", {
+                Theme = {Color = "Outline"},
+                Parent = Items["Window"].Instance,
+                Name = "\0",
+                Color = Library.Theme["Outline"],
+                LineJoinMode = Enum.LineJoinMode.Miter,
+                ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+            })
+            Instances:Create("UIStroke", {
+                Theme = {Color = "Border"},
+                Parent = Items["Window"].Instance,
+                Name = "\0",
+                Color = Library.Theme["Border"],
+                LineJoinMode = Enum.LineJoinMode.Miter,
+                ApplyStrokeMode = Enum.ApplyStrokeMode.Border,
+                BorderOffset = UDimNew(0, 1)
+            })
+            Instances:Create("UIListLayout", {
+                Parent = Items["Window"].Instance,
+                Name = "\0",
+                Padding = UDimNew(0, GAP),
+                SortOrder = Enum.SortOrder.LayoutOrder
+            })
+            Instances:Create("UIPadding", {
+                Parent = Items["Window"].Instance,
+                Name = "\0",
+                PaddingTop = UDimNew(0, PAD),
+                PaddingBottom = UDimNew(0, PAD),
+                PaddingLeft = UDimNew(0, PAD),
+                PaddingRight = UDimNew(0, PAD)
+            })
+
+            -- el alto se lleva a mano (sin esperar al layout) para poder centrar/clampear la ventana al abrir
+            local Add = function(Height)
+                Popup.Height = Popup.Height + Height + (Popup.Count > 0 and GAP or 0)
+                Popup.Count = Popup.Count + 1
+                Popup.Order = Popup.Order + 1
+                Items["Window"].Instance.Size = UDim2New(0, Popup.Width, 0, Popup.Height + PAD * 2)
+                return Popup.Order
+            end
+
+            local AddStrokes = function(Parent)
+                Instances:Create("UIStroke", {
+                    Theme = {Color = "Outline"},
+                    Parent = Parent,
+                    Name = "\0",
+                    Color = Library.Theme["Outline"],
+                    LineJoinMode = Enum.LineJoinMode.Miter,
+                    ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+                })
+                Instances:Create("UIStroke", {
+                    Theme = {Color = "Border"},
+                    Parent = Parent,
+                    Name = "\0",
+                    Color = Library.Theme["Border"],
+                    LineJoinMode = Enum.LineJoinMode.Miter,
+                    ApplyStrokeMode = Enum.ApplyStrokeMode.Border,
+                    BorderOffset = UDimNew(0, 1)
+                })
+            end
+
+            function Popup:AddLabel(Text)
+                local Order = Add(14)
+                local Label = Instances:Create("TextLabel", {
+                    Theme = {TextColor3 = "Text"},
+                    Parent = Items["Window"].Instance,
+                    Name = "\0",
+                    FontFace = Library.MenuFont,
+                    TextColor3 = Library.Theme["Text"],
+                    BorderColor3 = FromRGB(0, 0, 0),
+                    Text = Text or "",
+                    LayoutOrder = Order,
+                    Size = UDim2New(1, 0, 0, 14),
+                    BackgroundTransparency = 1,
+                    TextXAlignment = Enum.TextXAlignment.Left,
+                    TextTruncate = Enum.TextTruncate.AtEnd,
+                    BorderSizePixel = 0,
+                    TextSize = 12,
+                    ZIndex = Z + 1,
+                    BackgroundColor3 = FromRGB(255, 255, 255)
+                })
+                return Label.Instance
+            end
+
+            function Popup:AddSeparator()
+                local Order = Add(1)
+                Instances:Create("Frame", {
+                    Theme = {BackgroundColor3 = "Outline"},
+                    Parent = Items["Window"].Instance,
+                    Name = "\0",
+                    LayoutOrder = Order,
+                    Size = UDim2New(1, 0, 0, 1),
+                    BorderSizePixel = 0,
+                    ZIndex = Z + 1,
+                    BackgroundColor3 = Library.Theme["Outline"]
+                })
+            end
+
+            function Popup:AddTextbox(Placeholder, OnEnter)
+                local Order = Add(20)
+                local Box = Instances:Create("TextBox", {
+                    Theme = {BackgroundColor3 = "Element", TextColor3 = "Text", PlaceholderColor3 = "Inactive Text"},
+                    Parent = Items["Window"].Instance,
+                    Name = "\0",
+                    FontFace = Library.MenuFont,
+                    TextColor3 = Library.Theme["Text"],
+                    PlaceholderColor3 = Library.Theme["Inactive Text"],
+                    PlaceholderText = Placeholder or "",
+                    BorderColor3 = FromRGB(0, 0, 0),
+                    Text = "",
+                    ClearTextOnFocus = false,
+                    LayoutOrder = Order,
+                    Size = UDim2New(1, 0, 0, 20),
+                    TextXAlignment = Enum.TextXAlignment.Left,
+                    BorderSizePixel = 0,
+                    TextSize = 12,
+                    ZIndex = Z + 1,
+                    BackgroundColor3 = Library.Theme["Element"]
+                })
+
+                Instances:Create("UIPadding", {
+                    Parent = Box.Instance,
+                    Name = "\0",
+                    PaddingLeft = UDimNew(0, 6),
+                    PaddingRight = UDimNew(0, 6)
+                })
+                Instances:Create("UIGradient", {
+                    Parent = Box.Instance,
+                    Name = "\0",
+                    Rotation = 90,
+                    Color = RGBSequence{RGBSequenceKeypoint(0, FromRGB(255, 255, 255)), RGBSequenceKeypoint(1, FromRGB(163, 163, 163))}
+                })
+                AddStrokes(Box.Instance)
+
+                if OnEnter then
+                    Library:Connect(Box.Instance.FocusLost, function(Enter)
+                        if Enter then
+                            Library:SafeCall(OnEnter, Box.Instance.Text)
+                        end
+                    end)
+                end
+
+                TableInsert(Popup.Boxes, Box.Instance)
+
+                return {
+                    Instance = Box.Instance,
+                    Get = function() return Box.Instance.Text end,
+                    Set = function(_, Text) Box.Instance.Text = Text end
+                }
+            end
+
+            function Popup:AddButtons(List)
+                local Order = Add(20)
+                local Row = Instances:Create("Frame", {
+                    Parent = Items["Window"].Instance,
+                    Name = "\0",
+                    BackgroundTransparency = 1,
+                    BorderColor3 = FromRGB(0, 0, 0),
+                    LayoutOrder = Order,
+                    Size = UDim2New(1, 0, 0, 20),
+                    BorderSizePixel = 0,
+                    ZIndex = Z + 1,
+                    BackgroundColor3 = FromRGB(255, 255, 255)
+                })
+
+                Instances:Create("UIListLayout", {
+                    Parent = Row.Instance,
+                    Name = "\0",
+                    FillDirection = Enum.FillDirection.Horizontal,
+                    Padding = UDimNew(0, GAP),
+                    SortOrder = Enum.SortOrder.LayoutOrder
+                })
+
+                local Count = #List
+                for Index, Info in List do
+                    local Button = Instances:Create("TextButton", {
+                        Theme = {BackgroundColor3 = "Element 2", TextColor3 = "Text"},
+                        Parent = Row.Instance,
+                        Name = "\0",
+                        FontFace = Library.MenuFont,
+                        TextColor3 = Library.Theme["Text"],
+                        BorderColor3 = FromRGB(0, 0, 0),
+                        Text = Info[1],
+                        AutoButtonColor = false,
+                        LayoutOrder = Index,
+                        Size = UDim2New(1 / Count, -(GAP * (Count - 1)) / Count, 1, 0),
+                        BorderSizePixel = 0,
+                        TextSize = 12,
+                        ZIndex = Z + 2,
+                        BackgroundColor3 = Library.Theme["Element 2"]
+                    })
+
+                    Instances:Create("UIGradient", {
+                        Parent = Button.Instance,
+                        Name = "\0",
+                        Rotation = 90,
+                        Color = RGBSequence{RGBSequenceKeypoint(0, FromRGB(255, 255, 255)), RGBSequenceKeypoint(1, FromRGB(163, 163, 163))}
+                    })
+                    AddStrokes(Button.Instance)
+
+                    Button:OnHover(function()
+                        Button:Tween(nil, {BackgroundColor3 = Library.Theme["Hovered Element"]})
+                    end)
+                    Button:OnHoverLeave(function()
+                        Button:Tween(nil, {BackgroundColor3 = Library.Theme["Element 2"]})
+                    end)
+
+                    Library:Connect(Button.Instance.MouseButton1Click, function()
+                        if Info[2] then
+                            Library:SafeCall(Info[2])
+                        end
+                    end)
+                end
+            end
+
+            -- titulo
+            do
+                local Title = Popup:AddLabel(Data.Title or Data.Name or "")
+                Popup:AddSeparator()
+            end
+
+            local Debounce = false
+
+            function Popup:SetOpen(Bool)
+                -- si llega mientras se anima, se aplica al terminar
+                if Debounce then
+                    Popup.Pending = Bool
+                    return
+                end
+
+                if Bool == Popup.IsOpen then
+                    return
+                end
+
+                Popup.IsOpen = Bool
+                Debounce = true
+
+                local Window = Items["Window"].Instance
+
+                if Bool then
+                    for Index, Value in Library.OpenFrames do
+                        Value:SetOpen(false)
+                    end
+
+                    Library.OpenFrames[Popup] = Popup
+                    Popup.OpenedAt = os.clock()
+
+                    local MousePos = UserInputService:GetMouseLocation()
+                    local Camera = Workspace.CurrentCamera
+                    local Viewport = Camera and Camera.ViewportSize or Vector2New(1920, 1080)
+                    local Width, Height = Popup.Width, Popup.Height + PAD * 2
+
+                    Window.Position = UDim2New(
+                        0, MathClamp(MousePos.X + 6, 0, math.max(Viewport.X - Width - 4, 0)),
+                        0, MathClamp(MousePos.Y + 6, 0, math.max(Viewport.Y - Height - 4, 0))
+                    )
+                    Window.Visible = true
+                    Window.Parent = Library.Holder.Instance
+                else
+                    Library.OpenFrames[Popup] = nil
+
+                    for _, Box in Popup.Boxes do
+                        pcall(function() Box:ReleaseFocus() end)
+                    end
+                end
+
+                local Descendants = Window:GetDescendants()
+                TableInsert(Descendants, Window)
+
+                local NewTween
+
+                for Index, Value in Descendants do
+                    local TransparencyProperty = Tween:GetProperty(Value)
+
+                    if not TransparencyProperty then
+                        continue
+                    end
+
+                    if type(TransparencyProperty) == "table" then
+                        for _, Property in TransparencyProperty do
+                            NewTween = Tween:FadeItem(Value, Property, Bool, Library.FadeSpeed)
+                        end
+                    else
+                        NewTween = Tween:FadeItem(Value, TransparencyProperty, Bool, Library.FadeSpeed)
+                    end
+                end
+
+                NewTween.Tween.Completed:Connect(function()
+                    Debounce = false
+                    Window.Visible = Popup.IsOpen
+
+                    local Pending = Popup.Pending
+                    Popup.Pending = nil
+                    if Pending ~= nil and Pending ~= Popup.IsOpen then
+                        Popup:SetOpen(Pending)
+                    end
+
+                    task.wait(0.2)
+                    Window.Parent = not Popup.IsOpen and Library.UnusedHolder.Instance or Library.Holder.Instance
+                end)
+            end
+
+            function Popup:Open()
+                Popup:SetOpen(true)
+            end
+
+            function Popup:Close()
+                Popup:SetOpen(false)
+            end
+
+            -- cerrar al hacer clic fuera de la ventana
+            Library:Connect(UserInputService.InputBegan, function(Input)
+                if not Popup.IsOpen or Debounce then
+                    return
+                end
+
+                if Input.UserInputType ~= Enum.UserInputType.MouseButton1 and Input.UserInputType ~= Enum.UserInputType.MouseButton2 then
+                    return
+                end
+
+                if os.clock() - (Popup.OpenedAt or 0) < 0.2 then
+                    return
+                end
+
+                local Window = Items["Window"].Instance
+                local MousePos = UserInputService:GetMouseLocation()
+                local Position, Size = Window.AbsolutePosition, Window.AbsoluteSize
+
+                if MousePos.X >= Position.X and MousePos.X <= Position.X + Size.X
+                    and MousePos.Y >= Position.Y and MousePos.Y <= Position.Y + Size.Y then
+                    return
+                end
+
+                Popup:SetOpen(false)
+            end)
+
+            return Popup
+        end
+
         -- Menu de clic derecho del colorpicker: Copy color / Paste color
         Library.ColorClipboard = nil
 
@@ -3093,12 +3455,12 @@ local Library do
         end
 
 
-        -- Fade-in rapido del contenido de un tab (0.05s). Guarda la transparencia original mientras dura el fade,
+        -- Fade-in rapido del contenido de un tab (0.10s). Guarda la transparencia original mientras dura el fade,
         -- asi si cambias de tab muy rapido no se queda nada invisible.
         local ActiveFades = setmetatable({ }, {__mode = "k"})
 
         Library.FadeContent = function(self, Root, Duration)
-            Duration = Duration or 0.05
+            Duration = Duration or 0.10
             local Info = TweenInfo.new(Duration, Enum.EasingStyle.Linear, Enum.EasingDirection.Out)
             local Touched = { }
 
@@ -5331,7 +5693,7 @@ local Library do
                 Items["PageContent"].Instance.Parent = Bool and Page.Window.Items["MainFrame"].Instance or Library.UnusedHolder.Instance
 
                 if Bool and not Was then
-                    Library:FadeContent(Items["PageContent"].Instance, 0.05)
+                    Library:FadeContent(Items["PageContent"].Instance, 0.10)
                 end
                 Items["SubPages"].Instance.Visible = Bool
 
@@ -5502,7 +5864,7 @@ local Library do
                 Items["PageContent"].Instance.Parent = Bool and Page.Page.Items["PageContent"].Instance or Library.UnusedHolder.Instance
 
                 if Bool and not Was then
-                    Library:FadeContent(Items["PageContent"].Instance, 0.05)
+                    Library:FadeContent(Items["PageContent"].Instance, 0.10)
                 end
 
                 if Page.Active then
