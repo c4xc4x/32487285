@@ -79,7 +79,7 @@ local Library do
 
         GlowTransparency = 0.8,
 
-        RainbowSpeed = 0.2,
+        RainbowSpeed = 0.28,
 
         Folders = {
             Directory = "Pandora",
@@ -204,18 +204,18 @@ local Library do
 
     local Themes = {
         ["Preset"] = {
-            ["Border"] = FromRGB(10, 10, 10),
-            ["Outline"] = FromRGB(60, 60, 60),
-            ["Background"] = FromRGB(16, 16, 16),
-            ["Inline"] = FromRGB(23, 23, 23),
-            ["Accent"] = FromRGB(176, 176, 209),
-            ["Dark Accent"] = FromRGB(123, 123, 146),
-            ["Glow"] = FromRGB(176, 176, 209),
+            ["Border"] = FromRGB(9, 10, 14),
+            ["Outline"] = FromRGB(55, 59, 72),
+            ["Background"] = FromRGB(15, 16, 22),
+            ["Inline"] = FromRGB(21, 23, 31),
+            ["Accent"] = FromRGB(158, 160, 199),
+            ["Dark Accent"] = FromRGB(110, 112, 139),
+            ["Glow"] = FromRGB(158, 160, 199),
             ["Text"] = FromRGB(255, 255, 255),
-            ["Inactive Text"] = FromRGB(155, 155, 155),
-            ["Element"] = FromRGB(46, 46, 46),
-            ["Element 2"] = FromRGB(64, 64, 64),
-            ["Hovered Element"] = FromRGB(72, 72, 72)
+            ["Inactive Text"] = FromRGB(150, 154, 172),
+            ["Element"] = FromRGB(42, 45, 58),
+            ["Element 2"] = FromRGB(58, 62, 78),
+            ["Hovered Element"] = FromRGB(66, 70, 88)
         }
     }
 
@@ -1038,6 +1038,10 @@ local Library do
     })
 
     Library.Unload = function(self)
+        if self.PlaytimeSave then
+            pcall(self.PlaytimeSave)
+        end
+
         for Index, Value in self.Connections do 
             Value.Connection:Disconnect()
         end
@@ -3088,6 +3092,54 @@ local Library do
             end
         end
 
+
+        -- Fade-in rapido del contenido de un tab (0.05s). Guarda la transparencia original mientras dura el fade,
+        -- asi si cambias de tab muy rapido no se queda nada invisible.
+        local ActiveFades = setmetatable({ }, {__mode = "k"})
+
+        Library.FadeContent = function(self, Root, Duration)
+            Duration = Duration or 0.05
+            local Info = TweenInfo.new(Duration, Enum.EasingStyle.Linear, Enum.EasingDirection.Out)
+            local Touched = { }
+
+            for _, Object in Root:GetDescendants() do
+                local Properties = Tween:GetProperty(Object)
+
+                if not Properties then
+                    continue
+                end
+
+                local Original = ActiveFades[Object]
+
+                if not Original then
+                    Original = { }
+                    for _, Property in Properties do
+                        Original[Property] = Object[Property]
+                    end
+                    ActiveFades[Object] = Original
+                    TableInsert(Touched, Object)
+                end
+
+                local Goal = { }
+                for Property, Value in Original do
+                    if Value < 1 then
+                        Object[Property] = 1
+                        Goal[Property] = Value
+                    end
+                end
+
+                if next(Goal) then
+                    TweenService:Create(Object, Info, Goal):Play()
+                end
+            end
+
+            task.delay(Duration + 0.05, function()
+                for _, Object in Touched do
+                    ActiveFades[Object] = nil
+                end
+            end)
+        end
+
         -- Panel base con el mismo estilo que el Keybind List (header + liner + contenido)
         Library.CreatePanel = function(self, Title, Width, Position, AnchorPoint, MinSize, NoResize)
             local Items = { } do
@@ -3229,8 +3281,8 @@ local Library do
             local Preview = { OnVisibility = nil }
 
             -- el dummy crece DummyScale; el panel solo PanelScale (menos), asi el dummy llena mas el panel
-            local DummyScale = Library.PreviewDummyScale or 1.25
-            local PanelScale = Library.PreviewPanelScale or 1.12
+            local DummyScale = 1 -- sin UIScale: escalar el lienzo rompia AbsoluteSize/posiciones (bounding box) y desenfocaba el texto
+            local PanelScale = Library.PreviewPanelScale or 1.22 -- margen extra alrededor del dummy para que la caja quede por fuera
             local PanelW = MathFloor(StageWidth * PanelScale)
             local PanelH = MathFloor(StageHeight * PanelScale)
 
@@ -3244,7 +3296,7 @@ local Library do
                     Size = UDim2New(1, 0, 0, PanelH),
                     BorderSizePixel = 0,
                     ClipsDescendants = true,
-                    BackgroundColor3 = FromRGB(12, 12, 12)
+                    BackgroundColor3 = FromRGB(13, 14, 19)
                 })
 
                 -- lienzo donde el script dibuja (mismo tamaño original, escalado) centrado dentro del panel
@@ -3258,12 +3310,6 @@ local Library do
                     BorderSizePixel = 0,
                     ClipsDescendants = false,
                     BackgroundColor3 = FromRGB(12, 12, 12)
-                })
-
-                Instances:Create("UIScale", {
-                    Parent = Items["Canvas"].Instance,
-                    Name = "\0",
-                    Scale = DummyScale
                 })
 
                 Instances:Create("UIStroke", {
@@ -3288,6 +3334,20 @@ local Library do
 
             Preview.Items = Items
             Preview.Stage = Items["Canvas"].Instance
+            Preview.Font = Library.MenuFont
+            Preview.TextSize = 12
+
+            -- Ajusta una caja (GuiObject) para que rodee EXACTAMENTE a Target por fuera, con Pad px de separacion.
+            -- Usa AbsolutePosition/AbsoluteSize relativos al lienzo (ya sin UIScale), asi nunca toca al dummy.
+            function Preview:FitBox(Box, Target, Pad)
+                Pad = Pad or 3
+                local Canvas = Preview.Stage
+                local Position = Target.AbsolutePosition - Canvas.AbsolutePosition
+                local Size = Target.AbsoluteSize
+                Box.AnchorPoint = Vector2New(0, 0)
+                Box.Position = UDim2FromOffset(MathFloor(Position.X - Pad), MathFloor(Position.Y - Pad))
+                Box.Size = UDim2FromOffset(MathFloor(Size.X + Pad * 2), MathFloor(Size.Y + Pad * 2))
+            end
 
             Preview.Wanted = false
             Preview.Shown = false
@@ -3682,18 +3742,149 @@ local Library do
             return PlayerList
         end
 
-        -- Player indicator: avatar (headshot), nombre y barra de vida del jugador
+        -- Playtime acumulado y persistente. Roblox NO expone el tiempo total que un jugador lleva en un juego,
+        -- asi que se acumula (y se guarda en disco) todo el tiempo que cada jugador coincide contigo en este juego:
+        -- sobrevive a cambios de server y reinicios, no solo a la sesion actual.
+        Library.PlaytimePath = Library.Folders.Directory .. "/Playtime.json"
+        Library.PlaytimeData = { }
+        Library.PlaytimeKey = tostring(game.GameId ~= 0 and game.GameId or game.PlaceId)
+
+        do
+            local Ok, Data = pcall(function()
+                if isfile(Library.PlaytimePath) then
+                    return HttpService:JSONDecode(readfile(Library.PlaytimePath))
+                end
+            end)
+
+            if Ok and type(Data) == "table" then
+                Library.PlaytimeData = Data
+            end
+        end
+
+        Library.PlaytimeSave = function()
+            pcall(function()
+                writefile(Library.PlaytimePath, HttpService:JSONEncode(Library.PlaytimeData))
+            end)
+        end
+
+        Library.GetPlaytime = function(self, Player)
+            local Game = Library.PlaytimeData[Library.PlaytimeKey]
+            return Game and Game[tostring(Player.UserId)] or 0
+        end
+
+        Library.FormatDuration = function(self, Seconds)
+            Seconds = MathFloor(Seconds)
+            if Seconds < 60 then
+                return StringFormat("%ds", Seconds)
+            elseif Seconds < 3600 then
+                return StringFormat("%dm %02ds", MathFloor(Seconds / 60), Seconds % 60)
+            end
+            return StringFormat("%dh %02dm", MathFloor(Seconds / 3600), MathFloor((Seconds % 3600) / 60))
+        end
+
+        Library:Thread(function()
+            local Last, Saved = os.clock(), os.clock()
+
+            while true do
+                task.wait(1)
+
+                local Now = os.clock()
+                local Delta = Now - Last
+                Last = Now
+
+                local Game = Library.PlaytimeData[Library.PlaytimeKey]
+                if not Game then
+                    Game = { }
+                    Library.PlaytimeData[Library.PlaytimeKey] = Game
+                end
+
+                for _, Plr in Players:GetPlayers() do
+                    local Id = tostring(Plr.UserId)
+                    Game[Id] = (Game[Id] or 0) + Delta
+                end
+
+                if Now - Saved >= 30 then
+                    Saved = Now
+                    Library.PlaytimeSave()
+                end
+            end
+        end)
+
+        -- Vida: primero la "vida custom" del juego (atributos / NumberValue), luego Humanoid.
+        -- Muchos juegos dejan Humanoid.Health fijo en 100 y llevan la vida por su cuenta; por eso la barra no bajaba.
+        local HealthNames = { "Health", "health", "HP", "hp", "CurrentHealth", "currentHealth", "Hp" }
+        local MaxHealthNames = { "MaxHealth", "maxHealth", "MaxHP", "maxHP", "MaxHp", "maxHp" }
+
+        local ReadNumber = function(Object, Names)
+            for _, Name in Names do
+                local Attribute = Object:GetAttribute(Name)
+                if type(Attribute) == "number" then
+                    return Attribute
+                end
+
+                local Child = Object:FindFirstChild(Name)
+                if Child and (Child:IsA("NumberValue") or Child:IsA("IntValue")) then
+                    return Child.Value
+                end
+            end
+        end
+
+        Library.GetHealth = function(self, Player)
+            if not Player then
+                return nil
+            end
+
+            local Character = Player.Character
+            local Humanoid = Character and Character:FindFirstChildOfClass("Humanoid")
+
+            local Sources = { }
+            if Character then TableInsert(Sources, Character) end
+            if Humanoid then TableInsert(Sources, Humanoid) end
+            TableInsert(Sources, Player)
+
+            local Health, Max
+            for _, Source in Sources do
+                Health = ReadNumber(Source, HealthNames)
+                if Health then
+                    Max = ReadNumber(Source, MaxHealthNames)
+                    break
+                end
+            end
+
+            if not Health then
+                if not Humanoid then
+                    return nil
+                end
+                Health = Humanoid.Health
+            end
+
+            Max = Max or (Humanoid and Humanoid.MaxHealth) or 100
+            if Max <= 0 then Max = 100 end
+            if Health > Max then Max = Health end
+
+            return Health, Max
+        end
+
+        -- Player indicator: avatar (headshot), nombre, stats y barra de vida del jugador
         Library.PlayerIndicator = function(self)
             local Indicator = {
                 Player = nil,
-                Health = -1,
+                HealthKey = nil,
                 Enabled = true,
-                HideNoTarget = true,
+                HideNoTarget = false, -- el indicator sale siempre, aunque no haya target
                 Follow = false,
                 OffScreen = false
             }
 
+            local AVATAR = 64
+
             local Items = Library:CreatePanel("Indicator", 288, UDim2New(0.014, 0, 0.55, 0), nil, Vector2New(240, 120)) do
+                -- mas aire entre el header del panel y el titulo "Info"
+                local PanelPad = Items["Content"].Instance:FindFirstChildOfClass("UIPadding")
+                if PanelPad then
+                    PanelPad.PaddingTop = UDimNew(0, 13)
+                end
+
                 -- "pagina" falsa: asi se usa una Section real de la libreria (titulo "Info" dentro del borde, como en Playerlist)
                 Items["Holder"] = Instances:Create("Frame", {
                     Parent = Items["Content"].Instance,
@@ -3729,29 +3920,21 @@ local Library do
                     BackgroundTransparency = 1,
                     BorderColor3 = FromRGB(0, 0, 0),
                     LayoutOrder = 1,
-                    Size = UDim2New(1, 0, 0, 72),
+                    Size = UDim2New(1, 0, 0, AVATAR),
                     BorderSizePixel = 0,
                     BackgroundColor3 = FromRGB(255, 255, 255)
                 })
 
-                -- avatar con fondo "chill"
+                -- avatar sin fondo ni borde
                 Items["Avatar"] = Instances:Create("ImageLabel", {
                     Parent = Items["Row"].Instance,
                     Name = "\0",
-                    Size = UDim2New(0, 72, 0, 72),
+                    Size = UDim2New(0, AVATAR, 0, AVATAR),
                     BorderColor3 = FromRGB(0, 0, 0),
                     BorderSizePixel = 0,
                     Image = "",
-                    BackgroundTransparency = 0,
-                    BackgroundColor3 = Library.ChillCell
-                })
-
-                Instances:Create("UIStroke", {
-                    Parent = Items["Avatar"].Instance,
-                    Name = "\0",
-                    Color = Library.ChillStroke,
-                    LineJoinMode = Enum.LineJoinMode.Miter,
-                    ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+                    BackgroundTransparency = 1,
+                    BackgroundColor3 = FromRGB(255, 255, 255)
                 })
 
                 -- linea 1: nombre (@usuario)
@@ -3763,8 +3946,8 @@ local Library do
                     TextColor3 = Library.Theme["Text"],
                     BorderColor3 = FromRGB(0, 0, 0),
                     Text = "no target",
-                    Position = UDim2New(0, 80, 0, 0),
-                    Size = UDim2New(1, -80, 0, 14),
+                    Position = UDim2New(0, AVATAR + 8, 0, 0),
+                    Size = UDim2New(1, -(AVATAR + 8), 0, 14),
                     BackgroundTransparency = 1,
                     TextXAlignment = Enum.TextXAlignment.Left,
                     TextTruncate = Enum.TextTruncate.AtEnd,
@@ -3773,20 +3956,20 @@ local Library do
                     BackgroundColor3 = FromRGB(255, 255, 255)
                 })
 
-                -- lineas 2-5: etiqueta a la izquierda, valor a la derecha
+                -- lineas 2-4: etiqueta a la izquierda, valor a la derecha
                 Items["Stats"] = { }
-                for Index, Label in { "Playtime", "Items", "Value", "Inventory" } do
-                    local Y = 2 + Index * 14
+                for Index, Label in { "Playtime", "Health", "Inventory" } do
+                    local Y = 3 + Index * 14
                     Instances:Create("TextLabel", {
-                        Theme = {TextColor3 = "Text"},
+                        Theme = {TextColor3 = "Inactive Text"},
                         Parent = Items["Row"].Instance,
                         Name = "\0",
                         FontFace = Library.MenuFont,
-                        TextColor3 = Library.Theme["Text"],
+                        TextColor3 = Library.Theme["Inactive Text"],
                         BorderColor3 = FromRGB(0, 0, 0),
                         Text = Label,
-                        Position = UDim2New(0, 80, 0, Y),
-                        Size = UDim2New(0.5, -40, 0, 14),
+                        Position = UDim2New(0, AVATAR + 8, 0, Y),
+                        Size = UDim2New(0.5, -(AVATAR + 8) / 2, 0, 14),
                         BackgroundTransparency = 1,
                         TextXAlignment = Enum.TextXAlignment.Left,
                         BorderSizePixel = 0,
@@ -3804,7 +3987,7 @@ local Library do
                         Text = "-",
                         AnchorPoint = Vector2New(1, 0),
                         Position = UDim2New(1, 0, 0, Y),
-                        Size = UDim2New(0.5, -40, 0, 14),
+                        Size = UDim2New(0.5, -(AVATAR + 8) / 2, 0, 14),
                         BackgroundTransparency = 1,
                         TextXAlignment = Enum.TextXAlignment.Right,
                         TextTruncate = Enum.TextTruncate.AtEnd,
@@ -3815,18 +3998,18 @@ local Library do
                 end
 
                 -- Inventory: Visible -> color Accent del tema; Hidden -> color de texto normal
-                Items["Stats"][4]:ChangeItemTheme({TextColor3 = function()
+                Items["Stats"][3]:ChangeItemTheme({TextColor3 = function()
                     return Indicator.InventoryVisible and Library.Theme["Accent"] or Library.Theme["Text"]
                 end})
 
-                -- barra de vida (ancho completo) con "vida/max" centrado
+                -- barra de vida (ancho completo, sin texto: el "100/100" va en el stat Health)
                 Items["Bar"] = Instances:Create("Frame", {
                     Theme = {BackgroundColor3 = "Element 2"},
                     Parent = ElementsHolder,
                     Name = "\0",
                     LayoutOrder = 2,
                     BorderColor3 = FromRGB(0, 0, 0),
-                    Size = UDim2New(1, 0, 0, 16),
+                    Size = UDim2New(1, 0, 0, 10),
                     BorderSizePixel = 0,
                     ClipsDescendants = true,
                     BackgroundColor3 = Library.Theme["Element 2"]
@@ -3874,32 +4057,16 @@ local Library do
                     Color = RGBSequence{RGBSequenceKeypoint(0, FromRGB(255, 255, 255)), RGBSequenceKeypoint(1, FromRGB(163, 163, 163))}
                 })
 
-                Items["HealthText"] = Instances:Create("TextLabel", {
-                    Theme = {TextColor3 = "Text"},
-                    Parent = Items["Bar"].Instance,
-                    Name = "\0",
-                    FontFace = Library.MenuFont,
-                    TextColor3 = Library.Theme["Text"],
-                    BorderColor3 = FromRGB(0, 0, 0),
-                    Text = "0/100",
-                    Size = UDim2New(1, 0, 1, 0),
-                    BackgroundTransparency = 1,
-                    BorderSizePixel = 0,
-                    TextSize = 12,
-                    ZIndex = 2,
-                    BackgroundColor3 = FromRGB(255, 255, 255)
-                })
-
                 Library:OutlineTexts(Items["Holder"].Instance)
 
-                -- titulo "Info" sin contorno negro y con el mismo espacio a cada lado que el del Inventory Viewer
+                -- titulo "Info" sin contorno negro y con espacio a cada lado
                 do
                     local Title = Section.Items["Text"].Instance
                     Title.TextStrokeTransparency = 1
                     local Pad = Title:FindFirstChildOfClass("UIPadding")
                     if Pad then
-                        Pad.PaddingLeft = UDimNew(0, 6)
-                        Pad.PaddingRight = UDimNew(0, 6)
+                        Pad.PaddingLeft = UDimNew(0, 7)
+                        Pad.PaddingRight = UDimNew(0, 7)
                     end
                 end
 
@@ -3907,15 +4074,12 @@ local Library do
             end
 
             function Indicator:Apply()
-                local Show = Indicator.Enabled
-                    and (not Indicator.HideNoTarget or Indicator.Player ~= nil)
-                    and not Indicator.OffScreen
-                Items["Panel"].Instance.Visible = Show
+                -- sale siempre que este activado (haya o no target)
+                Items["Panel"].Instance.Visible = Indicator.Enabled and not Indicator.OffScreen
             end
 
             function Indicator:SetHideNoTarget()
-                Indicator.HideNoTarget = true -- siempre activo
-                Indicator:Apply()
+                Indicator:Apply() -- ya no oculta sin target
             end
 
             -- Follow: el panel sigue al personaje del target (esquina de abajo, suavizado)
@@ -3933,24 +4097,48 @@ local Library do
                 Indicator:Apply()
             end
 
-            -- Info = { Playtime = minutos, PlaytimeSession = bool, Items = n, Value = $, Visible = bool }
+            function Indicator:UpdatePlaytime()
+                local Text = "-"
+
+                if Indicator.Player then
+                    local Seconds = Library:GetPlaytime(Indicator.Player)
+
+                    -- si el script pasa un playtime total (no de sesion) mayor, se usa ese
+                    if Indicator.InfoPlaytime and Indicator.InfoPlaytime > Seconds then
+                        Seconds = Indicator.InfoPlaytime
+                    end
+
+                    if Seconds > 0 then
+                        Text = Library:FormatDuration(Seconds)
+                    end
+                end
+
+                Items["Stats"][1].Instance.Text = Text
+            end
+
+            -- Info = { Playtime = minutos (total), PlaytimeSession = bool, Visible = bool }  (Items / Value ya no se muestran)
             function Indicator:SetInfo(Info)
                 Info = Info or { }
                 local Stats = Items["Stats"]
 
-                Stats[1].Instance.Text = Info.Playtime
-                    and (StringFormat("%.1fmin", Info.Playtime) .. (Info.PlaytimeSession and " (srv)" or "")) or "-"
-                Stats[2].Instance.Text = Info.Items and tostring(Info.Items) or "-"
-                Stats[3].Instance.Text = Info.Value and ("$" .. Library:FormatNumber(Info.Value)) or "-"
+                Indicator.InfoPlaytime = (Info.Playtime and not Info.PlaytimeSession) and (Info.Playtime * 60) or nil
+                Indicator:UpdatePlaytime()
 
                 Indicator.InventoryVisible = Info.Visible == true
-                Stats[4].Instance.Text = Info.Visible == nil and "-" or (Info.Visible and "Visible" or "Hidden")
-                Stats[4].Instance.TextColor3 = Indicator.InventoryVisible and Library.Theme["Accent"] or Library.Theme["Text"]
+                Stats[3].Instance.Text = Info.Visible == nil and "-" or (Info.Visible and "Visible" or "Hidden")
+                Stats[3].Instance.TextColor3 = Indicator.InventoryVisible and Library.Theme["Accent"] or Library.Theme["Text"]
+            end
+
+            -- vida manual (si el juego guarda la vida en un sitio raro): Indicator:SetHealth(50, 100); SetHealth(nil) vuelve a auto
+            function Indicator:SetHealth(Health, Max)
+                Indicator.HealthOverride = Health and {Health, Max or 100} or nil
+                Indicator.HealthKey = nil
             end
 
             function Indicator:SetPlayer(Player)
                 Indicator.Player = Player
-                Indicator.Health = -1
+                Indicator.HealthKey = nil
+                Indicator.HealthOverride = nil
                 Indicator.FollowPos = nil
                 if Library.InventoryObj then
                     Library.InventoryObj:Apply()
@@ -3959,6 +4147,7 @@ local Library do
                 if Player then
                     Items["Name"].Instance.Text = (Player.DisplayName ~= Player.Name) and (Player.DisplayName .. " (@" .. Player.Name .. ")") or Player.Name
                     Items["Avatar"].Instance.Image = StringFormat("rbxthumb://type=AvatarHeadShot&id=%d&w=100&h=100", Player.UserId)
+                    Indicator:UpdatePlaytime()
                 else
                     Items["Name"].Instance.Text = "no target"
                     Items["Avatar"].Instance.Image = ""
@@ -3977,8 +4166,25 @@ local Library do
                     return
                 end
 
+                local Panel = Items["Panel"].Instance
+
+                -- sin target: el panel se queda en su sitio y sigue visible
+                if not Indicator.Player then
+                    if Indicator.OffScreen then
+                        Indicator.OffScreen = false
+                        Indicator:Apply()
+                    end
+                    if Indicator.FollowPos then
+                        Indicator.FollowPos = nil
+                        if Indicator.HomePosition then
+                            Panel.Position = Indicator.HomePosition
+                        end
+                    end
+                    return
+                end
+
                 local Camera = Workspace.CurrentCamera
-                local Character = Indicator.Player and Indicator.Player.Character
+                local Character = Indicator.Player.Character
                 local Root = Character and Character:FindFirstChild("HumanoidRootPart")
                 if not Camera or not Root then
                     if not Indicator.OffScreen then
@@ -4009,7 +4215,6 @@ local Library do
                     Indicator:Apply()
                 end
 
-                local Panel = Items["Panel"].Instance
                 local Viewport = Camera.ViewportSize
                 local PanelSize = Panel.AbsoluteSize
                 local Target = Vector2New(
@@ -4025,24 +4230,32 @@ local Library do
                 Panel.Position = UDim2FromOffset(MathFloor(Indicator.FollowPos.X + 0.5), MathFloor(Indicator.FollowPos.Y + 0.5))
             end)
 
-            local LastInfo = 0
+            local LastSecond = 0
             Library:Connect(RunService.RenderStepped, function()
-                local Player = Indicator.Player
-                local Character = Player and Player.Character
-                local Humanoid = Character and Character:FindFirstChildOfClass("Humanoid")
-
-                local Health = Humanoid and MathFloor(Humanoid.Health) or 0
-                local MaxHealth = Humanoid and Humanoid.MaxHealth or 100
-
-                if Health == Indicator.Health then
-                    return
+                -- playtime vivo (1 vez por segundo)
+                local Now = os.clock()
+                if Now - LastSecond >= 1 then
+                    LastSecond = Now
+                    Indicator:UpdatePlaytime()
                 end
 
-                Indicator.Health = Health
+                local Health, Max
+                if Indicator.HealthOverride then
+                    Health, Max = Indicator.HealthOverride[1], Indicator.HealthOverride[2]
+                else
+                    Health, Max = Library:GetHealth(Indicator.Player)
+                end
 
-                local Ratio = MathClamp(Health / math.max(MaxHealth, 1), 0, 1)
+                -- la clave incluye la vida maxima: si cambia el max tambien se actualiza
+                local Key = Health and (MathFloor(Health) .. "/" .. MathFloor(Max)) or "none"
+                if Key == Indicator.HealthKey then
+                    return
+                end
+                Indicator.HealthKey = Key
 
-                Items["HealthText"].Instance.Text = Health .. "/" .. MathFloor(MaxHealth)
+                local Ratio = Health and MathClamp(Health / math.max(Max, 1), 0, 1) or 0
+
+                Items["Stats"][2].Instance.Text = Health and (MathFloor(Health) .. "/" .. MathFloor(Max)) or "-"
                 Items["Fill"]:Tween(TweenInfo.new(0.2, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), {
                     Size = UDim2New(Ratio, 0, 1, 0)
                 })
@@ -4086,7 +4299,7 @@ local Library do
 
             local CELL, GAP = 72, 5
             local GRID_PAD = 3   -- margen dentro de la grilla: sin esto el scroll recorta el borde de las celdas de los extremos
-            local TITLE_PAD = 6  -- espacio a cada lado del titulo "Info"
+            local TITLE_PAD = 7  -- espacio a cada lado del titulo "Info"
             local MAX_COLS, MAX_ROWS = 4, 4
             local MIN_WIDTH = 300
             local ICON = 52
@@ -4095,6 +4308,12 @@ local Library do
 
             local Items = Library:CreatePanel("Inventory Viewer", MIN_WIDTH, UDim2New(0.014, 0, 0.04, 0), nil, nil, true) do
                 Items["Panel"].Instance.Visible = false
+
+                -- mas aire entre el header del panel y el titulo "Info"
+                local PanelPad = Items["Content"].Instance:FindFirstChildOfClass("UIPadding")
+                if PanelPad then
+                    PanelPad.PaddingTop = UDimNew(0, 13)
+                end
 
                 -- "pagina" falsa: asi se usa una Section real de la libreria (igual que el Indicator)
                 Items["Holder"] = Instances:Create("Frame", {
@@ -4158,7 +4377,7 @@ local Library do
                     TextColor3 = Library.Theme["Text"],
                     BorderColor3 = FromRGB(0, 0, 0),
                     Text = "no target",
-                    Size = UDim2New(0.5, 0, 1, 0),
+                    Size = UDim2New(1, 0, 1, 0),
                     BackgroundTransparency = 1,
                     TextXAlignment = Enum.TextXAlignment.Left,
                     TextTruncate = Enum.TextTruncate.AtEnd,
@@ -4174,7 +4393,8 @@ local Library do
                     FontFace = Library.MenuFont,
                     TextColor3 = Library.Theme["Text"],
                     BorderColor3 = FromRGB(0, 0, 0),
-                    Text = "0 items",
+                    Text = "",
+                    Visible = false,
                     AnchorPoint = Vector2New(1, 0),
                     Position = UDim2New(1, 0, 0, 0),
                     Size = UDim2New(0.5, 0, 1, 0),
@@ -4297,39 +4517,31 @@ local Library do
                 Viewer.Count = #List
                 Viewer.Total = Total
 
-                Items["Header"].Instance.Text = StringFormat("%d items%s", #List,
-                    Total and (", $" .. Library:FormatNumber(Total)) or "")
 
                 ClearCells()
 
                 for Index, Value in List do
                     local Cell = Instances:Create("Frame", {
-                        Theme = {BackgroundColor3 = "Background"},
                         Parent = Items["Grid"].Instance,
                         Name = "\0",
                         LayoutOrder = Index,
                         BorderSizePixel = 0,
-                        BackgroundColor3 = Library.Theme["Background"]
+                        BackgroundTransparency = 1,
+                        BackgroundColor3 = FromRGB(255, 255, 255)
                     })
 
-                    Instances:Create("UIStroke", {
-                        Theme = {Color = "Outline"},
-                        Parent = Cell.Instance,
-                        Name = "\0",
-                        Color = Library.Theme["Outline"],
-                        LineJoinMode = Enum.LineJoinMode.Miter,
-                        ApplyStrokeMode = Enum.ApplyStrokeMode.Border
-                    })
-
-                    Instances:Create("UIStroke", {
-                        Theme = {Color = "Border"},
-                        Parent = Cell.Instance,
-                        Name = "\0",
-                        Color = Library.Theme["Border"],
-                        LineJoinMode = Enum.LineJoinMode.Miter,
-                        ApplyStrokeMode = Enum.ApplyStrokeMode.Border,
-                        BorderOffset = UDimNew(0, 1)
-                    })
+                    -- sin fondo; solo un borde fino (Library.InventoryCellOutline = false lo quita del todo)
+                    if Library.InventoryCellOutline ~= false then
+                        Instances:Create("UIStroke", {
+                            Theme = {Color = "Outline"},
+                            Parent = Cell.Instance,
+                            Name = "\0",
+                            Color = Library.Theme["Outline"],
+                            Transparency = 0.5,
+                            LineJoinMode = Enum.LineJoinMode.Miter,
+                            ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+                        })
+                    end
 
                     if Value.Icon and Value.Icon ~= "" then
                         -- solo el icono, centrado (sin nombre)
@@ -4592,8 +4804,8 @@ local Library do
             local Fading = false
             local Pending = nil
 
-            local WaveWidth = 3     -- letras iluminadas a la vez
-            local WaveSpeed = 4     -- letras por segundo
+            local WaveWidth = 5     -- letras iluminadas a la vez
+            local WaveSpeed = 5.5     -- letras por segundo
 
             local Fps, Frames, LastTick = 60, 0, os.clock()
             local White = FromRGB(255, 255, 255)
@@ -4734,7 +4946,7 @@ local Library do
                     AnchorPoint = Vector2New(0.5, 0.5),
                     Position = UDim2New(0.5, 0, 0.5, 0),
                     BorderColor3 = FromRGB(0, 0, 0),
-                    Size = UDim2New(0, 760, 0, 560),
+                    Size = UDim2New(0, 760, 0, 580),
                     BorderSizePixel = 0,
                     BackgroundColor3 = Library.Theme["Background"],
                     Theme = {BackgroundColor3 = "Background"}
@@ -5095,10 +5307,15 @@ local Library do
             local Debounce = false
 
             function Page:Turn(Bool)
+                local Was = Page.Active
                 Page.Active = Bool
                 
                 Items["PageContent"].Instance.Visible = Bool
                 Items["PageContent"].Instance.Parent = Bool and Page.Window.Items["MainFrame"].Instance or Library.UnusedHolder.Instance
+
+                if Bool and not Was then
+                    Library:FadeContent(Items["PageContent"].Instance, 0.05)
+                end
                 Items["SubPages"].Instance.Visible = Bool
 
                 if Page.Active then
@@ -5261,10 +5478,15 @@ local Library do
             local Debounce = false
 
             function Page:Turn(Bool)
+                local Was = Page.Active
                 Page.Active = Bool
                 
                 Items["PageContent"].Instance.Visible = Bool
                 Items["PageContent"].Instance.Parent = Bool and Page.Page.Items["PageContent"].Instance or Library.UnusedHolder.Instance
+
+                if Bool and not Was then
+                    Library:FadeContent(Items["PageContent"].Instance, 0.05)
+                end
 
                 if Page.Active then
                     Items["Icon"]:ChangeItemTheme({ImageColor3 = "Accent"})
