@@ -2204,7 +2204,7 @@ local Library do
                 Items["KeyButton"] = Instances:Create("TextButton", {
                     Parent = Data.Parent.Instance,
                     Name = "\0",
-                    FontFace = Library.MenuFont,
+                    FontFace = Library:GetUIFont("Smallest Pixel-7") or Library.MenuFont,
                     TextColor3 = Library.Theme["Inactive Text"],
                     BorderColor3 = FromRGB(0, 0, 0),
                     Text = "[NONE]",
@@ -3400,6 +3400,12 @@ local Library do
             local Items = Library:CreatePanel("Playerlist", 520, UDim2New(0.3, 0, 0.12, 0), nil, Vector2New(420, 100)) do
                 Items["Panel"].Instance.Visible = false
 
+                -- mas aire entre el header del panel y el titulo "Info"
+                local PanelPad = Items["Content"].Instance:FindFirstChildOfClass("UIPadding")
+                if PanelPad then
+                    PanelPad.PaddingTop = UDimNew(0, 13)
+                end
+
                 -- "pagina" falsa: asi se usan Section / Textbox / Label / Dropdown reales de la libreria
                 Items["Holder"] = Instances:Create("Frame", {
                     Parent = Items["Content"].Instance,
@@ -3418,8 +3424,19 @@ local Library do
                 SubPages = { }
             }, Library.Pages)
 
-            local Section = Library.Pages.Section(FakePage, {Name = "Playerlist"})
+            local Section = Library.Pages.Section(FakePage, {Name = "Info"})
             Section.Items["Outline"].Instance.Size = UDim2New(1, 0, 0, 400)
+
+            -- titulo "Info" sin contorno negro y con espacio a cada lado (igual que Indicator / Inventory Viewer)
+            do
+                local Title = Section.Items["Text"].Instance
+                Title.TextStrokeTransparency = 1
+                local Pad = Title:FindFirstChildOfClass("UIPadding")
+                if Pad then
+                    Pad.PaddingLeft = UDimNew(0, 7)
+                    Pad.PaddingRight = UDimNew(0, 7)
+                end
+            end
 
             local ElementsHolder = Section.Items["ElementsHolder"].Instance
             local FitSection = function()
@@ -3430,7 +3447,7 @@ local Library do
                 Items["Holder"].Instance.Size = UDim2New(1, 0, 0, Height + 70)
                 local Panel = Items["Panel"].Instance
                 Panel.AutomaticSize = Enum.AutomaticSize.None
-                Panel.Size = UDim2New(Panel.Size.X.Scale, Panel.Size.X.Offset, 0, Height + 41)
+                Panel.Size = UDim2New(Panel.Size.X.Scale, Panel.Size.X.Offset, 0, Height + 48)
             end
             Library:Connect(ElementsHolder:GetPropertyChangedSignal("AbsoluteSize"), FitSection)
 
@@ -3961,11 +3978,11 @@ local Library do
                 for Index, Label in { "Playtime", "Health", "Inventory" } do
                     local Y = 3 + Index * 14
                     Instances:Create("TextLabel", {
-                        Theme = {TextColor3 = "Inactive Text"},
+                        Theme = {TextColor3 = "Text"},
                         Parent = Items["Row"].Instance,
                         Name = "\0",
                         FontFace = Library.MenuFont,
-                        TextColor3 = Library.Theme["Inactive Text"],
+                        TextColor3 = Library.Theme["Text"],
                         BorderColor3 = FromRGB(0, 0, 0),
                         Text = Label,
                         Position = UDim2New(0, AVATAR + 8, 0, Y),
