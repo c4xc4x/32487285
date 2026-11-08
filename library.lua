@@ -4071,7 +4071,8 @@ local Library do
         end
 
         -- Inventory viewer: grid con TODO lo que tiene el target (armadura, armas, items).
-        -- Crece en ancho/alto segun el contenido (hasta 4 columnas x 3 filas); si hay mas, aparece un scroll.
+        -- Mismo estilo que el Indicator (Section real, colores del tema, fuente de la UI).
+        -- Crece en ancho/alto segun el contenido (hasta 4 columnas x 4 filas); si hay mas, aparece un scroll.
         Library.InventoryViewer = function(self)
             local Viewer = {
                 Enabled = true,
@@ -4083,112 +4084,128 @@ local Library do
                 Total = nil
             }
 
-            local CELL, GAP = 64, 4
-            local MAX_COLS, MAX_ROWS = 4, 3
-            local MIN_WIDTH = 232
+            local CELL, GAP = 72, 5
+            local GRID_PAD = 3   -- margen dentro de la grilla: sin esto el scroll recorta el borde de las celdas de los extremos
+            local TITLE_PAD = 6  -- espacio a cada lado del titulo "Info"
+            local MAX_COLS, MAX_ROWS = 4, 4
+            local MIN_WIDTH = 300
+            local ICON = 52
+            -- ancho extra del panel respecto a la grilla: padding del panel (16) + margenes internos de la Section (30)
+            local EXTRA_W = 46
 
             local Items = Library:CreatePanel("Inventory Viewer", MIN_WIDTH, UDim2New(0.014, 0, 0.04, 0), nil, nil, true) do
                 Items["Panel"].Instance.Visible = false
 
-                -- fondo chill detras de todo el contenido
-                Items["Content"].Instance.BackgroundColor3 = Library.ChillBg
-                Items["Content"].Instance.BackgroundTransparency = 0
-
-                Instances:Create("UIListLayout", {
+                -- "pagina" falsa: asi se usa una Section real de la libreria (igual que el Indicator)
+                Items["Holder"] = Instances:Create("Frame", {
                     Parent = Items["Content"].Instance,
                     Name = "\0",
-                    FillDirection = Enum.FillDirection.Vertical,
-                    Padding = UDimNew(0, 4),
-                    SortOrder = Enum.SortOrder.LayoutOrder
+                    BackgroundTransparency = 1,
+                    BorderColor3 = FromRGB(0, 0, 0),
+                    Size = UDim2New(1, 0, 0, 130),
+                    BorderSizePixel = 0,
+                    BackgroundColor3 = FromRGB(255, 255, 255)
                 })
 
-                Items["Header"] = Instances:Create("TextLabel", {
-                    Theme = {TextColor3 = "Text"},
-                    Parent = Items["Content"].Instance,
+                local FakePage = setmetatable({
+                    Window = nil,
+                    Items = { PageContent = Items["Holder"] },
+                    SubPages = { }
+                }, Library.Pages)
+
+                local Section = Library.Pages.Section(FakePage, {Name = "Info"})
+                Section.Items["Outline"].Instance.Size = UDim2New(1, 0, 0, 130)
+                Items["Section"] = Section
+
+                -- titulo sin contorno negro y con mas separacion respecto a la linea
+                local CleanTitle = function()
+                    local Title = Section.Items["Text"].Instance
+                    Title.TextStrokeTransparency = 1
+                    local Pad = Title:FindFirstChildOfClass("UIPadding")
+                    if Pad then
+                        Pad.PaddingLeft = UDimNew(0, TITLE_PAD)
+                        Pad.PaddingRight = UDimNew(0, TITLE_PAD)
+                    end
+                end
+                CleanTitle()
+                Items["CleanTitle"] = CleanTitle
+
+                local ElementsHolder = Section.Items["ElementsHolder"].Instance
+                local FitSection = function()
+                    local Height = ElementsHolder.AbsoluteSize.Y + 34
+                    Section.Items["Outline"].Instance.Size = UDim2New(1, 0, 0, Height)
+                    Items["Holder"].Instance.Size = UDim2New(1, 0, 0, Height + 2)
+                end
+                Library:Connect(ElementsHolder:GetPropertyChangedSignal("AbsoluteSize"), FitSection)
+
+                -- fila superior: nombre del target (izquierda) y cantidad / valor (derecha)
+                Items["Row"] = Instances:Create("Frame", {
+                    Parent = ElementsHolder,
                     Name = "\0",
-                    FontFace = Library.MenuFont,
-                    TextColor3 = Library.Theme["Text"],
-                    Text = "INVENTORY VIEWER - 0 ITEMS",
-                    LayoutOrder = 1,
-                    Size = UDim2New(1, 0, 0, 13),
                     BackgroundTransparency = 1,
-                    TextXAlignment = Enum.TextXAlignment.Left,
-                    TextTruncate = Enum.TextTruncate.AtEnd,
+                    BorderColor3 = FromRGB(0, 0, 0),
+                    LayoutOrder = 1,
+                    Size = UDim2New(1, 0, 0, 14),
                     BorderSizePixel = 0,
-                    TextSize = 11,
                     BackgroundColor3 = FromRGB(255, 255, 255)
                 })
 
                 Items["PlayerName"] = Instances:Create("TextLabel", {
                     Theme = {TextColor3 = "Text"},
-                    Parent = Items["Content"].Instance,
+                    Parent = Items["Row"].Instance,
                     Name = "\0",
                     FontFace = Library.MenuFont,
                     TextColor3 = Library.Theme["Text"],
-                    Text = "",
-                    LayoutOrder = 2,
-                    Size = UDim2New(1, 0, 0, 13),
+                    BorderColor3 = FromRGB(0, 0, 0),
+                    Text = "no target",
+                    Size = UDim2New(0.5, 0, 1, 0),
                     BackgroundTransparency = 1,
                     TextXAlignment = Enum.TextXAlignment.Left,
                     TextTruncate = Enum.TextTruncate.AtEnd,
                     BorderSizePixel = 0,
-                    TextSize = 11,
+                    TextSize = 12,
                     BackgroundColor3 = FromRGB(255, 255, 255)
                 })
 
-                -- caja con borde que contiene "ITEMS (N)" y la grilla
-                Items["Box"] = Instances:Create("Frame", {
-                    Parent = Items["Content"].Instance,
-                    Name = "\0",
-                    LayoutOrder = 3,
-                    Size = UDim2New(1, 0, 0, 100),
-                    BorderSizePixel = 0,
-                    BackgroundColor3 = Library.ChillBox
-                })
-
-                Instances:Create("UIStroke", {
-                    Parent = Items["Box"].Instance,
-                    Name = "\0",
-                    Color = Library.ChillStroke,
-                    LineJoinMode = Enum.LineJoinMode.Miter,
-                    ApplyStrokeMode = Enum.ApplyStrokeMode.Border
-                })
-
-                Items["BoxTitle"] = Instances:Create("TextLabel", {
+                Items["Header"] = Instances:Create("TextLabel", {
                     Theme = {TextColor3 = "Text"},
-                    Parent = Items["Box"].Instance,
+                    Parent = Items["Row"].Instance,
                     Name = "\0",
                     FontFace = Library.MenuFont,
                     TextColor3 = Library.Theme["Text"],
-                    Text = "ITEMS (0)",
-                    Position = UDim2New(0, 8, 0, 5),
-                    Size = UDim2New(1, -16, 0, 12),
+                    BorderColor3 = FromRGB(0, 0, 0),
+                    Text = "0 items",
+                    AnchorPoint = Vector2New(1, 0),
+                    Position = UDim2New(1, 0, 0, 0),
+                    Size = UDim2New(0.5, 0, 1, 0),
                     BackgroundTransparency = 1,
-                    TextXAlignment = Enum.TextXAlignment.Left,
+                    TextXAlignment = Enum.TextXAlignment.Right,
+                    TextTruncate = Enum.TextTruncate.AtEnd,
                     BorderSizePixel = 0,
-                    TextSize = 11,
+                    TextSize = 12,
                     BackgroundColor3 = FromRGB(255, 255, 255)
                 })
 
                 Items["Empty"] = Instances:Create("TextLabel", {
                     Theme = {TextColor3 = "Text"},
-                    Parent = Items["Box"].Instance,
+                    Parent = ElementsHolder,
                     Name = "\0",
                     FontFace = Library.MenuFont,
                     TextColor3 = Library.Theme["Text"],
-                    Text = "NONE",
-                    Position = UDim2New(0, 8, 0, 24),
-                    Size = UDim2New(1, -16, 0, 12),
+                    BorderColor3 = FromRGB(0, 0, 0),
+                    Text = "None",
+                    LayoutOrder = 2,
+                    Size = UDim2New(1, 0, 0, 14),
                     BackgroundTransparency = 1,
                     TextXAlignment = Enum.TextXAlignment.Left,
                     BorderSizePixel = 0,
-                    TextSize = 11,
+                    TextSize = 12,
                     BackgroundColor3 = FromRGB(255, 255, 255)
                 })
 
                 Items["Grid"] = Instances:Create("ScrollingFrame", {
                     Theme = {ScrollBarImageColor3 = "Accent"},
-                    Parent = Items["Box"].Instance,
+                    Parent = ElementsHolder,
                     Name = "\0",
                     Active = true,
                     AutomaticCanvasSize = Enum.AutomaticSize.Y,
@@ -4196,11 +4213,20 @@ local Library do
                     ScrollBarImageColor3 = Library.Theme["Accent"],
                     ScrollBarThickness = 4,
                     ScrollingDirection = Enum.ScrollingDirection.Y,
-                    Position = UDim2New(0, 8, 0, 22),
+                    LayoutOrder = 3,
                     Size = UDim2New(0, CELL, 0, CELL),
                     BackgroundTransparency = 1,
                     BorderSizePixel = 0,
                     BackgroundColor3 = FromRGB(255, 255, 255)
+                })
+
+                Instances:Create("UIPadding", {
+                    Parent = Items["Grid"].Instance,
+                    Name = "\0",
+                    PaddingLeft = UDimNew(0, GRID_PAD),
+                    PaddingRight = UDimNew(0, GRID_PAD),
+                    PaddingTop = UDimNew(0, GRID_PAD),
+                    PaddingBottom = UDimNew(0, GRID_PAD)
                 })
 
                 Instances:Create("UIGridLayout", {
@@ -4210,9 +4236,11 @@ local Library do
                     CellPadding = UDim2New(0, GAP, 0, GAP),
                     SortOrder = Enum.SortOrder.LayoutOrder
                 })
+
+                Items["FitSection"] = FitSection
             end
 
-            -- ajusta tamaño de la grilla, de la caja y del panel segun la cantidad de items
+            -- ajusta tamaño de la grilla y del panel segun la cantidad de items
             function Viewer:Layout()
                 local N = Viewer.Count
                 local Cols = N == 0 and 1 or math.min(MAX_COLS, N)
@@ -4220,8 +4248,8 @@ local Library do
                 local VisibleRows = math.min(MAX_ROWS, Rows)
                 local NeedScroll = Rows > MAX_ROWS
 
-                local GridW = Cols * CELL + (Cols - 1) * GAP
-                local GridH = VisibleRows * CELL + math.max(VisibleRows - 1, 0) * GAP
+                local GridW = Cols * CELL + (Cols - 1) * GAP + GRID_PAD * 2
+                local GridH = VisibleRows * CELL + math.max(VisibleRows - 1, 0) * GAP + GRID_PAD * 2
                 local ScrollW = NeedScroll and 8 or 0
 
                 Items["Grid"].Instance.Visible = N > 0
@@ -4231,12 +4259,10 @@ local Library do
 
                 Items["Grid"].Instance:FindFirstChildOfClass("UIGridLayout").FillDirectionMaxCells = Cols
 
-                -- caja: titulo (22) + grilla + margen
-                Items["Box"].Instance.Size = UDim2New(1, 0, 0, 22 + (N == 0 and 20 or GridH) + 8)
-
-                -- panel: ancho = grilla + margenes de la caja (8+8) + padding del contenido (8+8)
-                local Width = math.max(MIN_WIDTH, GridW + ScrollW + 16 + 16)
+                local Width = math.max(MIN_WIDTH, GridW + ScrollW + EXTRA_W)
                 Items["Panel"].Instance.Size = UDim2New(0, Width, 0, 0)
+
+                Items["FitSection"]()
             end
 
             local ClearCells = function()
@@ -4249,7 +4275,7 @@ local Library do
             function Viewer:SetPlayer(Player)
                 Viewer.Player = Player
                 Viewer.HasTarget = Player ~= nil
-                Items["PlayerName"].Instance.Text = Player and string.upper(Player.Name) or ""
+                Items["PlayerName"].Instance.Text = Player and Player.Name or "no target"
                 Viewer:Apply()
             end
 
@@ -4271,36 +4297,48 @@ local Library do
                 Viewer.Count = #List
                 Viewer.Total = Total
 
-                Items["Header"].Instance.Text = StringFormat("INVENTORY VIEWER - %d ITEMS%s", #List,
+                Items["Header"].Instance.Text = StringFormat("%d items%s", #List,
                     Total and (", $" .. Library:FormatNumber(Total)) or "")
-                Items["BoxTitle"].Instance.Text = StringFormat("ITEMS (%d)", #List)
 
                 ClearCells()
 
                 for Index, Value in List do
                     local Cell = Instances:Create("Frame", {
+                        Theme = {BackgroundColor3 = "Background"},
                         Parent = Items["Grid"].Instance,
                         Name = "\0",
                         LayoutOrder = Index,
                         BorderSizePixel = 0,
-                        BackgroundColor3 = Library.ChillCell
+                        BackgroundColor3 = Library.Theme["Background"]
                     })
 
                     Instances:Create("UIStroke", {
+                        Theme = {Color = "Outline"},
                         Parent = Cell.Instance,
                         Name = "\0",
-                        Color = Library.ChillStroke,
+                        Color = Library.Theme["Outline"],
                         LineJoinMode = Enum.LineJoinMode.Miter,
                         ApplyStrokeMode = Enum.ApplyStrokeMode.Border
                     })
 
+                    Instances:Create("UIStroke", {
+                        Theme = {Color = "Border"},
+                        Parent = Cell.Instance,
+                        Name = "\0",
+                        Color = Library.Theme["Border"],
+                        LineJoinMode = Enum.LineJoinMode.Miter,
+                        ApplyStrokeMode = Enum.ApplyStrokeMode.Border,
+                        BorderOffset = UDimNew(0, 1)
+                    })
+
                     if Value.Icon and Value.Icon ~= "" then
+                        -- solo el icono, centrado (sin nombre)
                         Instances:Create("ImageLabel", {
                             Parent = Cell.Instance,
                             Name = "\0",
-                            AnchorPoint = Vector2New(0.5, 0),
-                            Position = UDim2New(0.5, 0, 0, 4),
-                            Size = UDim2New(0, 38, 0, 38),
+                            AnchorPoint = Vector2New(0.5, 0.5),
+                            Position = UDim2New(0.5, 0, 0.5, 0),
+                            Size = UDim2New(0, ICON, 0, ICON),
                             BackgroundTransparency = 1,
                             BorderSizePixel = 0,
                             ScaleType = Enum.ScaleType.Fit,
@@ -4308,39 +4346,27 @@ local Library do
                             BackgroundColor3 = FromRGB(255, 255, 255)
                         })
                     else
+                        -- sin icono: el nombre, en el centro
                         Instances:Create("TextLabel", {
                             Theme = {TextColor3 = "Text"},
                             Parent = Cell.Instance,
                             Name = "\0",
                             FontFace = Library.MenuFont,
                             TextColor3 = Library.Theme["Text"],
-                            Text = string.upper(string.sub(Value.Name, 1, 3)),
-                            AnchorPoint = Vector2New(0.5, 0),
-                            Position = UDim2New(0.5, 0, 0, 4),
-                            Size = UDim2New(0, 38, 0, 38),
+                            Text = Value.Name,
+                            AnchorPoint = Vector2New(0.5, 0.5),
+                            Position = UDim2New(0.5, 0, 0.5, 0),
+                            Size = UDim2New(1, -8, 1, -8),
                             BackgroundTransparency = 1,
+                            TextXAlignment = Enum.TextXAlignment.Center,
+                            TextYAlignment = Enum.TextYAlignment.Center,
+                            TextWrapped = true,
+                            TextTruncate = Enum.TextTruncate.AtEnd,
                             BorderSizePixel = 0,
-                            TextSize = 14,
+                            TextSize = 12,
                             BackgroundColor3 = FromRGB(255, 255, 255)
                         })
                     end
-
-                    Instances:Create("TextLabel", {
-                        Theme = {TextColor3 = "Text"},
-                        Parent = Cell.Instance,
-                        Name = "\0",
-                        FontFace = Library.MenuFont,
-                        TextColor3 = Library.Theme["Text"],
-                        Text = string.upper(Value.Name),
-                        Position = UDim2New(0, 3, 1, -14),
-                        Size = UDim2New(1, -6, 0, 12),
-                        BackgroundTransparency = 1,
-                        TextXAlignment = Enum.TextXAlignment.Left,
-                        TextTruncate = Enum.TextTruncate.AtEnd,
-                        BorderSizePixel = 0,
-                        TextSize = 10,
-                        BackgroundColor3 = FromRGB(255, 255, 255)
-                    })
 
                     if Value.Count and Value.Count > 1 then
                         Instances:Create("TextLabel", {
@@ -4356,7 +4382,8 @@ local Library do
                             BackgroundTransparency = 1,
                             TextXAlignment = Enum.TextXAlignment.Right,
                             BorderSizePixel = 0,
-                            TextSize = 10,
+                            TextSize = 11,
+                            ZIndex = 2,
                             BackgroundColor3 = FromRGB(255, 255, 255)
                         })
                     end
@@ -4369,16 +4396,16 @@ local Library do
                 Viewer:Layout()
             end
 
-            -- visible solo con toggle activo Y con target (si el script no avisa, se usa el target del Player Indicator)
+            -- visible solo con toggle activo (si el script no avisa, se usa el target del Player Indicator)
             function Viewer:Apply()
                 local Indicator = Library.IndicatorObj
                 local Target = Viewer.Player or (Indicator and Indicator.Player)
 
                 if not Viewer.Player then
-                    Items["PlayerName"].Instance.Text = Target and string.upper(Target.Name) or ""
+                    Items["PlayerName"].Instance.Text = Target and Target.Name or "no target"
                 end
 
-                -- sale con solo tener el toggle activado (sin target muestra "NONE")
+                -- sale con solo tener el toggle activado (sin target muestra "None")
                 Items["Panel"].Instance.Visible = Viewer.Enabled
             end
 
@@ -4396,7 +4423,8 @@ local Library do
                 Viewer:Apply() -- siempre activo
             end
 
-            Library:OutlineTexts(Items["Content"].Instance)
+            Library:OutlineTexts(Items["Holder"].Instance)
+            Items["CleanTitle"]()
             Viewer:Layout()
 
             Library.InventoryObj = Viewer
