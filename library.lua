@@ -2789,7 +2789,7 @@ local Library do
                     Theme = {BackgroundColor3 = "Background"},
                     Parent = Library.Holder.Instance,
                     Name = "\0",
-                    Size = UDim2New(0, 180, 0, 35),
+                    Size = UDim2New(0, 200, 0, 35),
                     Position = UDim2New(0.014184396713972092, 0, 0.3557213842868805, 0),
                     BorderColor3 = FromRGB(0, 0, 0),
                     BorderSizePixel = 0,
@@ -2873,7 +2873,7 @@ local Library do
                     Theme = {TextColor3 = "Text"},
                     Parent = Items["Top"].Instance,
                     Name = "\0",
-                    FontFace = Library.MenuFont,
+                    FontFace = Library.TitleFont or Library.MenuFont,
                     TextColor3 = Library.Theme["Text"],
                     BorderColor3 = FromRGB(0, 0, 0),
                     Text = "Keybinds",
@@ -2915,7 +2915,7 @@ local Library do
             end
 
             Items["KeybindsList"]:MakeDraggable()
-            Items["KeybindsList"]:MakeResizeable(Vector2New(130, 0), Vector2New(9999, 9999), {Thickness = 4, AutoHeight = true, Sides = {"L", "R"}})
+            Items["KeybindsList"]:MakeResizeable(Vector2New(160, 0), Vector2New(9999, 9999), {Thickness = 4, AutoHeight = true, Sides = {"L", "R"}})
 
             function KeybindList:SetVisibility(Bool)
                 Items["KeybindsList"].Instance.Visible = Bool
@@ -3069,7 +3069,7 @@ local Library do
                     Theme = {TextColor3 = "Text"},
                     Parent = Items["Top"].Instance,
                     Name = "\0",
-                    FontFace = Library.MenuFont,
+                    FontFace = Library.TitleFont or Library.MenuFont,
                     TextColor3 = Library.Theme["Text"],
                     BorderColor3 = FromRGB(0, 0, 0),
                     Text = Title,
@@ -3188,7 +3188,7 @@ local Library do
                 return Priority[Plr.UserId] or "Neutral"
             end
 
-            local Items = Library:CreatePanel("Playerlist", 340, UDim2New(0.3, 0, 0.12, 0), nil, Vector2New(300, 100)) do
+            local Items = Library:CreatePanel("Playerlist", 520, UDim2New(0.3, 0, 0.12, 0), nil, Vector2New(420, 100)) do
                 Items["Panel"].Instance.Visible = false
 
                 -- "pagina" falsa: asi se usan Section / Textbox / Label / Dropdown reales de la libreria
@@ -3197,7 +3197,7 @@ local Library do
                     Name = "\0",
                     BackgroundTransparency = 1,
                     BorderColor3 = FromRGB(0, 0, 0),
-                    Size = UDim2New(1, 0, 0, 380),
+                    Size = UDim2New(1, 0, 0, 300),
                     BorderSizePixel = 0,
                     BackgroundColor3 = FromRGB(255, 255, 255)
                 })
@@ -3210,7 +3210,7 @@ local Library do
             }, Library.Pages)
 
             local Section = Library.Pages.Section(FakePage, {Name = "Playerlist"})
-            Section.Items["Outline"].Instance.Size = UDim2New(1, 0, 0, 330)
+            Section.Items["Outline"].Instance.Size = UDim2New(1, 0, 0, 260)
 
             local ElementsHolder = Section.Items["ElementsHolder"].Instance
             local FitSection = function()
@@ -3228,7 +3228,7 @@ local Library do
                     Parent = ElementsHolder,
                     Name = "\0",
                     BorderColor3 = FromRGB(0, 0, 0),
-                    Size = UDim2New(1, 0, 0, 170),
+                    Size = UDim2New(1, 0, 0, 110),
                     BorderSizePixel = 0,
                     ClipsDescendants = true,
                     BackgroundColor3 = Library.Theme["Background"]
@@ -3388,7 +3388,7 @@ local Library do
                     Selectable = false,
                     BorderColor3 = FromRGB(0, 0, 0),
                     BackgroundTransparency = 1,
-                    Size = UDim2New(1, -4, 0, 21),
+                    Size = UDim2New(1, -4, 0, 24),
                     LayoutOrder = Order,
                     BorderSizePixel = 0,
                     BackgroundColor3 = Library.Theme["Element"]
@@ -3410,7 +3410,7 @@ local Library do
                     Parent = Row.Button.Instance,
                     Name = "\0",
                     AnchorPoint = Vector2New(1, 0),
-                    Position = UDim2New(1, -88, 0, 0),
+                    Position = UDim2New(1, -150, 0, 0),
                     Size = UDim2New(0, 1, 1, 0),
                     BorderSizePixel = 0,
                     BackgroundColor3 = Library.Theme["Border"]
@@ -3425,8 +3425,8 @@ local Library do
                     BorderColor3 = FromRGB(0, 0, 0),
                     Text = Plr.Name,
                     BackgroundTransparency = 1,
-                    Position = UDim2New(0, 8, 0, 0),
-                    Size = UDim2New(1, -100, 1, 0),
+                    Position = UDim2New(0, 12, 0, 0),
+                    Size = UDim2New(1, -182, 1, 0),
                     BorderSizePixel = 0,
                     TextXAlignment = Enum.TextXAlignment.Left,
                     TextTruncate = Enum.TextTruncate.AtEnd,
@@ -3443,8 +3443,8 @@ local Library do
                     BorderColor3 = FromRGB(0, 0, 0),
                     Text = "Neutral",
                     BackgroundTransparency = 1,
-                    Position = UDim2New(1, -80, 0, 0),
-                    Size = UDim2New(0, 76, 1, 0),
+                    Position = UDim2New(1, -138, 0, 0),
+                    Size = UDim2New(0, 130, 1, 0),
                     BorderSizePixel = 0,
                     TextXAlignment = Enum.TextXAlignment.Left,
                     TextSize = 12,
@@ -3521,13 +3521,41 @@ local Library do
                 Health = -1
             }
 
-            local Items = Library:CreatePanel("Player indicator", 170, UDim2New(0.014, 0, 0.55, 0), nil, Vector2New(150, 75)) do
+            local Items = Library:CreatePanel("Indicator", 288, UDim2New(0.014, 0, 0.55, 0), nil, Vector2New(240, 120)) do
+                -- subtitulo "Info" + linea (igual que la UI original)
+                Items["InfoTitle"] = Instances:Create("TextLabel", {
+                    Theme = {TextColor3 = "Inactive Text"},
+                    Parent = Items["Content"].Instance,
+                    Name = "\0",
+                    FontFace = Library.TitleFont or Library.MenuFont,
+                    TextColor3 = Library.Theme["Inactive Text"],
+                    BorderColor3 = FromRGB(0, 0, 0),
+                    Text = "Info",
+                    Size = UDim2New(1, 0, 0, 16),
+                    BackgroundTransparency = 1,
+                    TextXAlignment = Enum.TextXAlignment.Left,
+                    BorderSizePixel = 0,
+                    TextSize = 12,
+                    BackgroundColor3 = FromRGB(255, 255, 255)
+                })
+
+                Items["InfoLine"] = Instances:Create("Frame", {
+                    Theme = {BackgroundColor3 = "Border"},
+                    Parent = Items["Content"].Instance,
+                    Name = "\0",
+                    Position = UDim2New(0, 0, 0, 17),
+                    Size = UDim2New(1, 0, 0, 1),
+                    BorderSizePixel = 0,
+                    BackgroundColor3 = Library.Theme["Border"]
+                })
+
                 Items["Row"] = Instances:Create("Frame", {
                     Parent = Items["Content"].Instance,
                     Name = "\0",
                     BackgroundTransparency = 1,
                     BorderColor3 = FromRGB(0, 0, 0),
-                    Size = UDim2New(1, 0, 0, 40),
+                    Position = UDim2New(0, 0, 0, 26),
+                    Size = UDim2New(1, 0, 0, 56),
                     BorderSizePixel = 0,
                     BackgroundColor3 = FromRGB(255, 255, 255)
                 })
@@ -3535,14 +3563,24 @@ local Library do
                 Items["Avatar"] = Instances:Create("ImageLabel", {
                     Parent = Items["Row"].Instance,
                     Name = "\0",
-                    Size = UDim2New(0, 40, 0, 40),
+                    Size = UDim2New(0, 56, 0, 56),
                     BorderColor3 = FromRGB(0, 0, 0),
                     BorderSizePixel = 0,
                     Image = "",
-                    BackgroundTransparency = 1,
+                    BackgroundTransparency = 0,
                     BackgroundColor3 = Library.Theme["Element 2"]
+                })  Items["Avatar"]:AddToTheme({BackgroundColor3 = "Element 2"})
+
+                Instances:Create("UIStroke", {
+                    Theme = {Color = "Outline"},
+                    Parent = Items["Avatar"].Instance,
+                    Name = "\0",
+                    Color = Library.Theme["Outline"],
+                    LineJoinMode = Enum.LineJoinMode.Miter,
+                    ApplyStrokeMode = Enum.ApplyStrokeMode.Border
                 })
 
+                -- linea 1: nombre (@usuario)
                 Items["Name"] = Instances:Create("TextLabel", {
                     Theme = {TextColor3 = "Text"},
                     Parent = Items["Row"].Instance,
@@ -3551,8 +3589,8 @@ local Library do
                     TextColor3 = Library.Theme["Text"],
                     BorderColor3 = FromRGB(0, 0, 0),
                     Text = "no target",
-                    Position = UDim2New(0, 48, 0, 4),
-                    Size = UDim2New(1, -82, 0, 14),
+                    Position = UDim2New(0, 66, 0, 0),
+                    Size = UDim2New(1, -66, 0, 14),
                     BackgroundTransparency = 1,
                     TextXAlignment = Enum.TextXAlignment.Left,
                     TextTruncate = Enum.TextTruncate.AtEnd,
@@ -3561,31 +3599,55 @@ local Library do
                     BackgroundColor3 = FromRGB(255, 255, 255)
                 })
 
-                Items["HealthText"] = Instances:Create("TextLabel", {
-                    Theme = {TextColor3 = "Inactive Text"},
-                    Parent = Items["Row"].Instance,
-                    Name = "\0",
-                    FontFace = Library.MenuFont,
-                    TextColor3 = Library.Theme["Inactive Text"],
-                    BorderColor3 = FromRGB(0, 0, 0),
-                    Text = "0",
-                    AnchorPoint = Vector2New(1, 0),
-                    Position = UDim2New(1, 0, 0, 4),
-                    Size = UDim2New(0, 30, 0, 14),
-                    BackgroundTransparency = 1,
-                    TextXAlignment = Enum.TextXAlignment.Right,
-                    BorderSizePixel = 0,
-                    TextSize = 12,
-                    BackgroundColor3 = FromRGB(255, 255, 255)
-                })
+                -- lineas 2-4: etiqueta a la izquierda, valor a la derecha
+                Items["Stats"] = { }
+                for Index, Label in { "Distance", "Weapon", "Account age" } do
+                    local Y = 4 + Index * 14
+                    Instances:Create("TextLabel", {
+                        Theme = {TextColor3 = "Inactive Text"},
+                        Parent = Items["Row"].Instance,
+                        Name = "\0",
+                        FontFace = Library.MenuFont,
+                        TextColor3 = Library.Theme["Inactive Text"],
+                        BorderColor3 = FromRGB(0, 0, 0),
+                        Text = Label,
+                        Position = UDim2New(0, 66, 0, Y),
+                        Size = UDim2New(0.5, -33, 0, 14),
+                        BackgroundTransparency = 1,
+                        TextXAlignment = Enum.TextXAlignment.Left,
+                        BorderSizePixel = 0,
+                        TextSize = 12,
+                        BackgroundColor3 = FromRGB(255, 255, 255)
+                    })
 
+                    Items["Stats"][Index] = Instances:Create("TextLabel", {
+                        Theme = {TextColor3 = "Text"},
+                        Parent = Items["Row"].Instance,
+                        Name = "\0",
+                        FontFace = Library.MenuFont,
+                        TextColor3 = Library.Theme["Text"],
+                        BorderColor3 = FromRGB(0, 0, 0),
+                        Text = "-",
+                        AnchorPoint = Vector2New(1, 0),
+                        Position = UDim2New(1, 0, 0, Y),
+                        Size = UDim2New(0.5, -33, 0, 14),
+                        BackgroundTransparency = 1,
+                        TextXAlignment = Enum.TextXAlignment.Right,
+                        TextTruncate = Enum.TextTruncate.AtEnd,
+                        BorderSizePixel = 0,
+                        TextSize = 12,
+                        BackgroundColor3 = FromRGB(255, 255, 255)
+                    })
+                end
+
+                -- barra de vida (ancho completo) con "vida/max" centrado
                 Items["Bar"] = Instances:Create("Frame", {
                     Theme = {BackgroundColor3 = "Element 2"},
-                    Parent = Items["Row"].Instance,
+                    Parent = Items["Content"].Instance,
                     Name = "\0",
-                    Position = UDim2New(0, 48, 0, 24),
+                    Position = UDim2New(0, 0, 0, 92),
                     BorderColor3 = FromRGB(0, 0, 0),
-                    Size = UDim2New(1, -48, 0, 12),
+                    Size = UDim2New(1, 0, 0, 16),
                     BorderSizePixel = 0,
                     ClipsDescendants = true,
                     BackgroundColor3 = Library.Theme["Element 2"]
@@ -3632,6 +3694,26 @@ local Library do
                     Rotation = 90,
                     Color = RGBSequence{RGBSequenceKeypoint(0, FromRGB(255, 255, 255)), RGBSequenceKeypoint(1, FromRGB(163, 163, 163))}
                 })
+
+                Items["HealthText"] = Instances:Create("TextLabel", {
+                    Theme = {TextColor3 = "Text"},
+                    Parent = Items["Bar"].Instance,
+                    Name = "\0",
+                    FontFace = Library.MenuFont,
+                    TextColor3 = Library.Theme["Text"],
+                    BorderColor3 = FromRGB(0, 0, 0),
+                    Text = "0/100",
+                    Size = UDim2New(1, 0, 1, 0),
+                    BackgroundTransparency = 1,
+                    BorderSizePixel = 0,
+                    TextSize = 12,
+                    ZIndex = 2,
+                    BackgroundColor3 = FromRGB(255, 255, 255)
+                })
+
+                -- altura fija del contenido (la barra va debajo de la fila de datos)
+                Items["Content"].Instance.Size = UDim2New(1, 0, 0, 124)
+                Items["Content"].Instance.AutomaticSize = Enum.AutomaticSize.None
             end
 
             function Indicator:SetPlayer(Player)
@@ -3639,11 +3721,14 @@ local Library do
                 Indicator.Health = -1
 
                 if Player then
-                    Items["Name"].Instance.Text = Player.Name
+                    Items["Name"].Instance.Text = (Player.DisplayName ~= Player.Name) and (Player.DisplayName .. " (@" .. Player.Name .. ")") or Player.Name
                     Items["Avatar"].Instance.Image = StringFormat("rbxthumb://type=AvatarHeadShot&id=%d&w=100&h=100", Player.UserId)
                 else
                     Items["Name"].Instance.Text = "no target"
                     Items["Avatar"].Instance.Image = ""
+                    for _, Stat in Items["Stats"] do
+                        Stat.Instance.Text = "-"
+                    end
                 end
             end
 
@@ -3651,10 +3736,23 @@ local Library do
                 Items["Panel"].Instance.Visible = Bool
             end
 
+            local LastInfo = 0
             Library:Connect(RunService.RenderStepped, function()
                 local Player = Indicator.Player
                 local Character = Player and Player.Character
                 local Humanoid = Character and Character:FindFirstChildOfClass("Humanoid")
+
+                -- distancia / arma / edad de la cuenta (5 veces por segundo)
+                local Now = os.clock()
+                if Player and Now - LastInfo > 0.2 then
+                    LastInfo = Now
+                    local Mine = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+                    local Theirs = Character and Character:FindFirstChild("HumanoidRootPart")
+                    Items["Stats"][1].Instance.Text = (Mine and Theirs) and (MathFloor((Mine.Position - Theirs.Position).Magnitude) .. " studs") or "-"
+                    local Tool = Character and Character:FindFirstChildOfClass("Tool")
+                    Items["Stats"][2].Instance.Text = Tool and Tool.Name or "none"
+                    Items["Stats"][3].Instance.Text = tostring(Player.AccountAge) .. " days"
+                end
 
                 local Health = Humanoid and MathFloor(Humanoid.Health) or 0
                 local MaxHealth = Humanoid and Humanoid.MaxHealth or 100
@@ -3667,7 +3765,7 @@ local Library do
 
                 local Ratio = MathClamp(Health / math.max(MaxHealth, 1), 0, 1)
 
-                Items["HealthText"].Instance.Text = tostring(Health)
+                Items["HealthText"].Instance.Text = Health .. "/" .. MathFloor(MaxHealth)
                 Items["Fill"]:Tween(TweenInfo.new(0.2, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), {
                     Size = UDim2New(Ratio, 0, 1, 0)
                 })
@@ -3684,14 +3782,21 @@ local Library do
                 Signature = nil
             }
 
-            local Items = Library:CreatePanel("Hotbar", 150, UDim2New(0.5, 0, 1, -16), Vector2New(0.5, 1), Vector2New(100, 80)) do
+            local Items = Library:CreatePanel("Hotbar", 88, UDim2New(0.014, 0, 0.04, 0), nil, Vector2New(88, 120)) do
                 Instances:Create("UIListLayout", {
                     Parent = Items["Content"].Instance,
                     Name = "\0",
-                    FillDirection = Enum.FillDirection.Horizontal,
-                    Wraps = true,
+                    FillDirection = Enum.FillDirection.Vertical,
+                    HorizontalAlignment = Enum.HorizontalAlignment.Center,
                     Padding = UDimNew(0, 4),
                     SortOrder = Enum.SortOrder.LayoutOrder
+                })
+
+                -- alto minimo para que el panel sea tan alto como el de la UI original
+                Instances:Create("UISizeConstraint", {
+                    Parent = Items["Panel"].Instance,
+                    Name = "\0",
+                    MinSize = Vector2New(88, 210)
                 })
             end
 
@@ -3716,11 +3821,6 @@ local Library do
                 end
                 Hotbar.Slots = { }
 
-                if Items["Panel"].Instance.AutomaticSize ~= Enum.AutomaticSize.None then
-                    local Columns = MathClamp(#List, 1, 10)
-                    Items["Panel"].Instance.Size = UDim2New(0, math.max(150, Columns * 44 + 12), 0, 0)
-                end
-
                 if #List == 0 then
                     local Empty = Instances:Create("TextLabel", {
                     Theme = {TextColor3 = "Inactive Text"},
@@ -3729,7 +3829,7 @@ local Library do
                         FontFace = Library.MenuFont,
                         TextColor3 = Library.Theme["Inactive Text"],
                         Text = "no items",
-                        Size = UDim2New(1, 0, 0, 40),
+                        Size = UDim2New(1, 0, 0, 48),
                         BackgroundTransparency = 1,
                         BorderSizePixel = 0,
                         TextSize = 12,
@@ -3744,7 +3844,7 @@ local Library do
                     local Slot = Instances:Create("Frame", {
                                             Parent = Items["Content"].Instance,
                         Name = "\0",
-                        Size = UDim2New(0, 40, 0, 40),
+                        Size = UDim2New(1, 0, 0, 48),
                         BorderSizePixel = 0,
                         BackgroundTransparency = 1,
                         LayoutOrder = Index,
@@ -3803,7 +3903,7 @@ local Library do
                 Signature = nil
             }
 
-            local Items = Library:CreatePanel("Ammo", 170, UDim2New(0.014, 0, 0.68, 0), nil, Vector2New(150, 75)) do
+            local Items = Library:CreatePanel("Ammo", 288, UDim2New(0.014, 0, 0.75, 0), nil, Vector2New(240, 75)) do
                 Items["Row"] = Instances:Create("Frame", {
                     Parent = Items["Content"].Instance,
                     Name = "\0",
