@@ -3940,6 +3940,9 @@ local Library do
                 Indicator.Player = Player
                 Indicator.Health = -1
                 Indicator.FollowPos = nil
+                if Library.InventoryObj then
+                    Library.InventoryObj:Apply()
+                end
 
                 if Player then
                     Items["Name"].Instance.Text = (Player.DisplayName ~= Player.Name) and (Player.DisplayName .. " (@" .. Player.Name .. ")") or Player.Name
@@ -4354,9 +4357,16 @@ local Library do
                 Viewer:Layout()
             end
 
-            -- visible solo con toggle activo Y con target
+            -- visible solo con toggle activo Y con target (si el script no avisa, se usa el target del Player Indicator)
             function Viewer:Apply()
-                Items["Panel"].Instance.Visible = Viewer.Enabled and Viewer.HasTarget
+                local Indicator = Library.IndicatorObj
+                local Target = Viewer.Player or (Indicator and Indicator.Player)
+
+                if not Viewer.Player then
+                    Items["PlayerName"].Instance.Text = Target and string.upper(Target.Name) or ""
+                end
+
+                Items["Panel"].Instance.Visible = Viewer.Enabled and (Viewer.HasTarget or Target ~= nil)
             end
 
             function Viewer:SetVisibility(Bool)
