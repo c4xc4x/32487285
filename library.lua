@@ -4366,7 +4366,8 @@ local Library do
                     Items["PlayerName"].Instance.Text = Target and string.upper(Target.Name) or ""
                 end
 
-                Items["Panel"].Instance.Visible = Viewer.Enabled and (Viewer.HasTarget or Target ~= nil)
+                -- sale con solo tener el toggle activado (sin target muestra "NONE")
+                Items["Panel"].Instance.Visible = Viewer.Enabled
             end
 
             function Viewer:SetVisibility(Bool)
@@ -7221,6 +7222,8 @@ local Library do
                     MenuSection:Toggle({Name = "Inventory Viewer", Flag = "Inventory Viewer", Default = true, Callback = function(Value)
                         Library.InventoryObj:SetVisibility(Value)
                     end})
+                    -- compatibilidad: scripts viejos apagan el flag "Hotbar" al cargar
+                    Library.SetFlags["Hotbar"] = Library.SetFlags["Inventory Viewer"]
                 end
 
                 if Library.PlayerListObj then
