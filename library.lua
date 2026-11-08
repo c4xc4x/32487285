@@ -889,6 +889,72 @@ local Library do
         Library.Font = ProggyClean
         Library.MenuFont = ProggyClean
         Library.TitleFont = Tahoma
+
+        -- Fuentes seleccionables para el texto de la UI (Settings > Menu > UI Font). Se descargan al elegirlas.
+        Library.UIFontUrls = {
+            ["Zekton"] = "https://github.com/LuckyHub1/LuckyHub/raw/refs/heads/main/zekton_rg.ttf",
+            ["Smallest Pixel-7"] = "https://github.com/i77lhm/storage/raw/refs/heads/main/fonts/smallest_pixel-7.ttf",
+            ["Pixel Arial"] = "https://github.com/smi9/UnnamedCheats/raw/refs/heads/main/PixelArial.TTF",
+            ["Arial"] = "https://raw.githubusercontent.com/smi9/UnnamedCheats/refs/heads/main/Arial.ttf"
+        }
+        Library.UIFontNames = { "Zekton", "Proggy Clean", "Smallest Pixel-7", "Pixel Arial", "Arial" }
+        Library.UIFontCache = { ["Proggy Clean"] = ProggyClean }
+        Library.UIFontName = "Proggy Clean"
+
+        Library.GetUIFont = function(self, Name)
+            if Library.UIFontCache[Name] then
+                return Library.UIFontCache[Name]
+            end
+
+            local Url = Library.UIFontUrls[Name]
+            if not Url then
+                return nil
+            end
+
+            local Ok, Result = pcall(function()
+                return CustomFont:New(Name, 200, "normal", {
+                    Id = (Name:gsub("%s+", "")),
+                    Url = Url
+                })
+            end)
+
+            if Ok and Result then
+                Library.UIFontCache[Name] = Result
+                return Result
+            end
+
+            return nil
+        end
+
+        -- cambia la fuente de TODO el texto de la UI (los titulos se quedan con Tahoma)
+        Library.SetUIFont = function(self, Name)
+            local New = Library:GetUIFont(Name)
+            if not New then
+                return false
+            end
+
+            local Old = Library.MenuFont
+            Library.UIFontName = Name
+            Library.MenuFont = New
+            Library.SubFont = New
+            Library.Font = New
+
+            if Library.Holder and Old and Old.Family ~= New.Family then
+                for _, Object in Library.Holder.Instance:GetDescendants() do
+                    if Object:IsA("TextLabel") or Object:IsA("TextButton") or Object:IsA("TextBox") then
+                        local Face = Object.FontFace
+                        if Face.Family == Old.Family then
+                            Object.FontFace = New
+                        end
+                    end
+                end
+            end
+
+            return true
+        end
+
+        -- por defecto: Zekton (el de pchaxx13); si no se puede descargar se queda Proggy Clean
+        Library:SetUIFont("Zekton")
     end
 
     Library.Holder = Instances:Create("ScreenGui", {
@@ -3910,13 +3976,43 @@ local Library do
                 Signature = nil
             }
 
-            local Items = Library:CreatePanel("Ammo", 288, UDim2New(0.014, 0, 0.75, 0), nil, Vector2New(240, 75)) do
-                Items["Row"] = Instances:Create("Frame", {
+            local Items = Library:CreatePanel("Ammo", 288, UDim2New(0.014, 0, 0.75, 0), nil, Vector2New(240, 120)) do
+                -- "pagina" falsa: Section real de la libreria (titulo "Info" dentro del borde)
+                Items["Holder"] = Instances:Create("Frame", {
                     Parent = Items["Content"].Instance,
                     Name = "\0",
                     BackgroundTransparency = 1,
                     BorderColor3 = FromRGB(0, 0, 0),
-                    Size = UDim2New(1, 0, 0, 40),
+                    Size = UDim2New(1, 0, 0, 130),
+                    BorderSizePixel = 0,
+                    BackgroundColor3 = FromRGB(255, 255, 255)
+                })
+
+                local FakePage = setmetatable({
+                    Window = nil,
+                    Items = { PageContent = Items["Holder"] },
+                    SubPages = { }
+                }, Library.Pages)
+
+                local Section = Library.Pages.Section(FakePage, {Name = "Info"})
+                Section.Items["Outline"].Instance.Size = UDim2New(1, 0, 0, 130)
+                Items["Section"] = Section
+
+                local ElementsHolder = Section.Items["ElementsHolder"].Instance
+                local FitSection = function()
+                    local Height = ElementsHolder.AbsoluteSize.Y + 34
+                    Section.Items["Outline"].Instance.Size = UDim2New(1, 0, 0, Height)
+                    Items["Holder"].Instance.Size = UDim2New(1, 0, 0, Height + 2)
+                end
+                Library:Connect(ElementsHolder:GetPropertyChangedSignal("AbsoluteSize"), FitSection)
+
+                Items["Row"] = Instances:Create("Frame", {
+                    Parent = ElementsHolder,
+                    Name = "\0",
+                    BackgroundTransparency = 1,
+                    BorderColor3 = FromRGB(0, 0, 0),
+                    LayoutOrder = 1,
+                    Size = UDim2New(1, 0, 0, 56),
                     BorderSizePixel = 0,
                     BackgroundColor3 = FromRGB(255, 255, 255)
                 })
@@ -3924,13 +4020,22 @@ local Library do
                 Items["Icon"] = Instances:Create("ImageLabel", {
                     Parent = Items["Row"].Instance,
                     Name = "\0",
-                    Size = UDim2New(0, 40, 0, 40),
+                    Size = UDim2New(0, 56, 0, 56),
                     BorderColor3 = FromRGB(0, 0, 0),
                     BorderSizePixel = 0,
                     ScaleType = Enum.ScaleType.Fit,
                     Image = "",
-                    BackgroundTransparency = 1,
+                    BackgroundTransparency = 0,
                     BackgroundColor3 = Library.Theme["Element 2"]
+                })  Items["Icon"]:AddToTheme({BackgroundColor3 = "Element 2"})
+
+                Instances:Create("UIStroke", {
+                    Theme = {Color = "Outline"},
+                    Parent = Items["Icon"].Instance,
+                    Name = "\0",
+                    Color = Library.Theme["Outline"],
+                    LineJoinMode = Enum.LineJoinMode.Miter,
+                    ApplyStrokeMode = Enum.ApplyStrokeMode.Border
                 })
 
                 Items["IconText"] = Instances:Create("TextLabel", {
@@ -3947,6 +4052,7 @@ local Library do
                     BackgroundColor3 = FromRGB(255, 255, 255)
                 })
 
+                -- linea 1: nombre del arma
                 Items["Name"] = Instances:Create("TextLabel", {
                     Theme = {TextColor3 = "Text"},
                     Parent = Items["Row"].Instance,
@@ -3954,9 +4060,9 @@ local Library do
                     FontFace = Library.MenuFont,
                     TextColor3 = Library.Theme["Text"],
                     BorderColor3 = FromRGB(0, 0, 0),
-                    Text = "Ammo",
-                    Position = UDim2New(0, 48, 0, 4),
-                    Size = UDim2New(1, -98, 0, 14),
+                    Text = "no weapon",
+                    Position = UDim2New(0, 66, 0, 0),
+                    Size = UDim2New(1, -66, 0, 14),
                     BackgroundTransparency = 1,
                     TextXAlignment = Enum.TextXAlignment.Left,
                     TextTruncate = Enum.TextTruncate.AtEnd,
@@ -3965,32 +4071,55 @@ local Library do
                     BackgroundColor3 = FromRGB(255, 255, 255)
                 })
 
-                Items["Count"] = Instances:Create("TextLabel", {
-                    Theme = {TextColor3 = "Inactive Text"},
-                    Parent = Items["Row"].Instance,
-                    Name = "\0",
-                    FontFace = Library.MenuFont,
-                    TextColor3 = Library.Theme["Inactive Text"],
-                    BorderColor3 = FromRGB(0, 0, 0),
-                    Text = "-",
-                    AnchorPoint = Vector2New(1, 0),
-                    Position = UDim2New(1, 0, 0, 4),
-                    Size = UDim2New(0, 48, 0, 14),
-                    BackgroundTransparency = 1,
-                    TextXAlignment = Enum.TextXAlignment.Right,
-                    BorderSizePixel = 0,
-                    TextSize = 12,
-                    BackgroundColor3 = FromRGB(255, 255, 255)
-                })
+                -- lineas 2-4: etiqueta a la izquierda, valor a la derecha
+                Items["Stats"] = { }
+                for Index, Label in { "Current", "Max", "Status" } do
+                    local Y = 4 + Index * 14
+                    Instances:Create("TextLabel", {
+                        Theme = {TextColor3 = "Inactive Text"},
+                        Parent = Items["Row"].Instance,
+                        Name = "\0",
+                        FontFace = Library.MenuFont,
+                        TextColor3 = Library.Theme["Inactive Text"],
+                        BorderColor3 = FromRGB(0, 0, 0),
+                        Text = Label,
+                        Position = UDim2New(0, 66, 0, Y),
+                        Size = UDim2New(0.5, -33, 0, 14),
+                        BackgroundTransparency = 1,
+                        TextXAlignment = Enum.TextXAlignment.Left,
+                        BorderSizePixel = 0,
+                        TextSize = 12,
+                        BackgroundColor3 = FromRGB(255, 255, 255)
+                    })
 
-                -- Misma barra que la de vida / sliders (stroke + gradientes)
+                    Items["Stats"][Index] = Instances:Create("TextLabel", {
+                        Theme = {TextColor3 = "Text"},
+                        Parent = Items["Row"].Instance,
+                        Name = "\0",
+                        FontFace = Library.MenuFont,
+                        TextColor3 = Library.Theme["Text"],
+                        BorderColor3 = FromRGB(0, 0, 0),
+                        Text = "-",
+                        AnchorPoint = Vector2New(1, 0),
+                        Position = UDim2New(1, 0, 0, Y),
+                        Size = UDim2New(0.5, -33, 0, 14),
+                        BackgroundTransparency = 1,
+                        TextXAlignment = Enum.TextXAlignment.Right,
+                        TextTruncate = Enum.TextTruncate.AtEnd,
+                        BorderSizePixel = 0,
+                        TextSize = 12,
+                        BackgroundColor3 = FromRGB(255, 255, 255)
+                    })
+                end
+
+                -- barra de municion (ancho completo) con "actual/max" centrado
                 Items["Bar"] = Instances:Create("Frame", {
                     Theme = {BackgroundColor3 = "Element 2"},
-                    Parent = Items["Row"].Instance,
+                    Parent = ElementsHolder,
                     Name = "\0",
-                    Position = UDim2New(0, 48, 0, 24),
+                    LayoutOrder = 2,
                     BorderColor3 = FromRGB(0, 0, 0),
-                    Size = UDim2New(1, -48, 0, 12),
+                    Size = UDim2New(1, 0, 0, 16),
                     BorderSizePixel = 0,
                     ClipsDescendants = true,
                     BackgroundColor3 = Library.Theme["Element 2"]
@@ -4036,6 +4165,24 @@ local Library do
                     Rotation = 90,
                     Color = RGBSequence{RGBSequenceKeypoint(0, FromRGB(255, 255, 255)), RGBSequenceKeypoint(1, FromRGB(163, 163, 163))}
                 })
+
+                Items["Count"] = Instances:Create("TextLabel", {
+                    Theme = {TextColor3 = "Text"},
+                    Parent = Items["Bar"].Instance,
+                    Name = "\0",
+                    FontFace = Library.MenuFont,
+                    TextColor3 = Library.Theme["Text"],
+                    BorderColor3 = FromRGB(0, 0, 0),
+                    Text = "-",
+                    Size = UDim2New(1, 0, 1, 0),
+                    BackgroundTransparency = 1,
+                    BorderSizePixel = 0,
+                    TextSize = 12,
+                    ZIndex = 2,
+                    BackgroundColor3 = FromRGB(255, 255, 255)
+                })
+
+                FitSection()
             end
 
             local AmmoPatterns = {"ammo", "clip", "mag", "bullet", "rounds"}
@@ -4205,16 +4352,23 @@ local Library do
                 -- icono del arma (o sus 3 primeras letras si no tiene textura)
                 Items["Icon"].Instance.Image = Texture
                 Items["IconText"].Instance.Text = Texture == "" and string.upper(string.sub(Name, 1, 3)) or ""
+                Items["Name"].Instance.Text = Tool and Name or "no weapon"
 
                 if Current then
                     local Ratio = Max and Max > 0 and MathClamp(Current / Max, 0, 1) or 0
 
                     Items["Count"].Instance.Text = StringFormat("%d/%d", MathFloor(Current), MathFloor(Max or 0))
-                    Items["Count"].Instance.TextColor3 = Current <= 0 and FromRGB(255, 70, 70) or Library.Theme["Inactive Text"]
+                    Items["Count"].Instance.TextColor3 = Current <= 0 and FromRGB(255, 70, 70) or Library.Theme["Text"]
+                    Items["Stats"][1].Instance.Text = tostring(MathFloor(Current))
+                    Items["Stats"][2].Instance.Text = Max and tostring(MathFloor(Max)) or "-"
+                    Items["Stats"][3].Instance.Text = Current <= 0 and "empty" or "ready"
                     Items["Fill"]:Tween(TweenInfo.new(0.2, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), {Size = UDim2New(Ratio, 0, 1, 0)})
                 else
                     Items["Count"].Instance.Text = Tool and "n/a" or "-"
-                    Items["Count"].Instance.TextColor3 = Library.Theme["Inactive Text"]
+                    Items["Count"].Instance.TextColor3 = Library.Theme["Text"]
+                    for _, Stat in Items["Stats"] do
+                        Stat.Instance.Text = "-"
+                    end
                     Items["Fill"]:Tween(TweenInfo.new(0.2, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), {Size = UDim2New(0, 0, 1, 0)})
                 end
             end)
@@ -7032,6 +7186,25 @@ local Library do
                 MenuSection:Toggle({Name = "Watermark", Flag = "Watermark", Default = true, Callback = function(Value)
                     Watermark:SetVisibility(Value)
                 end})
+
+                MenuSection:Dropdown({
+                    Name = "UI Font",
+                    Flag = "UI Font",
+                    Items = Library.UIFontNames,
+                    Default = Library.UIFontName,
+                    Multi = false,
+                    Callback = function(Value)
+                        if type(Value) == "table" then
+                            Value = Value[1]
+                        end
+
+                        if Value and Value ~= Library.UIFontName then
+                            task.spawn(function()
+                                Library:SetUIFont(Value)
+                            end)
+                        end
+                    end
+                })
 
                 if Library.IndicatorObj then
                     MenuSection:Toggle({Name = "Player Indicator", Flag = "Player Indicator", Default = true, Callback = function(Value)
