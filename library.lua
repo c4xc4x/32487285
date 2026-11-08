@@ -379,6 +379,12 @@ local Library do
                 NewItem.Instance[Property] = Value
             end
 
+            -- Zekton es la fuente de la UI: todo texto creado con ella sube 1 punto de tamaño
+            if Library.UIFontName == "Zekton" and Library.MenuFont and NewItem.Properties.FontFace
+                and NewItem.Properties.FontFace.Family == Library.MenuFont.Family and NewItem.Instance.TextSize then
+                NewItem.Instance.TextSize = NewItem.Instance.TextSize + 1
+            end
+
             -- juanita style: Theme = {Property = "ThemeKey"} registers the item automatically
             if NewItem.Properties.Theme then
                 Library:AddToTheme(NewItem, NewItem.Properties.Theme)
@@ -912,10 +918,27 @@ local Library do
             end
 
             local Ok, Result = pcall(function()
-                return CustomFont:New(Name, 200, "normal", {
-                    Id = (Name:gsub("%s+", "")),
-                    Url = Url
-                })
+                local Id = (Name:gsub("%s+", ""))
+                local TtfPath = `{Library.Folders.Fonts}/{Id}.ttf`
+                local CfgPath = `{Library.Folders.Fonts}/{Id}.font`
+
+                -- descarga si no existe o si el archivo guardado no es una fuente valida
+                local Valid = false
+                if isfile(TtfPath) then
+                    local Head = readfile(TtfPath):sub(1, 4)
+                    Valid = Head == "\0\1\0\0" or Head == "OTTO" or Head == "true"
+                end
+
+                if not Valid then
+                    writefile(TtfPath, game:HttpGet(Url))
+                end
+
+                writefile(CfgPath, HttpService:JSONEncode({
+                    name = Id,
+                    faces = { { name = "Regular", weight = 400, style = "normal", assetId = getcustomasset(TtfPath) } }
+                }))
+
+                return Font.new(getcustomasset(CfgPath), Enum.FontWeight.Regular)
             end)
 
             if Ok and Result then
@@ -934,6 +957,8 @@ local Library do
             end
 
             local Old = Library.MenuFont
+            -- Zekton se ve 1 punto mas grande que el resto de fuentes
+            local Delta = (Name == "Zekton" and 1 or 0) - (Library.UIFontName == "Zekton" and 1 or 0)
             Library.UIFontName = Name
             Library.MenuFont = New
             Library.SubFont = New
@@ -945,6 +970,7 @@ local Library do
                         local Face = Object.FontFace
                         if Face.Family == Old.Family then
                             Object.FontFace = New
+                            Object.TextSize = Object.TextSize + Delta
                         end
                     end
                 end
@@ -953,8 +979,17 @@ local Library do
             return true
         end
 
-        -- por defecto: Zekton (el de pchaxx13); si no se puede descargar se queda Proggy Clean
-        Library:SetUIFont("Zekton")
+        -- Zekton (el de pchaxx13) es la fuente de la UI si o si: si falla la descarga se reintenta hasta que cargue
+        if not Library:SetUIFont("Zekton") then
+            task.spawn(function()
+                for Attempt = 1, 20 do
+                    task.wait(3)
+                    if Library:SetUIFont("Zekton") then
+                        break
+                    end
+                end
+            end)
+        end
     end
 
     Library.Holder = Instances:Create("ScreenGui", {
@@ -3043,6 +3078,16 @@ local Library do
             return KeybindList
         end
 
+        -- Outline (borde negro) para todos los TextLabel dentro de Root
+        Library.OutlineTexts = function(self, Root)
+            for _, Object in Root:GetDescendants() do
+                if Object:IsA("TextLabel") then
+                    Object.TextStrokeColor3 = FromRGB(0, 0, 0)
+                    Object.TextStrokeTransparency = 0.35
+                end
+            end
+        end
+
         -- Panel base con el mismo estilo que el Keybind List (header + liner + contenido)
         Library.CreatePanel = function(self, Title, Width, Position, AnchorPoint, MinSize, NoResize)
             local Items = { } do
@@ -3642,17 +3687,8 @@ local Library do
                     BorderColor3 = FromRGB(0, 0, 0),
                     BorderSizePixel = 0,
                     Image = "",
-                    BackgroundTransparency = 0,
-                    BackgroundColor3 = Library.Theme["Element 2"]
-                })  Items["Avatar"]:AddToTheme({BackgroundColor3 = "Element 2"})
-
-                Instances:Create("UIStroke", {
-                    Theme = {Color = "Outline"},
-                    Parent = Items["Avatar"].Instance,
-                    Name = "\0",
-                    Color = Library.Theme["Outline"],
-                    LineJoinMode = Enum.LineJoinMode.Miter,
-                    ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+                    BackgroundTransparency = 1,
+                    BackgroundColor3 = FromRGB(255, 255, 255)
                 })
 
                 -- linea 1: nombre (@usuario)
@@ -3786,6 +3822,7 @@ local Library do
                     BackgroundColor3 = FromRGB(255, 255, 255)
                 })
 
+                Library:OutlineTexts(Items["Holder"].Instance)
                 FitSection()
             end
 
@@ -4025,17 +4062,8 @@ local Library do
                     BorderSizePixel = 0,
                     ScaleType = Enum.ScaleType.Fit,
                     Image = "",
-                    BackgroundTransparency = 0,
-                    BackgroundColor3 = Library.Theme["Element 2"]
-                })  Items["Icon"]:AddToTheme({BackgroundColor3 = "Element 2"})
-
-                Instances:Create("UIStroke", {
-                    Theme = {Color = "Outline"},
-                    Parent = Items["Icon"].Instance,
-                    Name = "\0",
-                    Color = Library.Theme["Outline"],
-                    LineJoinMode = Enum.LineJoinMode.Miter,
-                    ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+                    BackgroundTransparency = 1,
+                    BackgroundColor3 = FromRGB(255, 255, 255)
                 })
 
                 Items["IconText"] = Instances:Create("TextLabel", {
@@ -4182,6 +4210,7 @@ local Library do
                     BackgroundColor3 = FromRGB(255, 255, 255)
                 })
 
+                Library:OutlineTexts(Items["Holder"].Instance)
                 FitSection()
             end
 
@@ -7186,25 +7215,6 @@ local Library do
                 MenuSection:Toggle({Name = "Watermark", Flag = "Watermark", Default = true, Callback = function(Value)
                     Watermark:SetVisibility(Value)
                 end})
-
-                MenuSection:Dropdown({
-                    Name = "UI Font",
-                    Flag = "UI Font",
-                    Items = Library.UIFontNames,
-                    Default = Library.UIFontName,
-                    Multi = false,
-                    Callback = function(Value)
-                        if type(Value) == "table" then
-                            Value = Value[1]
-                        end
-
-                        if Value and Value ~= Library.UIFontName then
-                            task.spawn(function()
-                                Library:SetUIFont(Value)
-                            end)
-                        end
-                    end
-                })
 
                 if Library.IndicatorObj then
                     MenuSection:Toggle({Name = "Player Indicator", Flag = "Player Indicator", Default = true, Callback = function(Value)
