@@ -79,6 +79,20 @@ local Library do
 
         GlowTransparency = 0.8,
 
+        -- linea de las secciones (cambia estos valores si quieres)
+        SectionLine = {
+            Enabled = true,   -- poner la linea de acento arriba de cada seccion
+            Glow = true,      -- brillo suave alrededor de la linea
+            Pulse = true,     -- true = la luz va y viene (fade in/out), false = linea fija
+            Speed = 3.5,      -- segundos por barrido
+        },
+
+        -- icono de los dropdowns: { cerrado, abierto }   ej: {"+", "-"}  o  {"v", "^"}
+        DropdownIcon = { "+", "-" },
+
+        -- texto gris cuando un toggle esta apagado
+        DimDisabledText = true,
+
         RainbowSpeed = 0.28,
 
         Folders = {
@@ -3941,7 +3955,7 @@ local Library do
                 end
 
                 local Prio = PrioOf(Plr)
-                Row.Prio.Instance.Text = Prio
+                Row.Prio.Instance.Text = (Prio == "LocalPlayer") and "You" or Prio
 
                 local Color = PrioColors[Prio]
                 if Color then
@@ -4004,16 +4018,17 @@ local Library do
                     BackgroundColor3 = Library.Theme["Border"]
                 })
 
-                Instances:Create("Frame", {
-                    Theme = {BackgroundColor3 = "Border"},
-                    Parent = Row.Button.Instance,
-                    Name = "\0",
-                    AnchorPoint = Vector2New(1, 0),
-                    Position = UDim2New(1, -150, 0, 0),
-                    Size = UDim2New(0, 1, 1, 0),
-                    BorderSizePixel = 0,
-                    BackgroundColor3 = Library.Theme["Border"]
-                })
+                for _, Scale in {0.36, 0.69} do
+                    Instances:Create("Frame", {
+                        Theme = {BackgroundColor3 = "Border"},
+                        Parent = Row.Button.Instance,
+                        Name = "\0",
+                        Position = UDim2New(Scale, 0, 0, 0),
+                        Size = UDim2New(0, 1, 1, 0),
+                        BorderSizePixel = 0,
+                        BackgroundColor3 = Library.Theme["Border"]
+                    })
+                end
 
                 Row.Name = Instances:Create("TextLabel", {
                     Theme = {TextColor3 = "Text"},
@@ -4024,8 +4039,26 @@ local Library do
                     BorderColor3 = FromRGB(0, 0, 0),
                     Text = Plr.Name,
                     BackgroundTransparency = 1,
-                    Position = UDim2New(0, 18, 0, 0),
-                    Size = UDim2New(1, -200, 1, 0),
+                    Position = UDim2New(0, 12, 0, 0),
+                    Size = UDim2New(0.36, -18, 1, 0),
+                    BorderSizePixel = 0,
+                    TextXAlignment = Enum.TextXAlignment.Left,
+                    TextTruncate = Enum.TextTruncate.AtEnd,
+                    TextSize = 12,
+                    BackgroundColor3 = FromRGB(255, 255, 255)
+                })
+
+                Row.Display = Instances:Create("TextLabel", {
+                    Theme = {TextColor3 = "Inactive Text"},
+                    Parent = Row.Button.Instance,
+                    Name = "\0",
+                    FontFace = Library.MenuFont,
+                    TextColor3 = Library.Theme["Inactive Text"],
+                    BorderColor3 = FromRGB(0, 0, 0),
+                    Text = Plr.DisplayName,
+                    BackgroundTransparency = 1,
+                    Position = UDim2New(0.36, 10, 0, 0),
+                    Size = UDim2New(0.33, -16, 1, 0),
                     BorderSizePixel = 0,
                     TextXAlignment = Enum.TextXAlignment.Left,
                     TextTruncate = Enum.TextTruncate.AtEnd,
@@ -4042,8 +4075,8 @@ local Library do
                     BorderColor3 = FromRGB(0, 0, 0),
                     Text = "Neutral",
                     BackgroundTransparency = 1,
-                    Position = UDim2New(1, -132, 0, 0),
-                    Size = UDim2New(0, 124, 1, 0),
+                    Position = UDim2New(0.69, 10, 0, 0),
+                    Size = UDim2New(0.31, -14, 1, 0),
                     BorderSizePixel = 0,
                     TextXAlignment = Enum.TextXAlignment.Left,
                     TextSize = 12,
@@ -5958,6 +5991,7 @@ local Library do
                     TextColor3 = Library.Theme["Text"],
                     BorderColor3 = FromRGB(0, 0, 0),
                     Text = Section.Name,
+                    ZIndex = 3,
                     TextXAlignment = Enum.TextXAlignment.Left,
                     Position = UDim2New(0, 9, 0, -2),
                     Size = UDim2New(0, 0, 0, 1),
@@ -5974,6 +6008,58 @@ local Library do
                     PaddingRight = UDimNew(0, 4),
                     PaddingLeft = UDimNew(0, 4)
                 })
+
+                -- linea de acento arriba de la seccion (con fade en los bordes, glow y barrido opcional)
+                local LineCfg = Library.SectionLine
+                if LineCfg and LineCfg.Enabled then
+                    Items["Liner"] = Instances:Create("Frame", {
+                        Theme = {BackgroundColor3 = "Accent"},
+                        Parent = Items["Outline"].Instance,
+                        Name = "\0",
+                        Position = UDim2New(0, 0, 0, 0),
+                        Size = UDim2New(1, 0, 0, 1),
+                        BorderSizePixel = 0,
+                        ZIndex = 1,
+                        BackgroundColor3 = Library.Theme["Accent"]
+                    })
+
+                    local LineGradient = Instances:Create("UIGradient", {
+                        Parent = Items["Liner"].Instance,
+                        Name = "\0",
+                        Transparency = NumSequence{
+                            NumSequenceKeypoint(0, 1),
+                            NumSequenceKeypoint(0.5, 0),
+                            NumSequenceKeypoint(1, 1)
+                        }
+                    })
+
+                    if LineCfg.Glow then
+                        Items["LinerGlow"] = Instances:Create("ImageLabel", {
+                            Theme = {ImageColor3 = "Glow"},
+                            Parent = Items["Liner"].Instance,
+                            Name = "\0",
+                            ImageColor3 = Library.Theme["Glow"],
+                            ScaleType = Enum.ScaleType.Slice,
+                            ImageTransparency = Library.GlowTransparency,
+                            Size = UDim2New(1, 6, 1, 6),
+                            AnchorPoint = Vector2New(0.5, 0.5),
+                            Position = UDim2New(0.5, 0, 0.5, 0),
+                            Image = "http://www.roblox.com/asset/?id=18245826428",
+                            BackgroundTransparency = 1,
+                            BorderSizePixel = 0,
+                            SliceCenter = Rect.new(Vector2.new(21, 21), Vector2.new(79, 79))
+                        })
+                    end
+
+                    if LineCfg.Pulse then
+                        -- el gradiente es ancho y se desplaza: la luz entra y sale de izquierda a derecha
+                        LineGradient.Instance.Offset = Vector2New(-0.6, 0)
+                        local PulseTween = TweenService:Create(LineGradient.Instance,
+                            TweenInfo.new(LineCfg.Speed or 3.5, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut, -1, true),
+                            {Offset = Vector2New(0.6, 0)})
+                        PulseTween:Play()
+                    end
+                end
 
                 Items["Elements"] = Instances:Create("ScrollingFrame", {
                     Parent = Items["Background"].Instance,
@@ -6169,6 +6255,11 @@ local Library do
             function Toggle:Set(Value)
                 Toggle.Value = Value 
                 Library.Flags[Toggle.Flag] = Value 
+
+                if Library.DimDisabledText then
+                    Items["Text"]:ChangeItemTheme({TextColor3 = Toggle.Value and "Text" or "Inactive Text"})
+                    Items["Text"]:Tween(nil, {TextColor3 = Toggle.Value and Library.Theme["Text"] or Library.Theme["Inactive Text"]})
+                end
 
                 if Toggle.Value then 
                     Items["Indicator"]:ChangeItemTheme({BackgroundColor3 = "Accent"})
@@ -6631,40 +6722,23 @@ local Library do
                     Color = RGBSequence{RGBSequenceKeypoint(0, FromRGB(255, 255, 255)), RGBSequenceKeypoint(1, FromRGB(163, 163, 163))}
                 })
                 
-                if not Dropdown.Multi then 
-                    Items["Icon"] = Instances:Create("ImageLabel", {
-                    Theme = {ImageColor3 = "Inactive Text"},
-                        Parent = Items["Indicator"].Instance,
-                        Name = "\0",
-                        ImageColor3 = Library.Theme["Inactive Text"],
-                        ScaleType = Enum.ScaleType.Fit,
-                        BorderColor3 = FromRGB(0, 0, 0),
-                        Size = UDim2New(0, 7, 0, 7),
-                        AnchorPoint = Vector2New(1, 0.5),
-                        Image = "rbxassetid://108270041153906",
-                        BackgroundTransparency = 1,
-                        Position = UDim2New(1, -8, 0.5, 0),
-                        ResampleMode = Enum.ResamplerMode.Pixelated,
-                        BorderSizePixel = 0,
-                        BackgroundColor3 = FromRGB(255, 255, 255)
-                    })
-                else
-                    Items["Icon"] = Instances:Create("ImageLabel", {
-                    Theme = {ImageColor3 = "Inactive Text", BackgroundColor3 = "Text"},
-                        Parent = Items["Indicator"].Instance,
-                        Name = "\0",
-                        ImageColor3 = Library.Theme["Inactive Text"],
-                        BorderColor3 = FromRGB(0, 0, 0),
-                        AnchorPoint = Vector2New(1, 0.5),
-                        Image = "rbxassetid://132890703695297",
-                        BackgroundTransparency = 1,
-                        Position = UDim2New(1, -8, 0.5, -1),
-                        Size = UDim2New(0, 8, 0, 8),
-                        BorderSizePixel = 0,
-                        BackgroundColor3 = Library.Theme["Text"]
-                    })                    
-                end
-                
+                Items["Icon"] = Instances:Create("TextLabel", {
+                    Theme = {TextColor3 = "Inactive Text"},
+                    Parent = Items["Indicator"].Instance,
+                    Name = "\0",
+                    FontFace = Library.MenuFont,
+                    TextColor3 = Library.Theme["Inactive Text"],
+                    BorderColor3 = FromRGB(0, 0, 0),
+                    Text = Library.DropdownIcon[1],
+                    TextSize = 14,
+                    AnchorPoint = Vector2New(1, 0.5),
+                    Position = UDim2New(1, -4, 0.5, 0),
+                    Size = UDim2New(0, 12, 0, 14),
+                    BackgroundTransparency = 1,
+                    BorderSizePixel = 0,
+                    BackgroundColor3 = FromRGB(255, 255, 255)
+                })
+
                 Items["Value"] = Instances:Create("TextLabel", {
                     Theme = {TextColor3 = "Inactive Text"},
                     Parent = Items["Indicator"].Instance,
@@ -6776,6 +6850,9 @@ local Library do
                 end
 
                 Dropdown.IsOpen = Bool
+
+                Items["Icon"].Instance.Text = Bool and Library.DropdownIcon[2] or Library.DropdownIcon[1]
+                Items["Icon"]:Tween(nil, {TextColor3 = Bool and Library.Theme["Accent"] or Library.Theme["Inactive Text"]})
 
                 Debounce = true 
 
