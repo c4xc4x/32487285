@@ -79,14 +79,6 @@ local Library do
 
         GlowTransparency = 0.8,
 
-        -- linea de las secciones (cambia estos valores si quieres)
-        SectionLine = {
-            Enabled = true,   -- poner la linea de acento arriba de cada seccion
-            Glow = true,      -- brillo suave alrededor de la linea
-            Pulse = true,     -- true = la luz va y viene (fade in/out), false = linea fija
-            Speed = 3.5,      -- segundos por barrido
-        },
-
         -- icono de los dropdowns: { cerrado, abierto }   ej: {"+", "-"}  o  {"v", "^"}
         DropdownIcon = { "+", "-" },
 
@@ -1010,7 +1002,8 @@ local Library do
         Parent = gethui(),
         Name = "\0",
         ZIndexBehavior = Enum.ZIndexBehavior.Global,
-        DisplayOrder = 2,
+        DisplayOrder = 2147483647, -- maximo: la UI siempre queda encima de todo lo demas
+        OnTopOfCoreBlur = true,
         IgnoreGuiInset = true,
         ResetOnSpawn = false
     })
@@ -3296,6 +3289,8 @@ local Library do
                     BorderOffset = UDimNew(0, 1)
                 })
                 
+                Library:RaiseZ(Items["KeybindsList"], 50)
+
                 Items["Top"] = Instances:Create("Frame", {
                     Theme = {BackgroundColor3 = "Inline"},
                     Parent = Items["KeybindsList"].Instance,
@@ -3516,6 +3511,39 @@ local Library do
             end)
         end
 
+        -- Sube el ZIndex de todo un arbol (y de lo que se le agregue despues) para que quede POR ENCIMA de la ventana
+        -- principal. Con ZIndexBehavior.Global los elementos de la ventana (ZIndex 2/3) se dibujaban sobre los paneles
+        -- y sus lineas los atravesaban; asi cada panel se dibuja completo encima.
+        Library.ZRaised = setmetatable({ }, {__mode = "k"})
+        Library.RaiseZ = function(self, Root, Amount)
+            Root = Root.Instance or Root
+            Amount = Amount or 50
+
+            if Library.ZRaised[Root] then
+                return
+            end
+            Library.ZRaised[Root] = true
+
+            local Done = setmetatable({ }, {__mode = "k"})
+            local Raise = function(Object)
+                if Done[Object] or not Object:IsA("GuiObject") then
+                    return
+                end
+                Done[Object] = true
+                Object.ZIndex = Object.ZIndex + Amount
+            end
+
+            Raise(Root)
+            for _, Object in Root:GetDescendants() do
+                Raise(Object)
+            end
+
+            -- defer: asi se suma sobre el ZIndex final del objeto (ya con todas sus propiedades puestas)
+            Library:Connect(Root.DescendantAdded, function(Object)
+                task.defer(Raise, Object)
+            end)
+        end
+
         -- Panel base con el mismo estilo que el Keybind List (header + liner + contenido)
         Library.CreatePanel = function(self, Title, Width, Position, AnchorPoint, MinSize, NoResize)
             local Items = { } do
@@ -3642,6 +3670,8 @@ local Library do
                     PaddingRight = UDimNew(0, 8)
                 })
             end
+
+            Library:RaiseZ(Items["Panel"], 50)
 
             Items["Panel"]:MakeDraggable()
             if not NoResize then
@@ -3773,7 +3803,7 @@ local Library do
                 return Priority[Plr.UserId] or "Neutral"
             end
 
-            local Items = Library:CreatePanel("Playerlist", 520, UDim2New(0.3, 0, 0.12, 0), nil, Vector2New(420, 100)) do
+            local Items = Library:CreatePanel("Playerlist", 400, UDim2New(0.3, 0, 0.12, 0), nil, nil, true) do
                 Items["Panel"].Instance.Visible = false
 
                 -- mas aire entre el header del panel y el titulo "Info"
@@ -3815,17 +3845,6 @@ local Library do
             end
 
             local ElementsHolder = Section.Items["ElementsHolder"].Instance
-            local FitSection = function()
-                local Height = ElementsHolder.AbsoluteSize.Y + 34
-                Section.Items["Outline"].Instance.Size = UDim2New(1, 0, 0, Height)
-                -- el Holder conserva espacio extra (para que la lista del dropdown no se considere "fuera"),
-                -- pero el panel se ajusta al contenido real: header 25 + padding 6 + contenido + padding 8
-                Items["Holder"].Instance.Size = UDim2New(1, 0, 0, Height + 70)
-                local Panel = Items["Panel"].Instance
-                Panel.AutomaticSize = Enum.AutomaticSize.None
-                Panel.Size = UDim2New(Panel.Size.X.Scale, Panel.Size.X.Offset, 0, Height + 48)
-            end
-            Library:Connect(ElementsHolder:GetPropertyChangedSignal("AbsoluteSize"), FitSection)
 
             -- lista (scroll) con el estilo de los elementos de la UI
             local ListItems = { } do
@@ -3893,6 +3912,37 @@ local Library do
                 })
             end
 
+            -- el panel mide EXACTAMENTE lo mismo de alto que la ventana principal; la lista (scroll) ocupa el espacio que sobra
+            local PANEL_W = 400
+            local FitSection = function()
+                local Panel = Items["Panel"].Instance
+                local MainFrame = Library.MainFrame and Library.MainFrame.Instance
+                local Height = MainFrame and MainFrame.AbsoluteSize.Y or 580
+                if Height < 200 then
+                    Height = 580
+                end
+
+                -- header 25 + padding arriba 13 + padding abajo 8
+                local ContentH = Height - 46
+
+                Panel.AutomaticSize = Enum.AutomaticSize.None
+                Panel.Size = UDim2New(0, PANEL_W, 0, Height)
+                Section.Items["Outline"].Instance.Size = UDim2New(1, 0, 0, ContentH)
+                Items["Holder"].Instance.Size = UDim2New(1, 0, 0, ContentH)
+
+                local List = ListItems["List"].Instance
+                local Other = ElementsHolder.AbsoluteSize.Y - List.AbsoluteSize.Y
+                local ListH = math.max(80, ContentH - 34 - Other)
+
+                if math.abs(List.Size.Y.Offset - ListH) > 0.5 then
+                    List.Size = UDim2New(1, 0, 0, ListH)
+                end
+            end
+            Library:Connect(ElementsHolder:GetPropertyChangedSignal("AbsoluteSize"), FitSection)
+            if Library.MainFrame then
+                Library:Connect(Library.MainFrame.Instance:GetPropertyChangedSignal("AbsoluteSize"), FitSection)
+            end
+
             local Search = Section:Textbox({
                 Placeholder = "Type here...",
                 Finished = false,
@@ -3955,15 +4005,18 @@ local Library do
                 end
 
                 local Prio = PrioOf(Plr)
-                Row.Prio.Instance.Text = (Prio == "LocalPlayer") and "You" or Prio
+                Row.Prio.Instance.Text = Prio
 
+                -- toda la linea del jugador toma el color de su prioridad (Neutral = texto blanco normal)
                 local Color = PrioColors[Prio]
-                if Color then
-                    Row.Prio:ChangeItemTheme({TextColor3 = function() return Color end})
-                    Row.Prio.Instance.TextColor3 = Color
-                else
-                    Row.Prio:ChangeItemTheme({TextColor3 = "Text"})
-                    Row.Prio.Instance.TextColor3 = Library.Theme["Text"]
+                for _, Label in { Row.Name, Row.Display, Row.Prio } do
+                    if Color then
+                        Label:ChangeItemTheme({TextColor3 = function() return Color end})
+                        Label.Instance.TextColor3 = Color
+                    else
+                        Label:ChangeItemTheme({TextColor3 = "Text"})
+                        Label.Instance.TextColor3 = Library.Theme["Text"]
+                    end
                 end
 
                 Row.Button.Instance.BackgroundTransparency = (PlayerList.Selected == Plr) and 0 or 1
@@ -4049,11 +4102,11 @@ local Library do
                 })
 
                 Row.Display = Instances:Create("TextLabel", {
-                    Theme = {TextColor3 = "Inactive Text"},
+                    Theme = {TextColor3 = "Text"},
                     Parent = Row.Button.Instance,
                     Name = "\0",
                     FontFace = Library.MenuFont,
-                    TextColor3 = Library.Theme["Inactive Text"],
+                    TextColor3 = Library.Theme["Text"],
                     BorderColor3 = FromRGB(0, 0, 0),
                     Text = Plr.DisplayName,
                     BackgroundTransparency = 1,
@@ -4121,11 +4174,39 @@ local Library do
 
             PlayerList.Wanted = false
 
+            -- la primera vez que se muestra se pega al lado de la ventana (arriba alineado); luego se puede arrastrar
+            local Docked = false
+            local Dock = function()
+                Docked = true
+
+                local MainFrame = Library.MainFrame and Library.MainFrame.Instance
+                if not MainFrame then
+                    return
+                end
+
+                local Pos, Size = MainFrame.AbsolutePosition, MainFrame.AbsoluteSize
+                local Screen = Library.Holder.Instance.AbsoluteSize
+                local X = Pos.X + Size.X + 10
+                if X + PANEL_W > Screen.X then
+                    X = math.max(0, Pos.X - PANEL_W - 10)
+                end
+
+                local Panel = Items["Panel"].Instance
+                Panel.AnchorPoint = Vector2New(0, 0)
+                Panel.Position = UDim2New(0, X, 0, Pos.Y)
+            end
+
             function PlayerList:Apply()
                 local Show = PlayerList.Wanted and Library.MenuOpen ~= false
+                if Show and not Docked then
+                    Dock()
+                end
+
                 Items["Panel"].Instance.Visible = Show
                 if Show then
+                    FitSection()
                     PlayerList:Refresh()
+                    task.delay(0.05, FitSection)
                 end
             end
 
@@ -5550,6 +5631,7 @@ local Library do
                 })
 
                 Window.Items = Items
+                Library.MainFrame = Items["MainFrame"]
             end
             
             local Debounce = false
@@ -6009,58 +6091,6 @@ local Library do
                     PaddingLeft = UDimNew(0, 4)
                 })
 
-                -- linea de acento arriba de la seccion (con fade en los bordes, glow y barrido opcional)
-                local LineCfg = Library.SectionLine
-                if LineCfg and LineCfg.Enabled then
-                    Items["Liner"] = Instances:Create("Frame", {
-                        Theme = {BackgroundColor3 = "Accent"},
-                        Parent = Items["Outline"].Instance,
-                        Name = "\0",
-                        Position = UDim2New(0, 0, 0, 0),
-                        Size = UDim2New(1, 0, 0, 1),
-                        BorderSizePixel = 0,
-                        ZIndex = 1,
-                        BackgroundColor3 = Library.Theme["Accent"]
-                    })
-
-                    local LineGradient = Instances:Create("UIGradient", {
-                        Parent = Items["Liner"].Instance,
-                        Name = "\0",
-                        Transparency = NumSequence{
-                            NumSequenceKeypoint(0, 1),
-                            NumSequenceKeypoint(0.5, 0),
-                            NumSequenceKeypoint(1, 1)
-                        }
-                    })
-
-                    if LineCfg.Glow then
-                        Items["LinerGlow"] = Instances:Create("ImageLabel", {
-                            Theme = {ImageColor3 = "Glow"},
-                            Parent = Items["Liner"].Instance,
-                            Name = "\0",
-                            ImageColor3 = Library.Theme["Glow"],
-                            ScaleType = Enum.ScaleType.Slice,
-                            ImageTransparency = Library.GlowTransparency,
-                            Size = UDim2New(1, 6, 1, 6),
-                            AnchorPoint = Vector2New(0.5, 0.5),
-                            Position = UDim2New(0.5, 0, 0.5, 0),
-                            Image = "http://www.roblox.com/asset/?id=18245826428",
-                            BackgroundTransparency = 1,
-                            BorderSizePixel = 0,
-                            SliceCenter = Rect.new(Vector2.new(21, 21), Vector2.new(79, 79))
-                        })
-                    end
-
-                    if LineCfg.Pulse then
-                        -- el gradiente es ancho y se desplaza: la luz entra y sale de izquierda a derecha
-                        LineGradient.Instance.Offset = Vector2New(-0.6, 0)
-                        local PulseTween = TweenService:Create(LineGradient.Instance,
-                            TweenInfo.new(LineCfg.Speed or 3.5, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut, -1, true),
-                            {Offset = Vector2New(0.6, 0)})
-                        PulseTween:Play()
-                    end
-                end
-
                 Items["Elements"] = Instances:Create("ScrollingFrame", {
                     Parent = Items["Background"].Instance,
                     Name = "\0",
@@ -6273,6 +6303,11 @@ local Library do
 
                 if Toggle.Callback then 
                     Library:SafeCall(Toggle.Callback, Toggle.Value)
+                end
+
+                -- avisa a los elementos que dependen de este toggle (se ponen grises / se activan)
+                if Toggle.OnChanged then
+                    Toggle.OnChanged()
                 end
             end
 
@@ -6859,6 +6894,7 @@ local Library do
                 if Dropdown.IsOpen then 
                     Items["DropdownHolder"].Instance.Visible = true
                     Items["DropdownHolder"].Instance.Parent = Library.Holder.Instance
+                    Library:RaiseZ(Items["DropdownHolder"], 300)
                     
                     RenderStepped = RunService.RenderStepped:Connect(function()
                         Items["DropdownHolder"].Instance.Position = UDim2New(
@@ -7907,6 +7943,175 @@ local Library do
             end
 
             return Dropdown
+        end
+
+        -- ===== Dependencias entre elementos =====
+        --   Section:Slider({ ..., Depends = MiToggle })        -- un toggle, o varios: Depends = { ToggleA, ToggleB }
+        --   MiToggle:Link(Slider, Dropdown, Label, ...)         -- lo mismo, pero despues de crear los elementos
+        --   Elemento:SetLocked(true/false)                      -- bloqueo manual
+        -- Si el toggle esta apagado, el elemento (texto incluido) se pone gris y no se puede usar.
+        -- Funciona en cadena: si un toggle hijo se bloquea, sus propios hijos tambien.
+        do
+            local LOCK_Z = 60            -- por encima del contenido de ventana y paneles, por debajo de los popups
+            local LOCK_TRANSPARENCY = 0.5 -- mas alto = menos gris
+
+            local Refresh
+
+            local IsActive = function(Parent)
+                local State = Parent.DependencyState
+                if State and State.Locked then
+                    return false
+                end
+                return Parent.Value == true
+            end
+
+            -- true si Target depende (directa o indirectamente) de Source
+            local DependsOn
+            DependsOn = function(Target, Source)
+                for Parent in Target.DependencyState.Parents do
+                    if Parent == Source or DependsOn(Parent, Source) then
+                        return true
+                    end
+                end
+                return false
+            end
+
+            Refresh = function(Element)
+                local State = Element.DependencyState
+                local Locked = State.Forced
+
+                if not Locked then
+                    for Parent in State.Parents do
+                        if not IsActive(Parent) then
+                            Locked = true
+                            break
+                        end
+                    end
+                end
+
+                if State.Locked ~= Locked then
+                    State.Locked = Locked
+                    for _, Overlay in State.Overlays do
+                        Overlay.Instance.Visible = Locked
+                    end
+                end
+
+                if Element.OnChanged then
+                    Element.OnChanged()
+                end
+            end
+
+            Library.LinkElement = function(self, Parent, Child)
+                if type(Parent) ~= "table" or type(Child) ~= "table" then
+                    return
+                end
+
+                local ParentState, ChildState = Parent.DependencyState, Child.DependencyState
+                if not ParentState or not ChildState or not Parent.OnChanged then
+                    warn("[Library] Depends/Link solo funciona con un Toggle como padre")
+                    return
+                end
+
+                if Parent == Child or DependsOn(Parent, Child) then
+                    return
+                end
+
+                ParentState.Children[Child] = true
+                ChildState.Parents[Parent] = true
+                Refresh(Child)
+            end
+
+            local Register = function(Element, Roots, IsToggle)
+                local State = { Locked = false, Forced = false, Parents = { }, Children = { }, Overlays = { } }
+                Element.DependencyState = State
+
+                for _, Root in Roots do
+                    TableInsert(State.Overlays, Instances:Create("TextButton", {
+                        Theme = {BackgroundColor3 = "Background"},
+                        Parent = Root,
+                        Name = "\0",
+                        Text = "",
+                        AutoButtonColor = false,
+                        Active = true,
+                        Selectable = false,
+                        Visible = false,
+                        BorderSizePixel = 0,
+                        BackgroundTransparency = LOCK_TRANSPARENCY,
+                        Position = UDim2New(0, 0, 0, -3),
+                        Size = UDim2New(1, 0, 1, 4),
+                        ZIndex = LOCK_Z,
+                        BackgroundColor3 = Library.Theme["Background"]
+                    }))
+                end
+
+                function Element:SetLocked(Bool)
+                    State.Forced = Bool == true
+                    Refresh(Element)
+                end
+
+                function Element:IsLocked()
+                    return State.Locked
+                end
+
+                if IsToggle then
+                    Element.OnChanged = function()
+                        for Child in State.Children do
+                            Refresh(Child)
+                        end
+                    end
+
+                    function Element:Link(...)
+                        for _, Child in {...} do
+                            Library:LinkElement(Element, Child)
+                        end
+                        return Element
+                    end
+                end
+            end
+
+            for _, Kind in {"Toggle", "Button", "Slider", "Dropdown", "Label", "Textbox", "Searchbox"} do
+                local Original = Library.Sections[Kind]
+
+                if Original then
+                    Library.Sections[Kind] = function(self, Data, ...)
+                        local Holder = self.Items["ElementsHolder"].Instance
+
+                        local Before = { }
+                        for _, Child in Holder:GetChildren() do
+                            Before[Child] = true
+                        end
+
+                        local Element = Original(self, Data, ...)
+                        if type(Element) ~= "table" then
+                            return Element
+                        end
+
+                        local Roots = { }
+                        for _, Child in Holder:GetChildren() do
+                            if not Before[Child] and Child:IsA("GuiObject") then
+                                TableInsert(Roots, Child)
+                            end
+                        end
+
+                        Register(Element, Roots, Kind == "Toggle")
+
+                        if type(Data) == "table" then
+                            local Depends = Data.Depends or Data.depends or Data.DependsOn or Data.dependson
+                            if type(Depends) == "table" then
+                                if Depends.DependencyState then
+                                    Library:LinkElement(Depends, Element)
+                                else
+                                    for _, Parent in Depends do
+                                        Library:LinkElement(Parent, Element)
+                                    end
+                                end
+                            end
+                        end
+
+                        return Element
+                    end
+                end
+            end
         end
     end
 
