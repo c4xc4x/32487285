@@ -8132,8 +8132,9 @@ local Library do
     Library.CreateSettingsPage = function(self, Window, KeybindList, Watermark)
         local SettingsPage = Window:Page({Icon = "rbxassetid://124693018107383", NoAutoIcon = true})
         
+        -- Tabs: Menu (interfaz + theme juntos) | Configs | Script
         local MenuSubPage = SettingsPage:SubPage({Name = "Menu", Icon = "rbxassetid://124693018107383"})
-        local ThemeSubPage = SettingsPage:SubPage({Name = "Theme", Icon = "rbxassetid://124693018107383"})
+        local ThemeSubPage = MenuSubPage
         local ConfigsSubPage = SettingsPage:SubPage({Name = "Configs", Icon = "rbxassetid://86962395649126"})
         local ScriptSubPage = SettingsPage:SubPage({Name = "Script", Icon = "rbxassetid://124693018107383"})
 
@@ -8229,69 +8230,38 @@ local Library do
             end
         end
 
-        do -- Theming (juanitahaxx)
-            local ThemingSection = ThemeSubPage:Section({Name = "Theming"}) do
-                local AccentLabel = ThemingSection:Label("Accent Color")
-                AccentLabel:Colorpicker({
-                    Flag = "AccentColor",
-                    Default = Library.Theme.Accent,
-                    Alpha = 0,
-                    Callback = function(Value)
-                        Library.Theme.Accent = Value
-                        Library:ChangeTheme("Accent", Value)
-                    end
-                })
+        do -- Theme (todo en filas compactas: varios colores por fila)
+            -- El glow siempre va a Library.GlowTransparency (0.8), sin slider.
+            local ThemeSection = ThemeSubPage:Section({Name = "Theme"}) do
+                -- {Etiqueta de la fila, {colores del theme en esa fila}}
+                local Rows = {
+                    {"Accent",     {"Accent", "Dark Accent", "Glow"}},
+                    {"Text",       {"Text", "Inactive Text"}},
+                    {"Background", {"Background", "Inline"}},
+                    {"Borders",    {"Border", "Outline"}},
+                    {"Elements",   {"Element", "Element 2", "Hovered Element"}},
+                }
 
-                AccentLabel:Colorpicker({
-                    Flag = "DarkAccentColor",
-                    Default = Library.Theme["Dark Accent"],
-                    Alpha = 0,
-                    Callback = function(Value)
-                        Library.Theme["Dark Accent"] = Value
-                        Library:ChangeTheme("Dark Accent", Value)
-                    end
-                })
+                -- flags de antes, para que las configs guardadas sigan cargando
+                local OldFlags = {
+                    ["Accent"] = "AccentColor",
+                    ["Dark Accent"] = "DarkAccentColor",
+                    ["Glow"] = "GlowColor"
+                }
 
-                ThemingSection:Label("Glow Color"):Colorpicker({
-                    Flag = "GlowColor",
-                    Default = Library.Theme["Glow"],
-                    Alpha = 0,
-                    Callback = function(Value)
-                        Library.Theme["Glow"] = Value
-                        Library:ChangeTheme("Glow", Value)
-                    end
-                })
-
-                ThemingSection:Slider({
-                    Name = "Glow transparency",
-                    Flag = "GlowTransparency",
-                    Default = Library.GlowTransparency,
-                    Min = 0,
-                    Max = 1,
-                    Decimals = 0.01,
-                    Callback = function(Value)
-                        Library.GlowTransparency = Value
-
-                        for Index, Holder in {Library.Holder.Instance, Library.UnusedHolder.Instance} do
-                            for _, Object in Holder:GetDescendants() do
-                                if Object:IsA("ImageLabel") and StringFind(Object.Image, "18245826428", 1, true) then
-                                    Object.ImageTransparency = Value
-                                end
+                for _, Row in Rows do
+                    local Label = ThemeSection:Label(Row[1])
+                    for _, Name in Row[2] do
+                        Label:Colorpicker({
+                            Flag = OldFlags[Name] or (Name .. "Theming"),
+                            Default = Library.Theme[Name],
+                            Alpha = 0,
+                            Callback = function(Value)
+                                Library.Theme[Name] = Value
+                                Library:ChangeTheme(Name, Value)
                             end
-                        end
+                        })
                     end
-                })
-
-                for Index, Name in {"Border", "Outline", "Background", "Inline", "Text", "Inactive Text", "Element", "Element 2", "Hovered Element"} do
-                    ThemingSection:Label(Name):Colorpicker({
-                        Flag = Name .. "Theming",
-                        Default = Library.Theme[Name],
-                        Alpha = 0,
-                        Callback = function(Value)
-                            Library.Theme[Name] = Value
-                            Library:ChangeTheme(Name, Value)
-                        end
-                    })
                 end
             end
         end
