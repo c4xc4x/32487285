@@ -8135,8 +8135,8 @@ local Library do
         -- Tabs: Menu (interfaz + theme juntos) | Configs | Script
         local MenuSubPage = SettingsPage:SubPage({Name = "Menu", Icon = "rbxassetid://124693018107383"})
         local ThemeSubPage = MenuSubPage
-        local ConfigsSubPage = SettingsPage:SubPage({Name = "Configs", Icon = "rbxassetid://86962395649126"})
-        local ScriptSubPage = SettingsPage:SubPage({Name = "Script", Icon = "rbxassetid://124693018107383"})
+        local ConfigsSubPage = SettingsPage:SubPage({Name = "Configs", Icon = "rbxassetid://124693018107383"})
+        local ScriptSubPage = SettingsPage:SubPage({Name = "Script", Icon = "rbxassetid://94670448260822"})
 
         do -- Menu subpages
             local MenuSection = MenuSubPage:Section({Name = "Menu"}) do
@@ -8267,13 +8267,13 @@ local Library do
         end
 
         do -- Config Subpages
-            local ConfigsSection = ConfigsSubPage:Section({Name = "Profiles"}) do
+            local ConfigsSection = ConfigsSubPage:Section({Name = "Configs"}) do
                 local ConfigName 
                 local ConfigSelected
                 
                 local ConfigsSearchbox = ConfigsSection:Searchbox({
-                    Name = "Profiles list",
-                    Flag = "Profiles list",
+                    Name = "Configs list",
+                    Flag = "Configs list",
                     Multi = false,
                     Items = { },
                     Callback = function(Value)
