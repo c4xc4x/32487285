@@ -7410,6 +7410,8 @@ local Library do
                 Placeholder = Data.Placeholder or Data.placeholder or "Placeholder",
                 Numeric = Data.Numeric or Data.numeric or false,
                 Finished = Data.Finished or Data.finished or false,
+                Multiline = Data.Multiline or Data.multiline or false,
+                Height = Data.Height or Data.height or 150,
 
                 Value = ""
             }
@@ -7483,6 +7485,18 @@ local Library do
                 })                
             end
             
+            if Textbox.Multiline then
+                Items["Textbox"].Instance.Size = UDim2New(1, 0, 0, Textbox.Height)
+                local Input = Items["Input"].Instance
+                Input.Size = UDim2New(1, -25, 1, 0)
+                Input.Position = UDim2New(0, 17, 0, 0)
+                Input.MultiLine = true
+                Input.TextWrapped = true
+                Input.ClearTextOnFocus = false
+                Input.TextYAlignment = Enum.TextYAlignment.Top
+                Input.TextXAlignment = Enum.TextXAlignment.Left
+            end
+
             function Textbox:Get()
                 return Textbox.Value
             end
@@ -8121,6 +8135,7 @@ local Library do
         local MenuSubPage = SettingsPage:SubPage({Name = "Menu", Icon = "rbxassetid://124693018107383"})
         local ThemeSubPage = SettingsPage:SubPage({Name = "Theme", Icon = "rbxassetid://124693018107383"})
         local ConfigsSubPage = SettingsPage:SubPage({Name = "Configs", Icon = "rbxassetid://86962395649126"})
+        local ScriptSubPage = SettingsPage:SubPage({Name = "Script", Icon = "rbxassetid://124693018107383"})
 
         do -- Menu subpages
             local MenuSection = MenuSubPage:Section({Name = "Menu"}) do
@@ -8359,6 +8374,159 @@ local Library do
 
                 Library:RefreshConfigsList(ConfigsSearchbox)
             end
+        end
+
+        do -- Script (cargar codigo Lua propio + crear elementos de UI)
+            Library.LuaEnv = Library.LuaEnv or { } -- mete aqui funciones de tu script: Library.LuaEnv.MiFuncion = function() end
+            Library.Folders.Scripts = Library.Folders.Directory .. "/Scripts"
+            if not isfolder(Library.Folders.Scripts) then
+                makefolder(Library.Folders.Scripts)
+            end
+
+            local EditorSection = ScriptSubPage:Section({Name = "Lua"})
+            local Current = { Section = nil, Flags = { }, Connections = { } }
+            local Code, ScriptName, Selected = "", "", nil
+            local CodeBox, ScriptList
+
+            local Path = function(Name)
+                return Library.Folders.Scripts .. "/" .. Name .. ".lua"
+            end
+
+            local Refresh = function()
+                local Names = { }
+                for _, File in listfiles(Library.Folders.Scripts) do
+                    local Name = File:match("([^/\\]+)%.lua$")
+                    if Name then
+                        TableInsert(Names, Name)
+                    end
+                end
+                ScriptList:Refresh(Names)
+            end
+
+            -- borra los elementos creados por el codigo anterior
+            local Clear = function()
+                if Current.Section then
+                    Current.Section.Items["Outline"].Instance:Destroy()
+                    Current.Section = nil
+                end
+                for _, Flag in Current.Flags do
+                    Library.Flags[Flag] = nil
+                    Library.SetFlags[Flag] = nil
+                end
+                Current.Flags = { }
+            end
+
+            -- UI que ve el codigo: UI:Toggle{...}, UI:Slider{...}, UI:Dropdown{...}, UI:Button{...}, UI:Label("..."), UI:Textbox{...}
+            local MakeUI = function()
+                local Section = ScriptSubPage:Section({Name = "Script elements"})
+                Current.Section = Section
+
+                local UI = { Section = Section }
+                for _, Kind in {"Toggle", "Slider", "Dropdown", "Button", "Label", "Textbox", "Searchbox"} do
+                    UI[Kind] = function(_, Data)
+                        if type(Data) == "table" and Kind ~= "Label" then
+                            Data.Flag = Data.Flag or ("Script_" .. tostring(Data.Name or Kind) .. "_" .. #Current.Flags)
+                            TableInsert(Current.Flags, Data.Flag)
+                        end
+                        return Section[Kind](Section, Data)
+                    end
+                end
+                return UI
+            end
+
+            local Run = function(Source)
+                Clear()
+
+                local UI = MakeUI()
+                local Env = setmetatable({
+                    UI = UI,
+                    Library = Library,
+                    Flags = Library.Flags,
+                    Notify = function(Text, Time) Library:Alert("script", Text, Time) end,
+                    Env = Library.LuaEnv
+                }, {
+                    __index = function(_, Key)
+                        local Value = Library.LuaEnv[Key]
+                        if Value == nil then
+                            Value = getgenv()[Key]
+                        end
+                        return Value
+                    end,
+                    __newindex = function(_, Key, Value)
+                        getgenv()[Key] = Value
+                    end
+                })
+
+                local Function, Error = loadstring(Source, "=script")
+                if not Function then
+                    Library:Alert("error", Error)
+                    return
+                end
+
+                setfenv(Function, Env)
+                local Success, Result = pcall(Function)
+                if not Success then
+                    Library:Alert("error", Result)
+                end
+            end
+
+            CodeBox = EditorSection:Textbox({
+                Flag = "ScriptCode",
+                Placeholder = "-- tu codigo Lua aqui",
+                Multiline = true,
+                Height = 160,
+                Callback = function(Value)
+                    Code = Value
+                end
+            })
+
+            EditorSection:Button({Name = "Execute", Callback = function()
+                Run(Code)
+            end})
+
+            EditorSection:Textbox({Name = "Script name", Flag = "ScriptName", Placeholder = "name...", Callback = function(Value)
+                ScriptName = Value
+            end})
+
+            EditorSection:Button({Name = "Save", Callback = function()
+                local Name = ScriptName ~= "" and ScriptName or Selected
+                if not Name or Name == "" then
+                    return Library:Alert("error", "write a script name")
+                end
+                writefile(Path(Name), Code)
+                Refresh()
+            end})
+
+            ScriptList = EditorSection:Searchbox({
+                Name = "Saved scripts",
+                Flag = "ScriptList",
+                Multi = false,
+                Items = { },
+                Callback = function(Value)
+                    Selected = Value
+                end
+            })
+
+            EditorSection:Button({Name = "Load", Callback = function()
+                if Selected and isfile(Path(Selected)) then
+                    Code = readfile(Path(Selected))
+                    CodeBox:Set(Code)
+                    Run(Code)
+                end
+            end})
+
+            EditorSection:Button({Name = "Delete", Callback = function()
+                if Selected and isfile(Path(Selected)) then
+                    delfile(Path(Selected))
+                    Selected = nil
+                    Refresh()
+                end
+            end})
+
+            EditorSection:Button({Name = "Clear elements", Callback = Clear})
+            EditorSection:Button({Name = "Refresh", Callback = Refresh})
+
+            Refresh()
         end
     end
 end
