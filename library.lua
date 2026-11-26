@@ -8434,6 +8434,8 @@ local Library do
                 return UI
             end
 
+            local Globals = getfenv(1) -- game, task, print, Instance, etc.
+
             local Run = function(Source)
                 Clear()
 
@@ -8449,6 +8451,9 @@ local Library do
                         local Value = Library.LuaEnv[Key]
                         if Value == nil then
                             Value = getgenv()[Key]
+                        end
+                        if Value == nil then
+                            Value = Globals[Key]
                         end
                         return Value
                     end,
