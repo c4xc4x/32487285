@@ -5846,6 +5846,7 @@ local Library do
 
                 Name = Data.Name or Data.name or "SubPage",
                 Icon = Data.Icon or Data.icon or Library.SubIcons[#self.SubPages + 1] or "rbxassetid://86962395649126",
+                IconSize = Data.IconSize or 25,
                 Items = { },
                 Active = false
             }
@@ -5900,7 +5901,7 @@ local Library do
                     BorderColor3 = FromRGB(0, 0, 0),
                     Image = Page.Icon,
                     AnchorPoint = Vector2New(0.5, 0.5),
-                    Size = UDim2New(0, 25, 0, 25),
+                    Size = UDim2New(0, Page.IconSize, 0, Page.IconSize),
                     BackgroundTransparency = 1,
                     Position = UDim2New(0.5, 0, 0.5, 0),
                     BorderSizePixel = 0,
@@ -8136,7 +8137,7 @@ local Library do
         local MenuSubPage = SettingsPage:SubPage({Name = "Menu", Icon = "rbxassetid://124693018107383"})
         local ThemeSubPage = MenuSubPage
         local ConfigsSubPage = SettingsPage:SubPage({Name = "Configs", Icon = "rbxassetid://124693018107383"})
-        local ScriptSubPage = SettingsPage:SubPage({Name = "Script", Icon = "rbxassetid://94670448260822"})
+        local ScriptSubPage = SettingsPage:SubPage({Name = "Script", Icon = "rbxassetid://94670448260822", IconSize = 56})
 
         do -- Menu subpages
             local MenuSection = MenuSubPage:Section({Name = "Menu"}) do
