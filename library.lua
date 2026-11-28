@@ -210,18 +210,18 @@ local Library do
 
     local Themes = {
         ["Preset"] = {
-            ["Border"] = FromRGB(9, 10, 14),
-            ["Outline"] = FromRGB(55, 59, 72),
-            ["Background"] = FromRGB(15, 16, 22),
-            ["Inline"] = FromRGB(21, 23, 31),
-            ["Accent"] = FromRGB(158, 160, 199),
-            ["Dark Accent"] = FromRGB(110, 112, 139),
-            ["Glow"] = FromRGB(158, 160, 199),
+            ["Border"] = FromRGB(9, 9, 9),
+            ["Outline"] = FromRGB(55, 55, 55),
+            ["Background"] = FromRGB(15, 15, 15),
+            ["Inline"] = FromRGB(21, 21, 21),
+            ["Accent"] = FromRGB(165, 165, 165),
+            ["Dark Accent"] = FromRGB(115, 115, 115),
+            ["Glow"] = FromRGB(165, 165, 165),
             ["Text"] = FromRGB(255, 255, 255),
-            ["Inactive Text"] = FromRGB(150, 154, 172),
-            ["Element"] = FromRGB(42, 45, 58),
-            ["Element 2"] = FromRGB(58, 62, 78),
-            ["Hovered Element"] = FromRGB(66, 70, 88)
+            ["Inactive Text"] = FromRGB(150, 150, 150),
+            ["Element"] = FromRGB(42, 42, 42),
+            ["Element 2"] = FromRGB(58, 58, 58),
+            ["Hovered Element"] = FromRGB(66, 66, 66)
         }
     }
 
@@ -8372,7 +8372,6 @@ local Library do
         local MenuSubPage = SettingsPage:SubPage({Name = "Menu", Icon = "rbxassetid://124693018107383"})
         local ThemeSubPage = SettingsPage:SubPage({Name = "Theme", Icon = "rbxassetid://124693018107383"})
         local ConfigsSubPage = SettingsPage:SubPage({Name = "Configs", Icon = "rbxassetid://86962395649126"})
-        local ScriptSubPage = SettingsPage:SubPage({Name = "Script", Icon = "rbxassetid://124693018107383"})
 
         do -- Menu subpages
             local MenuSection = MenuSubPage:Section({Name = "Menu"}) do
@@ -8613,17 +8612,21 @@ local Library do
             end
         end
 
-        do -- Script (cargar codigo Lua propio + crear elementos de UI)
-            Library.LuaEnv = Library.LuaEnv or { } -- mete aqui funciones de tu script: Library.LuaEnv.MiFuncion = function() end
+        do -- Script: editor de Lua + tabs / secciones / elementos creados desde codigo
+            Library.LuaEnv = Library.LuaEnv or { } -- funciones de tu script: Library.LuaEnv.Hola = function() end  (en el Lua: Hola())
             Library.Folders.Scripts = Library.Folders.Directory .. "/Scripts"
             if not isfolder(Library.Folders.Scripts) then
                 makefolder(Library.Folders.Scripts)
             end
 
-            local EditorSection = ScriptSubPage:Section({Name = "Lua"})
-            local Current = { Section = nil, Flags = { }, Connections = { } }
+            local Globals = getfenv(1) -- game, task, print, Instance, etc.
+            local Running = { }        -- scripts ejecutados (cada uno limpia lo suyo)
+            local Keep = false         -- true = no borra los scripts anteriores al ejecutar otro
             local Code, ScriptName, Selected = "", "", nil
             local CodeBox, ScriptList
+
+            local ScriptSubPage = SettingsPage:SubPage({Name = "Script", Icon = "rbxassetid://124693018107383"})
+            local EditorSection = ScriptSubPage:Section({Name = "Lua"})
 
             local Path = function(Name)
                 return Library.Folders.Scripts .. "/" .. Name .. ".lua"
@@ -8640,77 +8643,260 @@ local Library do
                 ScriptList:Refresh(Names)
             end
 
-            -- borra los elementos creados por el codigo anterior
-            local Clear = function()
-                if Current.Section then
-                    Current.Section.Items["Outline"].Instance:Destroy()
-                    Current.Section = nil
+            local Notify = function(Text, Time)
+                task.spawn(function()
+                    Library:Notification(tostring(Text), Time or 4, Library.Theme.Accent)
+                end)
+            end
+
+            -- Icon puede ser: "rbxassetid://123", 123, "123" o el nombre de un icono de la libreria ("Aim", "Visuals"...)
+            local ResolveIcon = function(Icon)
+                if type(Icon) == "number" then
+                    return "rbxassetid://" .. Icon
                 end
-                for _, Flag in Current.Flags do
+                if type(Icon) == "string" then
+                    if Library.Icons[Icon] then
+                        return Library:GetIcon(Icon)
+                    end
+                    if Icon:match("^%d+$") then
+                        return "rbxassetid://" .. Icon
+                    end
+                end
+                return Icon
+            end
+
+            local RemoveSubPage = function(Sub)
+                local Parent = Sub.Page
+                local WasActive = Sub.Active
+                local Index = table.find(Parent.SubPages, Sub)
+                if Index then
+                    table.remove(Parent.SubPages, Index)
+                end
+                Sub.Items["Inactive"].Instance:Destroy()
+                Sub.Items["PageContent"].Instance:Destroy()
+                if WasActive and Parent.SubPages[1] then
+                    Parent.SubPages[1]:Turn(true)
+                end
+            end
+
+            local RemovePage = function(Page)
+                local WasActive = Page.Active
+                local Index = table.find(Window.Pages, Page)
+                if Index then
+                    table.remove(Window.Pages, Index)
+                end
+                for _, Sub in Page.SubPages do
+                    pcall(function() Sub.Items["PageContent"].Instance:Destroy() end)
+                end
+                for _, Name in {"Inactive", "PageContent", "SubPages"} do
+                    pcall(function() Page.Items[Name].Instance:Destroy() end)
+                end
+                if WasActive and Window.Pages[1] then
+                    Window.Pages[1]:Turn(true)
+                end
+            end
+
+            local Destroy = function(Inst)
+                for _, Function in Inst.Cleanups do pcall(Function) end
+                for _, Connection in Inst.Connections do pcall(function() Connection:Disconnect() end) end
+                for _, Sub in Inst.SubPages do pcall(RemoveSubPage, Sub) end
+                for _, Page in Inst.Pages do pcall(RemovePage, Page) end
+                for _, Section in Inst.Sections do pcall(function() Section.Items["Outline"].Instance:Destroy() end) end
+                for _, Flag in Inst.Flags do
                     Library.Flags[Flag] = nil
                     Library.SetFlags[Flag] = nil
                 end
-                Current.Flags = { }
+                local Index = table.find(Running, Inst)
+                if Index then
+                    table.remove(Running, Index)
+                end
             end
 
-            -- UI que ve el codigo: UI:Toggle{...}, UI:Slider{...}, UI:Dropdown{...}, UI:Button{...}, UI:Label("..."), UI:Textbox{...}
-            local MakeUI = function()
-                local Section = ScriptSubPage:Section({Name = "Script elements"})
-                Current.Section = Section
+            local ClearAll = function()
+                for _, Inst in table.clone(Running) do
+                    Destroy(Inst)
+                end
+            end
 
-                local UI = { Section = Section }
-                for _, Kind in {"Toggle", "Slider", "Dropdown", "Button", "Label", "Textbox", "Searchbox"} do
-                    UI[Kind] = function(_, Data)
-                        if type(Data) == "table" and Kind ~= "Label" then
-                            Data.Flag = Data.Flag or ("Script_" .. tostring(Data.Name or Kind) .. "_" .. #Current.Flags)
-                            TableInsert(Current.Flags, Data.Flag)
-                        end
-                        return Section[Kind](Section, Data)
+            -- pagina (icono de arriba) donde se crean los tabs: por defecto la primera que NO es Settings
+            local FindPage = function(Target)
+                if type(Target) == "number" then
+                    return Window.Pages[Target] or SettingsPage
+                end
+                if type(Target) == "table" then
+                    return Target
+                end
+                for _, Page in Window.Pages do
+                    if Page ~= SettingsPage then
+                        return Page
                     end
                 end
+                return SettingsPage
+            end
+
+            -- UI: lo que el codigo Lua usa para crear cosas
+            local BuildUI = function(Inst)
+                local UI = { }
+                local Default
+
+                -- seccion por defecto (en Settings > Script) para UI:Toggle(...) sueltos
+                local GetDefault = function()
+                    if not Default then
+                        Default = ScriptSubPage:Section({Name = Inst.Name})
+                        TableInsert(Inst.Sections, Default)
+                    end
+                    return Default
+                end
+
+                for _, Kind in {"Toggle", "Slider", "Dropdown", "Button", "Label", "Textbox", "Searchbox"} do
+                    UI[Kind] = function(_, ...)
+                        local Section = GetDefault()
+                        return Section[Kind](Section, ...)
+                    end
+                end
+
+                -- UI:Section("Nombre") -> seccion extra en Settings > Script
+                UI.Section = function(_, Data)
+                    if type(Data) == "string" then Data = {Name = Data} end
+                    local Section = ScriptSubPage:Section(Data or { })
+                    TableInsert(Inst.Sections, Section)
+                    return Section
+                end
+
+                -- UI:Tab({Name = "...", Icon = "...", Page = nil}) -> tab nuevo en la izquierda (como Aim / Players / Visuals)
+                -- devuelve el tab: Tab:Section("Nombre") crea una seccion, y a la seccion le anyades Toggle/Slider/Dropdown/...
+                UI.Tab = function(_, Data)
+                    if type(Data) == "string" then Data = {Name = Data} end
+                    Data = Data or { }
+
+                    local Sub = FindPage(Data.Page):SubPage({
+                        Name = Data.Name or "Tab",
+                        Icon = ResolveIcon(Data.Icon)
+                    })
+                    TableInsert(Inst.SubPages, Sub)
+
+                    local Tab = setmetatable({ }, {__index = Sub})
+                    function Tab:Section(SectionData)
+                        if type(SectionData) == "string" then SectionData = {Name = SectionData} end
+                        return Sub:Section(SectionData or { })
+                    end
+                    return Tab
+                end
+
+                -- UI:Page({Icon = "..."}) -> pagina nueva (icono arriba a la derecha). Luego UI:Tab({Page = esaPagina})
+                UI.Page = function(_, Data)
+                    Data = Data or { }
+                    local Page = Window:Page({
+                        Icon = ResolveIcon(Data.Icon) or "rbxassetid://86962395649126",
+                        NoAutoIcon = true
+                    })
+                    TableInsert(Inst.Pages, Page)
+                    return Page
+                end
+
                 return UI
             end
 
-            local Globals = getfenv(1) -- game, task, print, Instance, etc.
-
-            local Run = function(Source)
-                Clear()
-
-                local UI = MakeUI()
-                local Env = setmetatable({
+            local BuildEnv = function(Inst, UI)
+                local Env = {
                     UI = UI,
+                    Window = Window,
                     Library = Library,
                     Flags = Library.Flags,
-                    Notify = function(Text, Time) Library:Alert("script", Text, Time) end,
-                    Env = Library.LuaEnv
-                }, {
+                    Env = Library.LuaEnv,
+                    Notify = Notify,
+
+                    -- Connect(Evento, funcion): como :Connect pero se desconecta solo al borrar/reejecutar el script
+                    Connect = function(Event, Function)
+                        local Connection = Event:Connect(Function)
+                        TableInsert(Inst.Connections, Connection)
+                        return Connection
+                    end,
+
+                    -- Loop(function(dt) ... end): corre cada frame, se para solo al borrar/reejecutar
+                    Loop = function(Function)
+                        local Connection = game:GetService("RunService").Heartbeat:Connect(Function)
+                        TableInsert(Inst.Connections, Connection)
+                        return Connection
+                    end,
+
+                    -- OnClear(function() ... end): se ejecuta cuando el script se borra (para restaurar cosas)
+                    OnClear = function(Function)
+                        TableInsert(Inst.Cleanups, Function)
+                    end,
+
+                    -- SetFlag("Flag", valor): cambia el valor de cualquier elemento por su flag
+                    SetFlag = function(Flag, Value)
+                        local Set = Library.SetFlags[Flag]
+                        if Set then Set(Value) end
+                    end
+                }
+
+                return setmetatable(Env, {
                     __index = function(_, Key)
                         local Value = Library.LuaEnv[Key]
-                        if Value == nil then
-                            Value = getgenv()[Key]
-                        end
-                        if Value == nil then
-                            Value = Globals[Key]
-                        end
+                        if Value == nil then Value = getgenv()[Key] end
+                        if Value == nil then Value = Globals[Key] end
                         return Value
                     end,
                     __newindex = function(_, Key, Value)
                         getgenv()[Key] = Value
                     end
                 })
-
-                local Function, Error = loadstring(Source, "=script")
-                if not Function then
-                    Library:Alert("error", Error)
-                    return
-                end
-
-                setfenv(Function, Env)
-                local Success, Result = pcall(Function)
-                if not Success then
-                    Library:Alert("error", Result)
-                end
             end
+
+            local Snapshot = function()
+                local Set = { }
+                for Key in Library.Flags do Set[Key] = true end
+                for Key in Library.SetFlags do Set[Key] = true end
+                return Set
+            end
+
+            local Run = function(Source, Name)
+                if not Keep then
+                    ClearAll()
+                end
+
+                local Inst = {Name = Name or "Script", Connections = { }, Cleanups = { }, SubPages = { }, Pages = { }, Sections = { }, Flags = { }}
+                TableInsert(Running, Inst)
+
+                local Before = Snapshot()
+                local Function, Error = loadstring(Source, "=" .. Inst.Name)
+                if not Function then
+                    Destroy(Inst)
+                    Library:Alert("error", Error)
+                    return false
+                end
+
+                setfenv(Function, BuildEnv(Inst, BuildUI(Inst)))
+                local Success, Result = pcall(Function)
+
+                -- flags creados por el script (para limpiarlos luego)
+                for Key in Snapshot() do
+                    if not Before[Key] then
+                        TableInsert(Inst.Flags, Key)
+                    end
+                end
+
+                if not Success then
+                    Destroy(Inst)
+                    Library:Alert("error", Result)
+                    return false
+                end
+                return true
+            end
+
+            -- para usarlos desde tu script principal: Library:RunLua("codigo") / Library:LoadLua("nombre guardado")
+            Library.RunLua = function(self, Source, Name)
+                return Run(Source, Name)
+            end
+            Library.LoadLua = function(self, Name)
+                if isfile(Path(Name)) then
+                    return Run(readfile(Path(Name)), Name)
+                end
+                return false
+            end
+            Library.ClearLua = ClearAll
 
             CodeBox = EditorSection:Textbox({
                 Flag = "ScriptCode",
@@ -8723,7 +8909,7 @@ local Library do
             })
 
             EditorSection:Button({Name = "Execute", Callback = function()
-                Run(Code)
+                Run(Code, ScriptName ~= "" and ScriptName or Selected or "Script")
             end})
 
             EditorSection:Textbox({Name = "Script name", Flag = "ScriptName", Placeholder = "name...", Callback = function(Value)
@@ -8753,7 +8939,7 @@ local Library do
                 if Selected and isfile(Path(Selected)) then
                     Code = readfile(Path(Selected))
                     CodeBox:Set(Code)
-                    Run(Code)
+                    Run(Code, Selected)
                 end
             end})
 
@@ -8765,7 +8951,11 @@ local Library do
                 end
             end})
 
-            EditorSection:Button({Name = "Clear elements", Callback = Clear})
+            EditorSection:Toggle({Name = "Keep other scripts", Flag = "ScriptKeep", Default = false, Callback = function(Value)
+                Keep = Value
+            end})
+
+            EditorSection:Button({Name = "Clear all scripts", Callback = ClearAll})
             EditorSection:Button({Name = "Refresh", Callback = Refresh})
 
             Refresh()
