@@ -640,20 +640,45 @@ local Library do
             end
 
             local Gui = self.Instance
+            Minimum = Minimum or Vector2New(100, 40)
             Maximum = Maximum or Vector2New(9999, 9999)
             Options = Options or { }
+
+            local Thickness = Options.Thickness or 6   -- zona de agarre de los bordes
+            local Corner = Options.Sides and 0 or (Options.CornerSize or 14) -- esquinas (solo si no se limitan los lados)
 
             local Resizing = false
             local CurrentSide = nil
 
-            local StartMouse = nil
-            local StartPosition = nil
-            local StartSize = nil
+            local StartMouse = Vector2New(0, 0)
+            local StartPosition = Gui.Position
+            local StartAbsPos = Vector2New(0, 0)
+            local StartAbsSize = Vector2New(0, 0)
 
-            local Highlight
+            local Buttons = { }
 
-            -- Funciona con cualquier AnchorPoint (no cambia la posicion al empezar)
-            local BeginResizing = function(Side)
+            -- {lado, posicion, tamaño, posicion del indicador, tamaño del indicador}
+            local Definitions = {
+                {"L", UDim2New(0, 0, 0, Corner), UDim2New(0, Thickness, 1, -Corner * 2), UDim2New(0, 0, 0, 0), UDim2New(0, 2, 1, 0)},
+                {"R", UDim2New(1, -Thickness, 0, Corner), UDim2New(0, Thickness, 1, -Corner * 2), UDim2New(1, -2, 0, 0), UDim2New(0, 2, 1, 0)},
+                {"T", UDim2New(0, Corner, 0, 0), UDim2New(1, -Corner * 2, 0, Thickness), UDim2New(0, 0, 0, 0), UDim2New(1, 0, 0, 2)},
+                {"B", UDim2New(0, Corner, 1, -Thickness), UDim2New(1, -Corner * 2, 0, Thickness), UDim2New(0, 0, 1, -2), UDim2New(1, 0, 0, 2)}
+            }
+
+            if Corner > 0 then
+                TableInsert(Definitions, {"TL", UDim2New(0, 0, 0, 0), UDim2New(0, Corner, 0, Corner), UDim2New(0, 0, 0, 0), UDim2New(0, 4, 0, 4)})
+                TableInsert(Definitions, {"TR", UDim2New(1, -Corner, 0, 0), UDim2New(0, Corner, 0, Corner), UDim2New(1, -4, 0, 0), UDim2New(0, 4, 0, 4)})
+                TableInsert(Definitions, {"BL", UDim2New(0, 0, 1, -Corner), UDim2New(0, Corner, 0, Corner), UDim2New(0, 0, 1, -4), UDim2New(0, 4, 0, 4)})
+                TableInsert(Definitions, {"BR", UDim2New(1, -Corner, 1, -Corner), UDim2New(0, Corner, 0, Corner), UDim2New(1, -4, 1, -4), UDim2New(0, 4, 0, 4)})
+            end
+
+            local Highlight = function(ActiveSide)
+                for Index, Value in Buttons do
+                    Value.Indicator.Instance.BackgroundTransparency = (ActiveSide and Value.Side == ActiveSide) and 0 or 1
+                end
+            end
+
+            local Begin = function(Side)
                 Resizing = true
                 CurrentSide = Side
 
@@ -666,15 +691,67 @@ local Library do
 
                 StartMouse = UserInputService:GetMouseLocation()
                 StartPosition = Gui.Position
-                StartSize = Vector2New(Gui.Size.X.Offset, Gui.Size.Y.Offset)
+                StartAbsPos = Gui.AbsolutePosition
+                StartAbsSize = Gui.AbsoluteSize
 
                 Highlight(Side)
             end
 
-            Highlight = MakeEdges(Gui, Options.Thickness or 2, BeginResizing, Options.Sides)
+            for Index, Definition in Definitions do
+                local Side = Definition[1]
+
+                if Options.Sides and not TableFind(Options.Sides, Side) then
+                    continue
+                end
+
+                local Button = Instances:Create("TextButton", {
+                    Name = "\0",
+                    Position = Definition[2],
+                    Size = Definition[3],
+                    BackgroundTransparency = 1,
+                    Text = "",
+                    BorderSizePixel = 0,
+                    AutoButtonColor = false,
+                    Parent = Gui,
+                    ZIndex = (#Side == 2) and 100000 or 99999
+                })
+
+                local Indicator = Instances:Create("Frame", {
+                    Theme = {BackgroundColor3 = "Accent"},
+                    Parent = Button.Instance,
+                    Name = "\0",
+                    Position = Definition[4],
+                    Size = Definition[5],
+                    BorderSizePixel = 0,
+                    BackgroundTransparency = 1,
+                    BackgroundColor3 = Library.Theme["Accent"],
+                    ZIndex = (#Side == 2) and 100001 or 100000
+                })
+
+                Button:Connect("InputBegan", function(Input)
+                    if Input.UserInputType == Enum.UserInputType.MouseButton1 or Input.UserInputType == Enum.UserInputType.Touch then
+                        Begin(Side)
+                    end
+                end)
+
+                -- el indicador se ve al pasar el mouse por encima
+                Button:Connect("MouseEnter", function()
+                    if not Resizing then
+                        Highlight(Side)
+                    end
+                end)
+
+                Button:Connect("MouseLeave", function()
+                    if not Resizing then
+                        Highlight(nil)
+                    end
+                end)
+
+                TableInsert(Buttons, {Button = Button, Indicator = Indicator, Side = Side})
+            end
 
             Library:Connect(UserInputService.InputEnded, function(Input)
-                if Input.UserInputType == Enum.UserInputType.MouseButton1 then
+                if Input.UserInputType == Enum.UserInputType.MouseButton1 or Input.UserInputType == Enum.UserInputType.Touch then
                     if Resizing then
                         Resizing = false
                         CurrentSide = nil
@@ -692,45 +769,48 @@ local Library do
                 local dx = MouseLocation.X - StartMouse.X
                 local dy = MouseLocation.Y - StartMouse.Y
 
-                local w, h = StartSize.X, StartSize.Y
+                local HasL = StringFind(CurrentSide, "L", 1, true) ~= nil
+                local HasR = StringFind(CurrentSide, "R", 1, true) ~= nil
+                local HasT = StringFind(CurrentSide, "T", 1, true) ~= nil
+                local HasB = StringFind(CurrentSide, "B", 1, true) ~= nil
 
-                if CurrentSide == "L" then
-                    w = StartSize.X - dx
-                elseif CurrentSide == "R" then
-                    w = StartSize.X + dx
-                elseif CurrentSide == "T" then
-                    h = StartSize.Y - dy
-                elseif CurrentSide == "B" then
-                    h = StartSize.Y + dy
+                local w, h = StartAbsSize.X, StartAbsSize.Y
+
+                if HasL then
+                    w = StartAbsSize.X - dx
+                elseif HasR then
+                    w = StartAbsSize.X + dx
                 end
 
-                w = MathClamp(w, Minimum.X, Maximum.X)
-                h = MathClamp(h, Minimum.Y, Maximum.Y)
+                if HasT then
+                    h = StartAbsSize.Y - dy
+                elseif HasB then
+                    h = StartAbsSize.Y + dy
+                end
+
+                -- nunca mas grande que la pantalla
+                local Camera = Workspace.CurrentCamera
+                local Screen = Camera and Camera.ViewportSize or Vector2New(9999, 9999)
+
+                w = MathClamp(w, Minimum.X, math.max(Minimum.X, math.min(Maximum.X, Screen.X)))
+                h = MathClamp(h, Minimum.Y, math.max(Minimum.Y, math.min(Maximum.Y, Screen.Y)))
 
                 if Options.AutoHeight then
-                    h = StartSize.Y
+                    h = StartAbsSize.Y
                 end
 
-                local dw = w - StartSize.X
-                local dh = h - StartSize.Y
+                -- el lado contrario al que arrastras se queda fijo (funciona con cualquier AnchorPoint)
+                local NewLeft = HasL and (StartAbsPos.X + StartAbsSize.X - w) or StartAbsPos.X
+                local NewTop = HasT and (StartAbsPos.Y + StartAbsSize.Y - h) or StartAbsPos.Y
 
                 local Anchor = Gui.AnchorPoint
-                local px, py = 0, 0
-
-                if CurrentSide == "L" then
-                    px = -dw * (1 - Anchor.X)
-                elseif CurrentSide == "R" then
-                    px = dw * Anchor.X
-                elseif CurrentSide == "T" then
-                    py = -dh * (1 - Anchor.Y)
-                elseif CurrentSide == "B" then
-                    py = dh * Anchor.Y
-                end
+                local OldRef = Vector2New(StartAbsPos.X + StartAbsSize.X * Anchor.X, StartAbsPos.Y + StartAbsSize.Y * Anchor.Y)
+                local NewRef = Vector2New(NewLeft + w * Anchor.X, NewTop + h * Anchor.Y)
 
                 Gui.Size = UDim2FromOffset(w, h)
                 Gui.Position = UDim2New(
-                    StartPosition.X.Scale, StartPosition.X.Offset + px,
-                    StartPosition.Y.Scale, StartPosition.Y.Offset + py
+                    StartPosition.X.Scale, StartPosition.X.Offset + (NewRef.X - OldRef.X),
+                    StartPosition.Y.Scale, StartPosition.Y.Offset + (NewRef.Y - OldRef.Y)
                 )
             end)
         end
@@ -3502,8 +3582,7 @@ local Library do
         Library.OutlineTexts = function(self, Root)
             for _, Object in Root:GetDescendants() do
                 if Object:IsA("TextLabel") then
-                    Object.TextStrokeColor3 = FromRGB(0, 0, 0)
-                    Object.TextStrokeTransparency = 0.35
+                    Object.TextStrokeTransparency = 1
                 end
             end
         end
@@ -3878,7 +3957,7 @@ local Library do
                 return Priority[Plr.UserId] or "Neutral"
             end
 
-            local Items = Library:CreatePanel("Playerlist", 400, UDim2New(0.3, 0, 0.12, 0), nil, nil, true) do
+            local Items = Library:CreatePanel("Playerlist", 640, UDim2New(0.3, 0, 0.12, 0), nil, nil, true) do
                 Items["Panel"].Instance.Visible = false
 
                 -- mas aire entre el header del panel y el titulo "Info"
@@ -3893,7 +3972,7 @@ local Library do
                     Name = "\0",
                     BackgroundTransparency = 1,
                     BorderColor3 = FromRGB(0, 0, 0),
-                    Size = UDim2New(1, 0, 0, 440),
+                    Size = UDim2New(1, 0, 0, 284),
                     BorderSizePixel = 0,
                     BackgroundColor3 = FromRGB(255, 255, 255)
                 })
@@ -3906,7 +3985,7 @@ local Library do
             }, Library.Pages)
 
             local Section = Library.Pages.Section(FakePage, {Name = "Info"})
-            Section.Items["Outline"].Instance.Size = UDim2New(1, 0, 0, 400)
+            Section.Items["Outline"].Instance.Size = UDim2New(1, 0, 0, 284)
 
             -- titulo "Info" sin contorno negro y con espacio a cada lado (igual que Indicator / Inventory Viewer)
             do
@@ -3928,7 +4007,7 @@ local Library do
                     Parent = ElementsHolder,
                     Name = "\0",
                     BorderColor3 = FromRGB(0, 0, 0),
-                    Size = UDim2New(1, 0, 0, 270),
+                    Size = UDim2New(1, 0, 0, 110),
                     BorderSizePixel = 0,
                     ClipsDescendants = true,
                     BackgroundColor3 = Library.Theme["Background"]
@@ -3988,8 +4067,8 @@ local Library do
             end
 
             -- el panel tiene un alto fijo (PANEL_H); la lista (scroll) ocupa el espacio que sobra
-            local PANEL_W = 400
-            local PANEL_H = 470
+            local PANEL_W = 640
+            local PANEL_H = 330
             local FitSection = function()
                 local Panel = Items["Panel"].Instance
                 local Height = PANEL_H
@@ -4164,7 +4243,7 @@ local Library do
                     BorderColor3 = FromRGB(0, 0, 0),
                     Text = Plr.Name,
                     TextStrokeColor3 = FromRGB(0, 0, 0),
-                    TextStrokeTransparency = 0.35,
+                    TextStrokeTransparency = 1,
                     BackgroundTransparency = 1,
                     Position = UDim2New(0, 12, 0, 0),
                     Size = UDim2New(0.36, -18, 1, 0),
@@ -4184,7 +4263,7 @@ local Library do
                     BorderColor3 = FromRGB(0, 0, 0),
                     Text = Plr.DisplayName,
                     TextStrokeColor3 = FromRGB(0, 0, 0),
-                    TextStrokeTransparency = 0.35,
+                    TextStrokeTransparency = 1,
                     BackgroundTransparency = 1,
                     Position = UDim2New(0.36, 10, 0, 0),
                     Size = UDim2New(0.33, -16, 1, 0),
@@ -4204,7 +4283,7 @@ local Library do
                     BorderColor3 = FromRGB(0, 0, 0),
                     Text = "Neutral",
                     TextStrokeColor3 = FromRGB(0, 0, 0),
-                    TextStrokeTransparency = 0.35,
+                    TextStrokeTransparency = 1,
                     BackgroundTransparency = 1,
                     Position = UDim2New(0.69, 10, 0, 0),
                     Size = UDim2New(0.31, -14, 1, 0),
