@@ -4469,6 +4469,8 @@ local Library do
             }
 
             local AVATAR = 64
+            -- foto que se ve cuando no hay nadie seleccionado (cambiala con Library.NoTargetImage = "rbxassetid://...")
+            Library.NoTargetImage = Library.NoTargetImage or "rbxassetid://76663710403159"
 
             local Items = Library:CreatePanel("Indicator", 288, UDim2New(0.014, 0, 0.55, 0), nil, Vector2New(240, 120)) do
                 -- mas aire entre el header del panel y el titulo "Info"
@@ -4524,7 +4526,7 @@ local Library do
                     Size = UDim2New(0, AVATAR, 0, AVATAR),
                     BorderColor3 = FromRGB(0, 0, 0),
                     BorderSizePixel = 0,
-                    Image = "",
+                    Image = Library.NoTargetImage,
                     BackgroundTransparency = 1,
                     BackgroundColor3 = FromRGB(255, 255, 255)
                 })
@@ -4742,7 +4744,7 @@ local Library do
                     Indicator:UpdatePlaytime()
                 else
                     Items["Name"].Instance.Text = "no target"
-                    Items["Avatar"].Instance.Image = ""
+                    Items["Avatar"].Instance.Image = Library.NoTargetImage
                     Indicator:SetInfo(nil)
                 end
                 Indicator:Apply()
@@ -8679,28 +8681,10 @@ local Library do
                 end
             end
 
-            local RemovePage = function(Page)
-                local WasActive = Page.Active
-                local Index = table.find(Window.Pages, Page)
-                if Index then
-                    table.remove(Window.Pages, Index)
-                end
-                for _, Sub in Page.SubPages do
-                    pcall(function() Sub.Items["PageContent"].Instance:Destroy() end)
-                end
-                for _, Name in {"Inactive", "PageContent", "SubPages"} do
-                    pcall(function() Page.Items[Name].Instance:Destroy() end)
-                end
-                if WasActive and Window.Pages[1] then
-                    Window.Pages[1]:Turn(true)
-                end
-            end
-
             local Destroy = function(Inst)
                 for _, Function in Inst.Cleanups do pcall(Function) end
                 for _, Connection in Inst.Connections do pcall(function() Connection:Disconnect() end) end
                 for _, Sub in Inst.SubPages do pcall(RemoveSubPage, Sub) end
-                for _, Page in Inst.Pages do pcall(RemovePage, Page) end
                 for _, Section in Inst.Sections do pcall(function() Section.Items["Outline"].Instance:Destroy() end) end
                 for _, Flag in Inst.Flags do
                     Library.Flags[Flag] = nil
@@ -8718,53 +8702,47 @@ local Library do
                 end
             end
 
-            -- pagina (icono de arriba) donde se crean los tabs: por defecto la primera que NO es Settings
+            -- pagina (icono de arriba) donde se crean los tabs. Settings esta PROTEGIDA: nunca se devuelve.
+            -- Sin Page = la primera que no es Settings. Page = numero (posicion de la pagina).
             local FindPage = function(Target)
+                local Page
                 if type(Target) == "number" then
-                    return Window.Pages[Target] or SettingsPage
-                end
-                if type(Target) == "table" then
-                    return Target
-                end
-                for _, Page in Window.Pages do
-                    if Page ~= SettingsPage then
-                        return Page
+                    Page = Window.Pages[Target]
+                elseif Target == nil then
+                    for _, Candidate in Window.Pages do
+                        if Candidate ~= SettingsPage then
+                            Page = Candidate
+                            break
+                        end
                     end
                 end
-                return SettingsPage
+                if Page == SettingsPage then
+                    error("los scripts no pueden usar la pagina de Settings / scripts cannot use the Settings page", 3)
+                end
+                if not Page then
+                    error("pagina no encontrada / page not found", 3)
+                end
+                return Page
             end
 
-            -- UI: lo que el codigo Lua usa para crear cosas
+            -- UI: lo que el codigo Lua usa
             local BuildUI = function(Inst)
                 local UI = { }
-                local Default
 
-                -- seccion por defecto (en Settings > Script) para UI:Toggle(...) sueltos
-                local GetDefault = function()
-                    if not Default then
-                        Default = ScriptSubPage:Section({Name = Inst.Name})
-                        TableInsert(Inst.Sections, Default)
+                local WrapTab = function(Sub)
+                    local Tab = setmetatable({ }, {__index = Sub})
+                    function Tab:Section(SectionData)
+                        if type(SectionData) == "string" then SectionData = {Name = SectionData} end
+                        local Section = Sub:Section(SectionData or { })
+                        TableInsert(Inst.Sections, Section) -- se borra al limpiar el script (tambien en tabs ya existentes)
+                        return Section
                     end
-                    return Default
+                    return Tab
                 end
 
-                for _, Kind in {"Toggle", "Slider", "Dropdown", "Button", "Label", "Textbox", "Searchbox"} do
-                    UI[Kind] = function(_, ...)
-                        local Section = GetDefault()
-                        return Section[Kind](Section, ...)
-                    end
-                end
-
-                -- UI:Section("Nombre") -> seccion extra en Settings > Script
-                UI.Section = function(_, Data)
-                    if type(Data) == "string" then Data = {Name = Data} end
-                    local Section = ScriptSubPage:Section(Data or { })
-                    TableInsert(Inst.Sections, Section)
-                    return Section
-                end
-
-                -- UI:Tab({Name = "...", Icon = "...", Page = nil}) -> tab nuevo en la izquierda (como Aim / Players / Visuals)
-                -- devuelve el tab: Tab:Section("Nombre") crea una seccion, y a la seccion le anyades Toggle/Slider/Dropdown/...
+                -- UI:Tab({Name = "...", Icon = "...", Page = nil}) -> tab NUEVO en la barra izquierda (como Aim / Players / Visuals)
+                -- Tab:Section("Nombre") crea una seccion; a la seccion le anyades Toggle/Slider/Dropdown/...
+                -- (no se puede crear paginas de arriba ni usar la pagina de Settings)
                 UI.Tab = function(_, Data)
                     if type(Data) == "string" then Data = {Name = Data} end
                     Data = Data or { }
@@ -8774,24 +8752,45 @@ local Library do
                         Icon = ResolveIcon(Data.Icon)
                     })
                     TableInsert(Inst.SubPages, Sub)
-
-                    local Tab = setmetatable({ }, {__index = Sub})
-                    function Tab:Section(SectionData)
-                        if type(SectionData) == "string" then SectionData = {Name = SectionData} end
-                        return Sub:Section(SectionData or { })
-                    end
-                    return Tab
+                    return WrapTab(Sub)
                 end
 
-                -- UI:Page({Icon = "..."}) -> pagina nueva (icono arriba a la derecha). Luego UI:Tab({Page = esaPagina})
-                UI.Page = function(_, Data)
-                    Data = Data or { }
-                    local Page = Window:Page({
-                        Icon = ResolveIcon(Data.Icon) or "rbxassetid://86962395649126",
-                        NoAutoIcon = true
-                    })
-                    TableInsert(Inst.Pages, Page)
-                    return Page
+                -- UI:GetTab("Players") -> tab YA EXISTENTE de la pagina principal; Tab:Section("x") anyade una seccion nueva dentro.
+                -- Los tabs de Settings (Menu, Theme, Configs, Script) estan protegidos y no se pueden obtener.
+                UI.GetTab = function(_, Name, PageTarget)
+                    for _, Sub in FindPage(PageTarget).SubPages do
+                        if Sub.Name == Name then
+                            return WrapTab(Sub)
+                        end
+                    end
+                    return nil
+                end
+
+                -- Elementos sueltos: UI:Toggle(...) etc. -> van a un tab propio del script (se crea solo, con el nombre del script)
+                local AutoTab, AutoSection
+                local GetAutoTab = function()
+                    if not AutoTab then
+                        AutoTab = UI:Tab({Name = Inst.Name})
+                    end
+                    return AutoTab
+                end
+                local GetAuto = function()
+                    if not AutoSection then
+                        AutoSection = GetAutoTab():Section(Inst.Name)
+                    end
+                    return AutoSection
+                end
+
+                for _, Kind in {"Toggle", "Slider", "Dropdown", "Button", "Label", "Textbox", "Searchbox"} do
+                    UI[Kind] = function(_, ...)
+                        local Section = GetAuto()
+                        return Section[Kind](Section, ...)
+                    end
+                end
+
+                -- UI:Section("Nombre") -> seccion extra en ese tab propio del script
+                UI.Section = function(_, Data)
+                    return GetAutoTab():Section(Data)
                 end
 
                 return UI
@@ -8800,7 +8799,6 @@ local Library do
             local BuildEnv = function(Inst, UI)
                 local Env = {
                     UI = UI,
-                    Window = Window,
                     Library = Library,
                     Flags = Library.Flags,
                     Env = Library.LuaEnv,
@@ -8857,7 +8855,7 @@ local Library do
                     ClearAll()
                 end
 
-                local Inst = {Name = Name or "Script", Connections = { }, Cleanups = { }, SubPages = { }, Pages = { }, Sections = { }, Flags = { }}
+                local Inst = {Name = Name or "Script", Connections = { }, Cleanups = { }, SubPages = { }, Sections = { }, Flags = { }}
                 TableInsert(Running, Inst)
 
                 local Before = Snapshot()
