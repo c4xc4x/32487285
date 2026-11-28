@@ -210,18 +210,18 @@ local Library do
 
     local Themes = {
         ["Preset"] = {
-            ["Border"] = FromRGB(8, 8, 11),
-            ["Outline"] = FromRGB(50, 48, 56),
-            ["Background"] = FromRGB(14, 14, 18),
-            ["Inline"] = FromRGB(21, 21, 26),
-            ["Accent"] = FromRGB(226, 84, 112),
-            ["Dark Accent"] = FromRGB(148, 52, 74),
-            ["Glow"] = FromRGB(226, 84, 112),
-            ["Text"] = FromRGB(244, 242, 246),
-            ["Inactive Text"] = FromRGB(143, 140, 152),
-            ["Element"] = FromRGB(38, 37, 45),
-            ["Element 2"] = FromRGB(56, 54, 64),
-            ["Hovered Element"] = FromRGB(70, 67, 79)
+            ["Border"] = FromRGB(9, 10, 14),
+            ["Outline"] = FromRGB(55, 59, 72),
+            ["Background"] = FromRGB(15, 16, 22),
+            ["Inline"] = FromRGB(21, 23, 31),
+            ["Accent"] = FromRGB(158, 160, 199),
+            ["Dark Accent"] = FromRGB(110, 112, 139),
+            ["Glow"] = FromRGB(158, 160, 199),
+            ["Text"] = FromRGB(255, 255, 255),
+            ["Inactive Text"] = FromRGB(150, 154, 172),
+            ["Element"] = FromRGB(42, 45, 58),
+            ["Element 2"] = FromRGB(58, 62, 78),
+            ["Hovered Element"] = FromRGB(66, 70, 88)
         }
     }
 
@@ -3912,15 +3912,12 @@ local Library do
                 })
             end
 
-            -- el panel mide EXACTAMENTE lo mismo de alto que la ventana principal; la lista (scroll) ocupa el espacio que sobra
+            -- el panel tiene un alto fijo (PANEL_H); la lista (scroll) ocupa el espacio que sobra
             local PANEL_W = 400
+            local PANEL_H = 470
             local FitSection = function()
                 local Panel = Items["Panel"].Instance
-                local MainFrame = Library.MainFrame and Library.MainFrame.Instance
-                local Height = MainFrame and MainFrame.AbsoluteSize.Y or 580
-                if Height < 200 then
-                    Height = 580
-                end
+                local Height = PANEL_H
 
                 -- header 25 + padding arriba 13 + padding abajo 8
                 local ContentH = Height - 46
@@ -4091,6 +4088,8 @@ local Library do
                     TextColor3 = Library.Theme["Text"],
                     BorderColor3 = FromRGB(0, 0, 0),
                     Text = Plr.Name,
+                    TextStrokeColor3 = FromRGB(0, 0, 0),
+                    TextStrokeTransparency = 0.35,
                     BackgroundTransparency = 1,
                     Position = UDim2New(0, 12, 0, 0),
                     Size = UDim2New(0.36, -18, 1, 0),
@@ -4109,6 +4108,8 @@ local Library do
                     TextColor3 = Library.Theme["Text"],
                     BorderColor3 = FromRGB(0, 0, 0),
                     Text = Plr.DisplayName,
+                    TextStrokeColor3 = FromRGB(0, 0, 0),
+                    TextStrokeTransparency = 0.35,
                     BackgroundTransparency = 1,
                     Position = UDim2New(0.36, 10, 0, 0),
                     Size = UDim2New(0.33, -16, 1, 0),
@@ -4127,6 +4128,8 @@ local Library do
                     TextColor3 = Library.Theme["Text"],
                     BorderColor3 = FromRGB(0, 0, 0),
                     Text = "Neutral",
+                    TextStrokeColor3 = FromRGB(0, 0, 0),
+                    TextStrokeTransparency = 0.35,
                     BackgroundTransparency = 1,
                     Position = UDim2New(0.69, 10, 0, 0),
                     Size = UDim2New(0.31, -14, 1, 0),
@@ -4227,6 +4230,9 @@ local Library do
                     PlayerList:Refresh()
                 end)
             end)
+
+            Library:OutlineTexts(Items["Holder"].Instance)
+            Section.Items["Text"].Instance.TextStrokeTransparency = 1
 
             PlayerList:Refresh()
             FitSection()
@@ -5508,24 +5514,6 @@ local Library do
                     Theme = {TextColor3 = "Inactive Text"}
                 })
 
-                Items["Status"] = Instances:Create("TextLabel", {
-                    Parent = Items["Bottom"].Instance,
-                    Name = "\0",
-                    FontFace = Library.MenuFont,
-                    TextColor3 = Library.Theme["Inactive Text"],
-                    BorderColor3 = FromRGB(0, 0, 0),
-                    Text = "",
-                    Size = UDim2New(0, 0, 0, 15),
-                    AnchorPoint = Vector2New(1, 0.5),
-                    BorderSizePixel = 0,
-                    BackgroundTransparency = 1,
-                    Position = UDim2New(1, -8, 0.5, -1),
-                    AutomaticSize = Enum.AutomaticSize.X,
-                    TextSize = 12,
-                    BackgroundColor3 = FromRGB(255, 255, 255),
-                    Theme = {TextColor3 = "Inactive Text"}
-                })
-
                 Items["Top"] = Instances:Create("Frame", {
                     Parent = Items["MainFrame"].Instance,
                     Name = "\0",
@@ -5716,34 +5704,6 @@ local Library do
                 end
             end)
 
-            do
-                local Frames, Elapsed = 0, 0
-                local Stats = game:GetService("Stats")
-
-                Library:Connect(RunService.Heartbeat, function(Delta)
-                    Frames = Frames + 1
-                    Elapsed = Elapsed + Delta
-
-                    if Elapsed < 0.5 then
-                        return
-                    end
-
-                    local Fps = MathFloor(Frames / Elapsed + 0.5)
-                    Frames, Elapsed = 0, 0
-
-                    if not Window.IsOpen then
-                        return
-                    end
-
-                    local Ping = 0
-                    pcall(function()
-                        Ping = MathFloor(Stats.Network.ServerStatsItem["Data Ping"]:GetValue() + 0.5)
-                    end)
-
-                    Items["Status"].Instance.Text = StringFormat("%d fps  |  %d ms  |  %s", Fps, Ping, os.date("%H:%M"))
-                end)
-            end
-
             Window:SetCenter()
             task.wait()
             Window:SetOpen(true)
@@ -5802,18 +5762,6 @@ local Library do
                     return Library.Theme["Inactive Text"]
                 end})
 
-                Items["Underline"] = Instances:Create("Frame", {
-                    Parent = Items["Inactive"].Instance,
-                    Name = "\0",
-                    AnchorPoint = Vector2New(0.5, 0),
-                    Position = UDim2New(0.5, 0, 1, 3),
-                    Size = UDim2New(0, 0, 0, 2),
-                    BorderColor3 = FromRGB(0, 0, 0),
-                    BorderSizePixel = 0,
-                    BackgroundColor3 = Library.Theme["Accent"],
-                    Theme = {BackgroundColor3 = "Accent"}
-                })
-
                 Items["PageContent"] = Instances:Create("Frame", {
                     Parent = Library.UnusedHolder.Instance,
                     Name = "\0",
@@ -5869,10 +5817,6 @@ local Library do
                     Library:FadeContent(Items["PageContent"].Instance, 0.10)
                 end
                 Items["SubPages"].Instance.Visible = Bool
-
-                if Items["Underline"] then
-                    Items["Underline"]:Tween(TweenInfo.new(0.25, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), {Size = UDim2New(Bool and 1 or 0, 0, 0, 2)})
-                end
 
                 if Page.Active then
                     Items["Icon"]:ChangeItemTheme({ImageColor3 = "Accent"})
@@ -6126,24 +6070,6 @@ local Library do
                     BackgroundTransparency = 1,
                     BorderSizePixel = 0,
                     BackgroundColor3 = FromRGB(255, 255, 255)
-                })
-
-                Items["TopAccent"] = Instances:Create("Frame", {
-                    Parent = Items["Outline"].Instance,
-                    Name = "\0",
-                    Position = UDim2New(0, 0, 0, -1),
-                    Size = UDim2New(1, 0, 0, 1),
-                    BorderColor3 = FromRGB(0, 0, 0),
-                    BorderSizePixel = 0,
-                    ZIndex = 2,
-                    BackgroundColor3 = Library.Theme["Accent"],
-                    Theme = {BackgroundColor3 = "Accent"}
-                })
-
-                Instances:Create("UIGradient", {
-                    Parent = Items["TopAccent"].Instance,
-                    Name = "\0",
-                    Transparency = NumSequence{NumSequenceKeypoint(0, 0), NumSequenceKeypoint(0.5, 0.8), NumSequenceKeypoint(1, 1)}
                 })
 
                 Items["Text"] = Instances:Create("TextLabel", {
