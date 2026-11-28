@@ -216,7 +216,7 @@ do
         end
     end
 
-    function Loader:Finish()
+    function Loader:Finish(failMsg, failDetail)
         local f = self.Steps.fonts
         local t0 = os.clock()
         while f and (f.State == "pending" or f.State == "loading") and os.clock() - t0 < 6 do
@@ -225,11 +225,20 @@ do
         if f and (f.State == "pending" or f.State == "loading") then
             self:Set("fonts", "fail", "timeout")
         end
-        line1.Text = "welcome back"
-        line1.TextColor3 = C.Text
-        line3.Text = ""
-        title.Text = "loaded"
-        task.wait(0.5)
+        if failMsg then
+            line1.Text = failMsg
+            line1.TextColor3 = C.Fail
+            line3.Text = failDetail or ""
+            line3.TextColor3 = C.Fail
+            title.Text = "failed"
+            task.wait(5)
+        else
+            line1.Text = "welcome back"
+            line1.TextColor3 = C.Text
+            line3.Text = ""
+            title.Text = "loaded"
+            task.wait(0.5)
+        end
         self.Dead = true
         pcall(function() gui:Destroy() end)
     end
@@ -5187,20 +5196,39 @@ end
 
 do
     Loader:Set("lib", "loading")
-    while not Loader.LibDone do task.wait() end -- was downloading in parallel since the start
-    local ok, Library = pcall(function()
-        return loadstring(Loader.LibSrc or game:HttpGet(PANDORA_URL))()
-    end)
-    Loader:Set("lib", (ok and Library) and "ok" or "fail", (ok and Library) and "ready" or "error")
+    -- was downloading in parallel since the start; timeout so a hung download can't freeze the loader forever
+    local tWait = os.clock()
+    while not Loader.LibDone and os.clock() - tWait < 20 do task.wait() end
+    local ok, Library, why = false, nil, nil
+    if not Loader.LibDone then
+        why = "timeout"
+    else
+        local src = Loader.LibSrc
+        if not src or src == "" then
+            local okH, s2 = pcall(function() return game:HttpGet(PANDORA_URL) end)
+            src = okH and s2 or nil
+        end
+        if not src or src == "" then
+            why = "download failed"
+        elseif src:find("pchaxx13_LOADER", 1, true) then
+            -- library.lua is this very script (not the UI library): running it would relaunch the loader forever
+            why = "wrong library.lua"
+        else
+            ok, Library = pcall(function() return loadstring(src)() end)
+            if not (ok and Library) then why = "load error" end
+        end
+    end
+    local libOk = (ok and Library) and true or false
+    Loader:Set("lib", libOk and "ok" or "fail", libOk and "ready" or (why or "error"))
 
     -- the loading screen disappears first...
-    Loader:Finish()
+    Loader:Finish(not libOk and "UI library error" or nil, why)
 
     -- ...and only then the UI is built
     if ok and Library then
         local ok2, err = pcall(buildUI, Library)
         if not ok2 then warn("[pchaxx13] Error construyendo la UI: " .. tostring(err)) end
     else
-        warn("[pchaxx13] No se pudo cargar la librería de UI: " .. tostring(Library))
+        warn("[pchaxx13] No se pudo cargar la librería de UI (" .. tostring(why) .. "): " .. tostring(Library))
     end
 end
