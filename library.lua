@@ -198,18 +198,18 @@ local Library do
 
     local Themes = {
         ["Preset"] = {
-            ["Border"] = FromRGB(10, 12, 18),
-            ["Outline"] = FromRGB(58, 65, 87),
-            ["Background"] = FromRGB(23, 27, 42),
-            ["Inline"] = FromRGB(30, 35, 54),
-            ["Accent"] = FromRGB(138, 184, 255),
-            ["Dark Accent"] = FromRGB(88, 128, 196),
-            ["Glow"] = FromRGB(138, 184, 255),
+            ["Border"] = FromRGB(9, 9, 9),
+            ["Outline"] = FromRGB(55, 55, 55),
+            ["Background"] = FromRGB(15, 15, 15),
+            ["Inline"] = FromRGB(21, 21, 21),
+            ["Accent"] = FromRGB(165, 165, 165),
+            ["Dark Accent"] = FromRGB(115, 115, 115),
+            ["Glow"] = FromRGB(165, 165, 165),
             ["Text"] = FromRGB(255, 255, 255),
-            ["Inactive Text"] = FromRGB(125, 134, 168),
-            ["Element"] = FromRGB(40, 46, 68),
-            ["Element 2"] = FromRGB(52, 59, 84),
-            ["Hovered Element"] = FromRGB(66, 74, 104)
+            ["Inactive Text"] = FromRGB(150, 150, 150),
+            ["Element"] = FromRGB(42, 42, 42),
+            ["Element 2"] = FromRGB(58, 58, 58),
+            ["Hovered Element"] = FromRGB(66, 66, 66)
         }
     }
 
@@ -366,6 +366,11 @@ local Library do
                 NewItem.Instance[Property] = Value
             end
 
+            if Library.UIFontName == "Zekton" and Library.MenuFont and NewItem.Properties.FontFace
+                and NewItem.Properties.FontFace.Family == Library.MenuFont.Family and NewItem.Instance.TextSize then
+                NewItem.Instance.TextSize = NewItem.Instance.TextSize + 1
+            end
+
             if NewItem.Properties.Theme then
                 Library:AddToTheme(NewItem, NewItem.Properties.Theme)
             end
@@ -477,7 +482,7 @@ local Library do
                     Name = "\0",
                     Position = Definition[2],
                     Size = Definition[3],
-                    BackgroundColor3 = FromRGB(138, 184, 255),
+                    BackgroundColor3 = FromRGB(166, 147, 243),
                     BackgroundTransparency = 1,
                     Text = "",
                     BorderSizePixel = 0,
@@ -914,11 +919,12 @@ local Library do
         Library.TitleFont = Tahoma
 
         Library.UIFontUrls = {
+            ["Zekton"] = "https://github.com/LuckyHub1/LuckyHub/raw/refs/heads/main/zekton_rg.ttf",
             ["Smallest Pixel-7"] = "https://github.com/i77lhm/storage/raw/refs/heads/main/fonts/smallest_pixel-7.ttf",
             ["Pixel Arial"] = "https://github.com/smi9/UnnamedCheats/raw/refs/heads/main/PixelArial.TTF",
             ["Arial"] = "https://raw.githubusercontent.com/smi9/UnnamedCheats/refs/heads/main/Arial.ttf"
         }
-        Library.UIFontNames = { "Proggy Clean", "Smallest Pixel-7", "Pixel Arial", "Arial" }
+        Library.UIFontNames = { "Zekton", "Proggy Clean", "Smallest Pixel-7", "Pixel Arial", "Arial" }
         Library.UIFontCache = { ["Proggy Clean"] = ProggyClean }
         Library.UIFontName = "Proggy Clean"
 
@@ -971,6 +977,7 @@ local Library do
 
             local Old = Library.MenuFont
 
+            local Delta = (Name == "Zekton" and 1 or 0) - (Library.UIFontName == "Zekton" and 1 or 0)
             Library.UIFontName = Name
             Library.MenuFont = New
             Library.SubFont = New
@@ -982,6 +989,7 @@ local Library do
                         local Face = Object.FontFace
                         if Face.Family == Old.Family then
                             Object.FontFace = New
+                            Object.TextSize = Object.TextSize + Delta
                         end
                     end
                 end
@@ -990,6 +998,16 @@ local Library do
             return true
         end
 
+        if not Library:SetUIFont("Zekton") then
+            task.spawn(function()
+                for Attempt = 1, 20 do
+                    task.wait(3)
+                    if Library:SetUIFont("Zekton") then
+                        break
+                    end
+                end
+            end)
+        end
     end
 
     Library.Holder = Instances:Create("ScreenGui", {
@@ -2683,7 +2701,7 @@ local Library do
                     ZIndex = 2,
                     BorderSizePixel = 0,
                     BackgroundTransparency = 1,
-                    BackgroundColor3 = FromRGB(138, 184, 255)
+                    BackgroundColor3 = FromRGB(166, 147, 243)
                 })  ModeItems["Accent1"]:AddToTheme({BackgroundColor3 = "Accent"})
 
                 ModeItems["Accent2"] = Instances:Create("Frame", {
@@ -2695,14 +2713,14 @@ local Library do
                     ZIndex = 2,
                     BackgroundTransparency = 1,
                     BorderSizePixel = 0,
-                    BackgroundColor3 = FromRGB(88, 128, 196)
+                    BackgroundColor3 = FromRGB(110, 97, 161)
                 })  ModeItems["Accent2"]:AddToTheme({BackgroundColor3 = "Dark Accent"})
 
                 ModeItems["Text"] = Instances:Create("TextLabel", {
                     Parent = ModeItems[Name].Instance,
                     Name = "\0",
                     FontFace = Library.MenuFont,
-                    TextColor3 = FromRGB(138, 184, 255),
+                    TextColor3 = FromRGB(166, 147, 243),
                     BorderColor3 = FromRGB(0, 0, 0),
                     Text = Name,
                     AnchorPoint = Vector2New(0, 0.5),
@@ -3814,7 +3832,7 @@ local Library do
                 return Priority[Plr.UserId] or "Neutral"
             end
 
-            local Items = Library:CreatePanel("Playerlist", 400, UDim2New(0.3, 0, 0.12, 0), nil, nil, true) do
+            local Items = Library:CreatePanel("Playerlist", 500, UDim2New(0.3, 0, 0.12, 0), nil, nil, true) do
                 Items["Panel"].Instance.Visible = false
 
                 local PanelPad = Items["Content"].Instance:FindFirstChildOfClass("UIPadding")
@@ -3919,8 +3937,8 @@ local Library do
                 })
             end
 
-            local PANEL_W = 400
-            local PANEL_H = 470
+            local PANEL_W = 500
+            local PANEL_H = 400
             local FitSection = function()
                 local Panel = Items["Panel"].Instance
                 local Height = PANEL_H
@@ -5757,6 +5775,7 @@ local Library do
 
                 Library.MenuOpen = Bool
                 if Library.PlayerListObj then Library.PlayerListObj:Apply() end
+                if Library.LuaObj then Library.LuaObj:Apply() end
                 if Library.PreviewObj then Library.PreviewObj:Apply() end
 
                 Debounce = true
@@ -5982,7 +6001,7 @@ local Library do
                     Position = UDim2New(0, 0, 0.5, 0),
                     ZIndex = 2,
                     BorderSizePixel = 0,
-                    BackgroundColor3 = FromRGB(138, 184, 255)
+                    BackgroundColor3 = FromRGB(166, 147, 243)
                 })  Items["Accent1"]:AddToTheme({BackgroundColor3 = "Accent"})
 
                 Items["Accent2"] = Instances:Create("Frame", {
@@ -5995,7 +6014,7 @@ local Library do
                     Size = UDim2New(0, 1, 0, 0),
                     ZIndex = 2,
                     BorderSizePixel = 0,
-                    BackgroundColor3 = FromRGB(88, 128, 196)
+                    BackgroundColor3 = FromRGB(110, 97, 161)
                 })  Items["Accent2"]:AddToTheme({BackgroundColor3 = "Dark Accent"})
 
                 Items["Icon"] = Instances:Create("ImageLabel", {
@@ -6663,7 +6682,7 @@ local Library do
                     BorderColor3 = FromRGB(0, 0, 0),
                     Size = UDim2New(0.5, -2, 1, 0),
                     BorderSizePixel = 0,
-                    BackgroundColor3 = FromRGB(138, 184, 255)
+                    BackgroundColor3 = FromRGB(166, 147, 243)
                 })  Items["Accent"]:AddToTheme({BackgroundColor3 = "Accent"})
 
                 Instances:Create("UIGradient", {
@@ -7085,7 +7104,7 @@ local Library do
                         Position = UDim2New(0, 0, 0.5, 0),
                         ZIndex = 2,
                         BorderSizePixel = 0,
-                        BackgroundColor3 = FromRGB(138, 184, 255)
+                        BackgroundColor3 = FromRGB(166, 147, 243)
                     })  OptionItems["Accent1"]:AddToTheme({BackgroundColor3 = "Accent"})
 
                     OptionItems["Accent2"] = Instances:Create("Frame", {
@@ -7097,7 +7116,7 @@ local Library do
                         AnchorPoint = Vector2New(0, 0.5),
                         ZIndex = 2,
                         BorderSizePixel = 0,
-                        BackgroundColor3 = FromRGB(88, 128, 196)
+                        BackgroundColor3 = FromRGB(110, 97, 161)
                     })  OptionItems["Accent2"]:AddToTheme({BackgroundColor3 = "Dark Accent"})
 
                     OptionItems["Text"] = Instances:Create("TextLabel", {
@@ -7818,7 +7837,7 @@ local Library do
                         Position = UDim2New(0, 0, 0.5, 0),
                         ZIndex = 1,
                         BorderSizePixel = 0,
-                        BackgroundColor3 = FromRGB(138, 184, 255)
+                        BackgroundColor3 = FromRGB(166, 147, 243)
                     })  OptionItems["Accent1"]:AddToTheme({BackgroundColor3 = "Accent"})
 
                     OptionItems["Accent2"] = Instances:Create("Frame", {
@@ -7830,7 +7849,7 @@ local Library do
                         AnchorPoint = Vector2New(0, 0.5),
                         ZIndex = 1,
                         BorderSizePixel = 0,
-                        BackgroundColor3 = FromRGB(88, 128, 196)
+                        BackgroundColor3 = FromRGB(110, 97, 161)
                     })  OptionItems["Accent2"]:AddToTheme({BackgroundColor3 = "Dark Accent"})
 
                     OptionItems["Text"] = Instances:Create("TextLabel", {
@@ -8261,6 +8280,12 @@ local Library do
                     end})
                 end
 
+                MenuSection:Toggle({Name = "Lua", Flag = "Lua Panel", Default = false, Callback = function(Value)
+                    if Library.LuaObj then
+                        Library.LuaObj:SetVisibility(Value)
+                    end
+                end})
+
                 if Library.PreviewObj then
                     MenuSection:Toggle({Name = "ESP Preview", Flag = "ESP Preview", Default = false, Callback = function(Value)
                         Library.PreviewObj:SetVisibility(Value)
@@ -8469,7 +8494,10 @@ local Library do
 
         do
             Library.LuaEnv = Library.LuaEnv or { }
-            Library.Folders.Scripts = Library.Folders.Directory .. "/Scripts"
+            Library.Folders.Scripts = "pchaxx13/luas"
+            if not isfolder("pchaxx13") then
+                makefolder("pchaxx13")
+            end
             if not isfolder(Library.Folders.Scripts) then
                 makefolder(Library.Folders.Scripts)
             end
@@ -8480,22 +8508,8 @@ local Library do
             local Code, ScriptName, Selected = "", "", nil
             local CodeBox, ScriptList
 
-            local ScriptSubPage = SettingsPage:SubPage({Name = "Script", Icon = "rbxassetid://124693018107383"})
-            local EditorSection = ScriptSubPage:Section({Name = "Lua"})
-
             local Path = function(Name)
                 return Library.Folders.Scripts .. "/" .. Name .. ".lua"
-            end
-
-            local Refresh = function()
-                local Names = { }
-                for _, File in listfiles(Library.Folders.Scripts) do
-                    local Name = File:match("([^/\\]+)%.lua$")
-                    if Name then
-                        TableInsert(Names, Name)
-                    end
-                end
-                ScriptList:Refresh(Names)
             end
 
             local Notify = function(Text, Time)
@@ -8732,67 +8746,517 @@ local Library do
             end
             Library.ClearLua = ClearAll
 
-            CodeBox = EditorSection:Textbox({
-                Flag = "ScriptCode",
-                Placeholder = "type your Lua code here",
-                Multiline = true,
-                Height = 160,
-                Callback = function(Value)
-                    Code = Value
+            local PanelW, PanelH = 540, 400
+            local Loaded = false
+            local Current = nil
+
+            local PanelItems = Library:CreatePanel("Lua", PanelW, UDim2New(0.1, 0, 0.12, 0), nil, nil, true) do
+                PanelItems["Panel"].Instance.Visible = false
+
+                local PanelPad = PanelItems["Content"].Instance:FindFirstChildOfClass("UIPadding")
+                if PanelPad then
+                    PanelPad.PaddingTop = UDimNew(0, 13)
                 end
+
+                PanelItems["Holder"] = Instances:Create("Frame", {
+                    Parent = PanelItems["Content"].Instance,
+                    Name = "\0",
+                    BackgroundTransparency = 1,
+                    BorderColor3 = FromRGB(0, 0, 0),
+                    Size = UDim2New(1, 0, 0, PanelH - 46),
+                    BorderSizePixel = 0,
+                    BackgroundColor3 = FromRGB(255, 255, 255)
+                })
+            end
+
+            local FakePage = setmetatable({
+                Window = nil,
+                Items = { PageContent = PanelItems["Holder"] },
+                SubPages = { }
+            }, Library.Pages)
+
+            local EditorSection = Library.Pages.Section(FakePage, {Name = "Editor"})
+            EditorSection.Items["Outline"].Instance.Size = UDim2New(1, 0, 0, PanelH - 46)
+
+            do
+                local Title = EditorSection.Items["Text"].Instance
+                Title.TextStrokeTransparency = 1
+                local Pad = Title:FindFirstChildOfClass("UIPadding")
+                if Pad then
+                    Pad.PaddingLeft = UDimNew(0, 7)
+                    Pad.PaddingRight = UDimNew(0, 7)
+                end
+            end
+
+            local ElementsHolder = EditorSection.Items["ElementsHolder"].Instance
+
+            local Toolbar = Instances:Create("Frame", {
+                Parent = ElementsHolder,
+                Name = "\0",
+                BackgroundTransparency = 1,
+                BorderColor3 = FromRGB(0, 0, 0),
+                Size = UDim2New(1, 0, 0, 22),
+                BorderSizePixel = 0,
+                BackgroundColor3 = FromRGB(255, 255, 255)
             })
 
-            EditorSection:Button({Name = "Execute", Callback = function()
-                Run(Code, ScriptName ~= "" and ScriptName or Selected or "Script")
-            end})
-
-            EditorSection:Textbox({Name = "Script name", Flag = "ScriptName", Placeholder = "name...", Callback = function(Value)
-                ScriptName = Value
-            end})
-
-            EditorSection:Button({Name = "Save", Callback = function()
-                local Name = ScriptName ~= "" and ScriptName or Selected
-                if not Name or Name == "" then
-                    return Library:Alert("error", "write a script name")
-                end
-                writefile(Path(Name), Code)
-                Refresh()
-            end})
-
-            ScriptList = EditorSection:Searchbox({
-                Name = "Saved scripts",
-                Flag = "ScriptList",
-                Multi = false,
-                Items = { },
-                Callback = function(Value)
-                    Selected = Value
-                end
+            Instances:Create("UIPadding", {
+                Parent = Toolbar.Instance,
+                Name = "\0",
+                PaddingLeft = UDimNew(0, 17),
+                PaddingRight = UDimNew(0, 8)
             })
 
-            EditorSection:Button({Name = "Load", Callback = function()
-                if Selected and isfile(Path(Selected)) then
-                    Code = readfile(Path(Selected))
-                    CodeBox:Set(Code)
-                    Run(Code, Selected)
+            Instances:Create("UIListLayout", {
+                Parent = Toolbar.Instance,
+                Name = "\0",
+                FillDirection = Enum.FillDirection.Horizontal,
+                VerticalAlignment = Enum.VerticalAlignment.Center,
+                Padding = UDimNew(0, 4),
+                SortOrder = Enum.SortOrder.LayoutOrder
+            })
+
+            local MakeButton = function(Text, Callback)
+                local Button = Instances:Create("TextButton", {
+                    Theme = {BackgroundColor3 = "Element", TextColor3 = "Text"},
+                    Parent = Toolbar.Instance,
+                    Name = "\0",
+                    FontFace = Library.MenuFont,
+                    Text = Text,
+                    TextSize = 12,
+                    TextColor3 = Library.Theme["Text"],
+                    BackgroundColor3 = Library.Theme["Element"],
+                    BorderColor3 = FromRGB(0, 0, 0),
+                    BorderSizePixel = 0,
+                    AutoButtonColor = false,
+                    Size = UDim2New(0, 0, 1, 0),
+                    AutomaticSize = Enum.AutomaticSize.X
+                })
+
+                Instances:Create("UIPadding", {
+                    Parent = Button.Instance,
+                    Name = "\0",
+                    PaddingLeft = UDimNew(0, 10),
+                    PaddingRight = UDimNew(0, 10)
+                })
+
+                Instances:Create("UIStroke", {
+                    Theme = {Color = "Outline"},
+                    Parent = Button.Instance,
+                    Name = "\0",
+                    Color = Library.Theme["Outline"],
+                    ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+                })
+
+                Button:Connect("MouseEnter", function()
+                    Button.Instance.BackgroundColor3 = Library.Theme["Hovered Element"]
+                end)
+
+                Button:Connect("MouseLeave", function()
+                    Button.Instance.BackgroundColor3 = Library.Theme["Element"]
+                end)
+
+                Button:Connect("MouseButton1Click", function()
+                    Library:SafeCall(Callback)
+                end)
+
+                return Button
+            end
+
+            local FileButton = MakeButton("File", function() end)
+            local LoadButton = MakeButton("Load", function() end)
+            local UnloadButton = MakeButton("Unload", function() end)
+            local SaveButton = MakeButton("Save", function() end)
+            local RefreshButton = MakeButton("Refresh", function() end)
+
+            local StatusLabel = Instances:Create("TextLabel", {
+                Theme = {TextColor3 = "Inactive Text"},
+                Parent = Toolbar.Instance,
+                Name = "\0",
+                FontFace = Library.MenuFont,
+                TextColor3 = Library.Theme["Inactive Text"],
+                BorderColor3 = FromRGB(0, 0, 0),
+                Text = "Unloaded",
+                Size = UDim2New(0, 0, 1, 0),
+                AutomaticSize = Enum.AutomaticSize.X,
+                BackgroundTransparency = 1,
+                BorderSizePixel = 0,
+                TextSize = 12,
+                BackgroundColor3 = FromRGB(255, 255, 255)
+            })
+
+            Instances:Create("UIPadding", {
+                Parent = StatusLabel.Instance,
+                Name = "\0",
+                PaddingLeft = UDimNew(0, 6)
+            })
+
+            local EditorWrap = Instances:Create("Frame", {
+                Parent = ElementsHolder,
+                Name = "\0",
+                BackgroundTransparency = 1,
+                BorderColor3 = FromRGB(0, 0, 0),
+                Size = UDim2New(1, 0, 0, 240),
+                BorderSizePixel = 0,
+                BackgroundColor3 = FromRGB(255, 255, 255)
+            })
+
+            Instances:Create("UIPadding", {
+                Parent = EditorWrap.Instance,
+                Name = "\0",
+                PaddingLeft = UDimNew(0, 17),
+                PaddingRight = UDimNew(0, 8)
+            })
+
+            local Box = Instances:Create("Frame", {
+                Theme = {BackgroundColor3 = "Background"},
+                Parent = EditorWrap.Instance,
+                Name = "\0",
+                BorderColor3 = FromRGB(0, 0, 0),
+                Size = UDim2New(1, 0, 1, 0),
+                BorderSizePixel = 0,
+                ClipsDescendants = true,
+                BackgroundColor3 = Library.Theme["Background"]
+            })
+
+            Instances:Create("UIStroke", {
+                Theme = {Color = "Outline"},
+                Parent = Box.Instance,
+                Name = "\0",
+                Color = Library.Theme["Outline"],
+                LineJoinMode = Enum.LineJoinMode.Miter,
+                ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+            })
+
+            Instances:Create("UIStroke", {
+                Theme = {Color = "Border"},
+                Parent = Box.Instance,
+                Name = "\0",
+                Color = Library.Theme["Border"],
+                LineJoinMode = Enum.LineJoinMode.Miter,
+                ApplyStrokeMode = Enum.ApplyStrokeMode.Border,
+                BorderOffset = UDimNew(0, 1)
+            })
+
+            local Scroll = Instances:Create("ScrollingFrame", {
+                Theme = {ScrollBarImageColor3 = "Accent"},
+                Parent = Box.Instance,
+                Name = "\0",
+                Active = true,
+                AutomaticCanvasSize = Enum.AutomaticSize.Y,
+                BorderSizePixel = 0,
+                CanvasSize = UDim2New(0, 0, 0, 0),
+                ScrollBarImageColor3 = Library.Theme["Accent"],
+                MidImage = "rbxassetid://81680855285439",
+                TopImage = "rbxassetid://81680855285439",
+                BottomImage = "rbxassetid://81680855285439",
+                BorderColor3 = FromRGB(0, 0, 0),
+                ScrollBarThickness = 2,
+                ScrollingDirection = Enum.ScrollingDirection.Y,
+                Size = UDim2New(1, 0, 1, 0),
+                BackgroundTransparency = 1,
+                BackgroundColor3 = FromRGB(255, 255, 255)
+            })
+
+            Instances:Create("UIPadding", {
+                Parent = Scroll.Instance,
+                Name = "\0",
+                PaddingTop = UDimNew(0, 4),
+                PaddingBottom = UDimNew(0, 4),
+                PaddingLeft = UDimNew(0, 6),
+                PaddingRight = UDimNew(0, 6)
+            })
+
+            local Input = Instances:Create("TextBox", {
+                Theme = {TextColor3 = "Text", PlaceholderColor3 = "Inactive Text"},
+                Parent = Scroll.Instance,
+                Name = "\0",
+                FontFace = Library.MenuFont,
+                TextColor3 = Library.Theme["Text"],
+                PlaceholderColor3 = Library.Theme["Inactive Text"],
+                PlaceholderText = "type your Lua code here",
+                BorderColor3 = FromRGB(0, 0, 0),
+                Text = "",
+                MultiLine = true,
+                ClearTextOnFocus = false,
+                TextWrapped = true,
+                TextSize = 12,
+                TextXAlignment = Enum.TextXAlignment.Left,
+                TextYAlignment = Enum.TextYAlignment.Top,
+                Size = UDim2New(1, 0, 0, 0),
+                AutomaticSize = Enum.AutomaticSize.Y,
+                BackgroundTransparency = 1,
+                BorderSizePixel = 0,
+                BackgroundColor3 = FromRGB(255, 255, 255)
+            })
+
+            local InputConstraint = Instances:Create("UISizeConstraint", {
+                Parent = Input.Instance,
+                Name = "\0",
+                MinSize = Vector2New(0, 0)
+            })
+
+            local FileList = Instances:Create("ScrollingFrame", {
+                Theme = {BackgroundColor3 = "Inline", ScrollBarImageColor3 = "Accent"},
+                Parent = Box.Instance,
+                Name = "\0",
+                Visible = false,
+                Active = true,
+                ZIndex = 10,
+                AutomaticCanvasSize = Enum.AutomaticSize.Y,
+                CanvasSize = UDim2New(0, 0, 0, 0),
+                ScrollBarImageColor3 = Library.Theme["Accent"],
+                MidImage = "rbxassetid://81680855285439",
+                TopImage = "rbxassetid://81680855285439",
+                BottomImage = "rbxassetid://81680855285439",
+                ScrollBarThickness = 2,
+                BorderColor3 = FromRGB(0, 0, 0),
+                BorderSizePixel = 0,
+                Position = UDim2New(0, 6, 0, 6),
+                Size = UDim2New(1, -12, 0.7, 0),
+                BackgroundColor3 = Library.Theme["Inline"]
+            })
+
+            Instances:Create("UIStroke", {
+                Theme = {Color = "Outline"},
+                Parent = FileList.Instance,
+                Name = "\0",
+                Color = Library.Theme["Outline"],
+                ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+            })
+
+            Instances:Create("UIListLayout", {
+                Parent = FileList.Instance,
+                Name = "\0",
+                Padding = UDimNew(0, 0),
+                SortOrder = Enum.SortOrder.LayoutOrder
+            })
+
+            Instances:Create("UIPadding", {
+                Parent = FileList.Instance,
+                Name = "\0",
+                PaddingTop = UDimNew(0, 3),
+                PaddingBottom = UDimNew(0, 3)
+            })
+
+            local EmptyLabel = Instances:Create("TextLabel", {
+                Theme = {TextColor3 = "Inactive Text"},
+                Parent = FileList.Instance,
+                Name = "\0",
+                FontFace = Library.MenuFont,
+                TextColor3 = Library.Theme["Inactive Text"],
+                BorderColor3 = FromRGB(0, 0, 0),
+                Text = "no .lua files in " .. Library.Folders.Scripts,
+                Size = UDim2New(1, 0, 0, 20),
+                BackgroundTransparency = 1,
+                BorderSizePixel = 0,
+                TextSize = 12,
+                ZIndex = 11,
+                BackgroundColor3 = FromRGB(255, 255, 255)
+            })
+
+            local FileRows = { }
+
+            local SetStatus = function(State)
+                Loaded = State
+                local Text = Loaded and "Loaded" or "Unloaded"
+                if Current then
+                    Text = Current .. ".lua  |  " .. Text
                 end
-            end})
+                StatusLabel.Instance.Text = Text
+                StatusLabel.Instance.TextColor3 = Loaded and Library.Theme["Accent"] or Library.Theme["Inactive Text"]
+            end
 
-            EditorSection:Button({Name = "Delete", Callback = function()
-                if Selected and isfile(Path(Selected)) then
-                    delfile(Path(Selected))
-                    Selected = nil
-                    Refresh()
+            local RefreshFiles = function()
+                for _, Row in FileRows do
+                    Row:Destroy()
                 end
-            end})
+                FileRows = { }
 
-            EditorSection:Toggle({Name = "Keep other scripts", Flag = "ScriptKeep", Default = false, Callback = function(Value)
-                Keep = Value
-            end})
+                local Names = { }
+                for _, File in listfiles(Library.Folders.Scripts) do
+                    local Name = File:match("([^/\\]+)%.lua$")
+                    if Name then
+                        TableInsert(Names, Name)
+                    end
+                end
+                table.sort(Names)
 
-            EditorSection:Button({Name = "Clear all scripts", Callback = ClearAll})
-            EditorSection:Button({Name = "Refresh", Callback = Refresh})
+                EmptyLabel.Instance.Visible = #Names == 0
 
-            Refresh()
+                for Index, Name in Names do
+                    local Row = Instances:Create("TextButton", {
+                        Theme = {TextColor3 = "Text"},
+                        Parent = FileList.Instance,
+                        Name = "\0",
+                        FontFace = Library.MenuFont,
+                        Text = Name,
+                        TextColor3 = Library.Theme["Text"],
+                        BorderColor3 = FromRGB(0, 0, 0),
+                        BackgroundTransparency = 1,
+                        BorderSizePixel = 0,
+                        AutoButtonColor = false,
+                        TextSize = 12,
+                        TextXAlignment = Enum.TextXAlignment.Left,
+                        Size = UDim2New(1, 0, 0, 20),
+                        LayoutOrder = Index,
+                        ZIndex = 11,
+                        BackgroundColor3 = Library.Theme["Element"]
+                    })
+
+                    Instances:Create("UIPadding", {
+                        Parent = Row.Instance,
+                        Name = "\0",
+                        PaddingLeft = UDimNew(0, 8)
+                    })
+
+                    Row:Connect("MouseEnter", function()
+                        Row.Instance.BackgroundTransparency = 0
+                    end)
+
+                    Row:Connect("MouseLeave", function()
+                        Row.Instance.BackgroundTransparency = 1
+                    end)
+
+                    Row:Connect("MouseButton1Click", function()
+                        FileList.Instance.Visible = false
+                        if isfile(Path(Name)) then
+                            Current = Name
+                            Input.Instance.Text = readfile(Path(Name))
+                            SetStatus(Loaded)
+                        end
+                    end)
+
+                    TableInsert(FileRows, Row.Instance)
+                end
+            end
+
+            Library:Connect(Input.Instance:GetPropertyChangedSignal("Text"), function()
+                Code = Input.Instance.Text
+            end)
+
+            FileButton:Connect("MouseButton1Click", function()
+                if FileList.Instance.Visible then
+                    FileList.Instance.Visible = false
+                    return
+                end
+                RefreshFiles()
+                FileList.Instance.Visible = true
+            end)
+
+            LoadButton:Connect("MouseButton1Click", function()
+                FileList.Instance.Visible = false
+                if Code == "" then
+                    Library:Alert("error", "the editor is empty")
+                    return
+                end
+                SetStatus(Run(Code, Current or "Script"))
+            end)
+
+            UnloadButton:Connect("MouseButton1Click", function()
+                ClearAll()
+                SetStatus(false)
+            end)
+
+            SaveButton:Connect("MouseButton1Click", function()
+                if not Current then
+                    local Index = 1
+                    while isfile(Path("script_" .. Index)) do
+                        Index += 1
+                    end
+                    Current = "script_" .. Index
+                end
+                writefile(Path(Current), Code)
+                RefreshFiles()
+                SetStatus(Loaded)
+                Notify("saved " .. Current .. ".lua", 3)
+            end)
+
+            RefreshButton:Connect("MouseButton1Click", function()
+                RefreshFiles()
+                Notify("found " .. #FileRows .. " lua file(s)", 3)
+            end)
+
+            Library.ClearLua = function()
+                ClearAll()
+                SetStatus(false)
+            end
+
+            local FitSection = function()
+                local Panel = PanelItems["Panel"].Instance
+                local ContentH = PanelH - 46
+
+                Panel.AutomaticSize = Enum.AutomaticSize.None
+                Panel.Size = UDim2New(0, PanelW, 0, PanelH)
+                EditorSection.Items["Outline"].Instance.Size = UDim2New(1, 0, 0, ContentH)
+                PanelItems["Holder"].Instance.Size = UDim2New(1, 0, 0, ContentH)
+
+                local Wrap = EditorWrap.Instance
+                local Other = ElementsHolder.AbsoluteSize.Y - Wrap.AbsoluteSize.Y
+                local WrapH = math.max(80, ContentH - 34 - Other)
+
+                if math.abs(Wrap.Size.Y.Offset - WrapH) > 0.5 then
+                    Wrap.Size = UDim2New(1, 0, 0, WrapH)
+                end
+
+                InputConstraint.Instance.MinSize = Vector2New(0, math.max(Scroll.Instance.AbsoluteSize.Y - 8, 0))
+            end
+
+            Library:Connect(ElementsHolder:GetPropertyChangedSignal("AbsoluteSize"), FitSection)
+            Library:Connect(Scroll.Instance:GetPropertyChangedSignal("AbsoluteSize"), FitSection)
+
+            local Lua = { Wanted = false }
+            local Docked = false
+
+            local Dock = function()
+                Docked = true
+
+                local MainFrame = Library.MainFrame and Library.MainFrame.Instance
+                if not MainFrame then
+                    return
+                end
+
+                local Pos, Size = MainFrame.AbsolutePosition, MainFrame.AbsoluteSize
+                local Screen = Library.Holder.Instance.AbsoluteSize
+                local X = Pos.X - PanelW - 10
+
+                if X < 0 then
+                    X = Pos.X + Size.X + 10
+                    if X + PanelW > Screen.X then
+                        X = math.max(0, Screen.X - PanelW)
+                    end
+                end
+
+                local Panel = PanelItems["Panel"].Instance
+                Panel.AnchorPoint = Vector2New(0, 0)
+                Panel.Position = UDim2New(0, X, 0, Pos.Y)
+            end
+
+            function Lua:Apply()
+                local Show = Lua.Wanted and Library.MenuOpen ~= false
+                if Show and not Docked then
+                    Dock()
+                end
+
+                PanelItems["Panel"].Instance.Visible = Show
+                if Show then
+                    FitSection()
+                    task.delay(0.05, FitSection)
+                end
+            end
+
+            function Lua:SetVisibility(Bool)
+                Lua.Wanted = Bool
+                Lua:Apply()
+            end
+
+            Library:OutlineTexts(PanelItems["Holder"].Instance)
+            EditorSection.Items["Text"].Instance.TextStrokeTransparency = 1
+
+            Library.LuaObj = Lua
+            RefreshFiles()
+            SetStatus(false)
+            FitSection()
         end
     end
 end
